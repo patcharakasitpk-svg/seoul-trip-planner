@@ -73,10 +73,11 @@
    "status": "source"
   },
   "hours": {
-   "text": "16:00–03:30 daily (DiningCode); MangoPlate says 15:00–03:00",
+   "text": "Daily 16:00-03:30 (next day), last order 03:00",
    "closedDays": null,
    "lastOrder": "03:00",
-   "status": "unverified"
+   "status": "verified",
+   "closedWeekdays": []
   },
   "openTime": "16:00",
   "closeTime": "03:30",
@@ -100,6 +101,10 @@
   "fashionTypes": null,
   "sources": [
    {
+    "label": "Naver Place - 옛날집 (어울마당로 143, place 19800770)",
+    "url": "https://m.place.naver.com/restaurant/19800770/home"
+   },
+   {
     "label": "DiningCode – 옛날집 (menu, hours)",
     "url": "https://www.diningcode.com/profile.php?rid=5BX8lRHhe63c"
    },
@@ -113,7 +118,7 @@
    }
   ],
   "checkedAt": "2026-11-13",
-  "notes": "Verified Korean name is 옛날집 (some listings: 옛날집참숯구이). Serves charcoal pork/beef BBQ (참숯 초벌 삼겹살, 갈매기살, 항정살). Hours conflict between sources (16:00–03:30 LO 03:00 vs 15:00–03:00); one blog wrote 143-1. Closed on Chuseok holidays per one blog mention. No minimum order stated. diningZone forced to 'near-hotel' because schema has no Hongdae zone: it is NOT walkable from the hotel — direct Line 2 City Hall→Hongik Univ. (5 stops). mealMin is an estimate."
+  "notes": "Naver Place lists the same hours Mon-Sun, closes past midnight (03:30 next day), last order 03:00, no regular or upcoming irregular closed days. No break time. Phone 0507-1346-9608."
  },
  {
   "id": "oliveyoung-myeongdong-global",
@@ -222,7 +227,7 @@
   "lng": 126.9856037,
   "coordStatus": "verified",
   "coordSource": "OSM node 4397381096 (명동교자, branch 본점, 29 Myeongdong 10-gil)",
-  "reasonTh": "ร้านคัลกุกซุ (บะหมี่ตัดมือในน้ำซุปไก่) และเกี๊ยวนึ่งชื่อดังตั้งแต่ปี 1966 กินเร็ว เดินจากโรงแรมได้",
+  "reasonTh": "กัลกุกซุและเกี๊ยวร้านดังของเมียงดง — ⚠ Naver ระบุว่าร้านหลักย้ายไป 129 Toegye-ro และที่อยู่เดิมกำลังปรับปรุง ตรวจใน Naver/Kakao Map ก่อนไป",
   "suggestedStayMin": 40,
   "budget": {
    "textTh": "คัลกุกซุ 12,000 วอน (ขึ้นราคาปี 2025 ตามข่าวเม.ย. 2026)",
@@ -231,10 +236,11 @@
    "status": "source"
   },
   "hours": {
-   "text": "10:30–21:00 or 21:30 daily (sources differ)",
-   "closedDays": null,
-   "lastOrder": null,
-   "status": "unverified"
+   "text": "Daily 10:30-21:00, last order 20:30 (open year-round except Seollal/Chuseok)",
+   "closedDays": "Seollal and Chuseok days (not in trip window)",
+   "lastOrder": "20:30",
+   "status": "unverified",
+   "closedWeekdays": []
   },
   "openTime": "10:30",
   "closeTime": "21:00",
@@ -253,6 +259,22 @@
   "fashionTypes": null,
   "sources": [
    {
+    "label": "VisitSeoul - Myeongdong Kyoja",
+    "url": "https://english.visitseoul.net/area/Myeongdong-Kyoja-EN/ENP008570"
+   },
+   {
+    "label": "VisitKorea - Myeongdong Kyoja",
+    "url": "https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?vcontsId=99925"
+   },
+   {
+    "label": "Naver Place - 명동교자 본점 (퇴계로 129)",
+    "url": "https://m.place.naver.com/place/11592650/home"
+   },
+   {
+    "label": "Naver Place - 명동교자 (명동10길 29)",
+    "url": "https://m.place.naver.com/place/1801246745/home"
+   },
+   {
     "label": "Asiae (2026-04-14) – kalguksu price 12,000 won",
     "url": "https://www.asiae.co.kr/en/visual-news/article/2026041415530926441"
    },
@@ -266,7 +288,7 @@
    }
   ],
   "checkedAt": "2026-11-13",
-  "notes": "Official site mdkj.co.kr blocked automated access. Closing time conflicts: OSM 21:30; several 2025–26 guides 21:00 with last order ~20:30 (not confirmed, so lastOrder null). Dumpling/bibim-guksu prices not confirmed for 2026. Long lines at peak; shared/fast seating. mealMin estimate."
+  "notes": "Closing is 21:00 (not 21:30); last order 20:30. Hours themselves agree across VisitSeoul/VisitKorea/Naver. Marked unverified because of the ADDRESS: on Naver, '명동교자 본점' is now listed at 129 Toegye-ro (퇴계로 129), while the 29 Myeongdong 10-gil listing shows every day as 휴무 (closed), and a Naver note says a branch is under construction and asks visitors to go to another location. VisitSeoul/VisitKorea still list 29 Myeongdong 10-gil. Check Naver Map for which building is open before going."
  },
  {
   "id": "hadongkwan-myeongdong",
@@ -692,10 +714,11 @@
    "status": "estimate"
   },
   "hours": {
-   "text": "Food alley roughly 09:00–23:00 daily (stall-dependent); fabric/clothing sections close earlier and some close Sundays",
-   "closedDays": null,
+   "text": "Food alley daily 09:00-23:00 (year-round); main market shops 09:00-18:00, closed Sundays",
+   "closedDays": "Main market (fabric/goods shops) and vintage shops closed Sundays; food alley open year-round",
    "lastOrder": null,
-   "status": "unverified"
+   "status": "verified",
+   "closedWeekdays": []
   },
   "openTime": "09:00",
   "closeTime": "23:00",
@@ -715,6 +738,14 @@
   "fashionTypes": null,
   "sources": [
    {
+    "label": "VisitSeoul - Gwangjang Market",
+    "url": "https://english.visitseoul.net/area/Gwangjang-Market/ENP000286"
+   },
+   {
+    "label": "VisitKorea - Gwangjang Market",
+    "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=106345"
+   },
+   {
     "label": "seoultourism.org (third-party) – Gwangjang guide",
     "url": "https://www.seoultourism.org/?p=1096"
    },
@@ -724,7 +755,7 @@
    }
   ],
   "checkedAt": "2026-11-13",
-  "notes": "Real route COEX→hotel: Samseong (Line 2) → Seongsu → Wangsimni → Sindang → Dongdaemun History & Culture Park → Euljiro 4-ga → Euljiro 3-ga → Euljiro 1-ga → City Hall (18 stops on the northern arc), or Bongeunsa (Line 9) → Express Bus Terminal → Line 3 → Chungmuro → Line 4 → Myeongdong/Hoehyeon. From Line 2 get off at Euljiro 4-ga and walk north on Changgyeonggung-ro (~500 m, map estimate; passes Woo Lae Oak) or use Jongno 5-ga (Line 1) exit 8. Hours/prices from third-party guides; stall hours vary (e.g. Park Bindaetteok 08:00–22:00 per one guide). Base id kept as 'gwangjang'."
+  "notes": "Hours are for the food alley. Each stall sets its own hours and days off (e.g. some popular stalls close Mondays); guides report fewer stalls open on Sundays. Vintage shops 10:00-19:00, closed Sun."
  },
  {
   "id": "namdaemun",
@@ -748,13 +779,16 @@
    "status": "estimate"
   },
   "hours": {
-   "text": "Most shops approx. 09:00–17:00 Mon–Sat (many open earlier; some wholesale overnight)",
-   "closedDays": "Mostly closed Sundays; much closed on Seollal/Chuseok",
+   "text": "Mon-Sat; VisitSeoul lists 00:00-23:00 on weekdays but hours vary by stall (most retail shops roughly daytime). Closed Sundays (most shops)",
+   "closedDays": "Sunday (most shops; a few open)",
    "lastOrder": null,
-   "status": "unverified"
+   "status": "verified",
+   "closedWeekdays": [
+    0
+   ]
   },
-  "openTime": "09:00",
-  "closeTime": "17:00",
+  "openTime": null,
+  "closeTime": null,
   "indoor": false,
   "food": {
    "type": "market",
@@ -770,6 +804,14 @@
   "fashionTypes": null,
   "sources": [
    {
+    "label": "VisitSeoul - Namdaemun Market",
+    "url": "https://english.visitseoul.net/area/Namdaemun-Market/ENP000085"
+   },
+   {
+    "label": "Seoul Mediahub - traditional markets roundup",
+    "url": "https://mediahub.seoul.go.kr/archives/1233633"
+   },
+   {
     "label": "seoultourism.org (third-party, checked Sep 2026)",
     "url": "https://www.seoultourism.org/?p=1626"
    },
@@ -779,7 +821,7 @@
    }
   ],
   "checkedAt": "2026-11-13",
-  "notes": "Walkable from hotel (~400 m, map estimate). Address '21 Namdaemunsijang 4-gil' appears in several listings; market spans many streets. One source claims closure only on 1st/3rd Sundays — conflicting. Base id kept as 'namdaemun'."
+  "notes": "Sunday closure is consistent across sources (some individual shops do open Sundays). Official listing gives 00:00-23:00 because of night wholesale trade; retail stalls typically keep daytime hours (one guide says ~09:00-17:00) - no single reliable retail time, so open/close left null. Plan a Mon-Sat daytime visit."
  },
  {
   "id": "myeongdong",
@@ -803,10 +845,11 @@
    "status": "estimate"
   },
   "hours": {
-   "text": "Street-food stalls roughly from ~16:00 to ~22:00 (sources differ); shops mostly ~10:00–22:00",
+   "text": "Shopping street open daily (store hours vary, typically ~10:00-22:00). Street-food stalls approx. late afternoon (~16:00-17:00) to ~22:00-23:00",
    "closedDays": null,
    "lastOrder": null,
-   "status": "unverified"
+   "status": "unverified",
+   "closedWeekdays": []
   },
   "openTime": "16:00",
   "closeTime": "22:00",
@@ -830,6 +873,18 @@
   ],
   "sources": [
    {
+    "label": "VisitSeoul - Myeongdong",
+    "url": "https://english.visitseoul.net/shopping/Myeong-dong/ENP000067"
+   },
+   {
+    "label": "Treksplorer - Myeongdong night market",
+    "url": "https://www.treksplorer.com/myeongdong-night-market-seoul/"
+   },
+   {
+    "label": "Wayfinder Atlas - Seoul night markets 2025",
+    "url": "https://wayfinder-atlas.blogspot.com/2025/10/blog-post_15.html"
+   },
+   {
     "label": "Creatrip – Myeongdong street food",
     "url": "https://creatrip.com/en/blog/15177"
    },
@@ -839,7 +894,7 @@
    }
   ],
   "checkedAt": "2026-11-13",
-  "notes": "Area entry, not a single venue. Street-food hours and prices from travel blogs only; prices in Myeongdong reported higher than Gwangjang. Base id kept as 'myeongdong'."
+  "notes": "VisitSeoul only says 'Open daily (hours vary by store)' and gives no stall times. Stall times are from blogs and vary: start 15:00-17:00, end 22:00-23:00 (some later). open/close are approximate. Store-hours '~10:00-22:00' is a general estimate, not sourced officially."
  },
  {
   "id": "mangwon",
@@ -863,17 +918,30 @@
    "status": "unknown"
   },
   "hours": {
-   "text": "About 09:00/10:00–21:00/22:00, varies by stall",
-   "closedDays": "Many stalls closed/short hours on public holidays",
+   "text": "Daily approx. 10:00-21:00 per VisitSeoul (varies by store); other sources say 10:00-20:00",
+   "closedDays": "None market-wide per current listings (individual shops have own days off)",
    "lastOrder": null,
-   "status": "unverified"
+   "status": "unverified",
+   "closedWeekdays": []
   },
   "openTime": "10:00",
-  "closeTime": "21:00",
+  "closeTime": "20:00",
   "indoor": false,
   "food": null,
   "fashionTypes": null,
   "sources": [
+   {
+    "label": "VisitSeoul - Mangwon Market",
+    "url": "https://english.visitseoul.net/shopping/Mangwon-Market/ENP037950"
+   },
+   {
+    "label": "Seoul Mediahub (2024) - Mangwon Market",
+    "url": "https://mediahub.seoul.go.kr/archives/2010536"
+   },
+   {
+    "label": "VisitSeoul tour page (older)",
+    "url": "https://english.visitseoul.net/tours/Munch-and-Chew-Taste-and-Enjoy-Korean-Traditional-Markets/ENN032105"
+   },
    {
     "label": "Time Out Seoul – Mangwon Market",
     "url": "https://www.timeout.com/seoul/attractions/mangwon-market"
@@ -884,7 +952,7 @@
    }
   ],
   "checkedAt": "2026-11-13",
-  "notes": "Mangwon stn (Line 6) exit 2. Address conflicts (14 Poeun-ro 8-gil / 27 Poeun-ro 6-gil / 30 Mangwon-ro 8-gil). food=null because no menu/price source verified and it is outside all three dining zones. Base id kept as 'mangwon'."
+  "notes": "Sources conflict on closing time: VisitSeoul 10:00-21:00, Seoul Mediahub (Mar 2024) 10:00-20:00 연중무휴, go!Seoul newsletter 08:00-22:00. An older VisitSeoul tour page mentions closures on Tue & Sun but newer listings don't. closeTime set to the conservative 20:00. Market tel +82-2-335-3591."
  },
  {
   "id": "musinsa-standard-myeongdong-jungang",
@@ -1097,13 +1165,14 @@
    "status": "unknown"
   },
   "hours": {
-   "text": "Approx. 10:00–22:00 (travel sites; not confirmed on official site)",
-   "closedDays": null,
+   "text": "Official site: open every day 10:00-20:00 (tourism sites say 10:00-22:00); store hours vary",
+   "closedDays": "Official site says open year-round (연중무휴); VisitSeoul says closed on Seollal & Chuseok (not in trip window)",
    "lastOrder": null,
-   "status": "unverified"
+   "status": "unverified",
+   "closedWeekdays": []
   },
   "openTime": "10:00",
-  "closeTime": "22:00",
+  "closeTime": "20:00",
   "indoor": true,
   "food": null,
   "fashionTypes": [
@@ -1112,6 +1181,18 @@
    "shoes"
   ],
   "sources": [
+   {
+    "label": "GOTO Mall official site",
+    "url": "https://gotomall.kr/"
+   },
+   {
+    "label": "VisitSeoul - Goto Mall",
+    "url": "https://english.visitseoul.net/shopping/Goto-Mall/ENP029546"
+   },
+   {
+    "label": "VisitKorea - Goto Mall",
+    "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=86283"
+   },
    {
     "label": "GOTO Mall official",
     "url": "https://www.gotomall.kr/"
@@ -1126,7 +1207,7 @@
    }
   ],
   "checkedAt": "2026-11-13",
-  "notes": "Official site shows address and exits 8-1/8-2 of Express Bus Terminal stn (Lines 3/7/9) but no hours/closed day; store inquiries 02-535-8182. Given app coordinate 37.505770,127.004620 matches OSM node (<1 m). Route: Bongeunsa (Line 9) → Express Bus Terminal → Line 3 to Chungmuro → Line 4 to Myeongdong/Hoehyeon. Base id kept as 'gotomall'."
+  "notes": "Conflict: official gotomall.kr lists '연중무휴 10:00 - 20:00'; VisitSeoul/VisitKorea list 10:00-22:00. Used the official 20:00 (conservative). No monthly holiday found. Tel 02-535-8182."
  },
  {
   "id": "hongdae",
@@ -1286,10 +1367,11 @@
    "status": "source"
   },
   "hours": {
-   "text": "05:00–22:00 daily (KTO); other sources differ",
-   "closedDays": null,
+   "text": "Grounds approx. daily 05:00-22:00 (most sources); one listing says 09:00-18:00",
+   "closedDays": "None (open year-round)",
    "lastOrder": null,
-   "status": "unverified"
+   "status": "unverified",
+   "closedWeekdays": []
   },
   "openTime": "05:00",
   "closeTime": "22:00",
@@ -1297,6 +1379,18 @@
   "food": null,
   "fashionTypes": null,
   "sources": [
+   {
+    "label": "VisitKorea - Seoul Bongeunsa Temple",
+    "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=104722"
+   },
+   {
+    "label": "VisitSeoul - Bongeunsa Temple",
+    "url": "https://english.visitseoul.net/attractions/bongeunsa_/432"
+   },
+   {
+    "label": "VisitSeoul - Gangnam full of culture to history",
+    "url": "https://english.visitseoul.net/hallyu/Gangnam-full-of-culture-to-history/40239"
+   },
    {
     "label": "KTripTips (KTO) – Bongeunsa",
     "url": "https://ktriptips.com/eng/tourspot/264594"
@@ -1307,7 +1401,7 @@
    }
   ],
   "checkedAt": "2026-11-13",
-  "notes": "Hours conflict across sites (04:00–20:00, 03:00–22:00). Across Bongeunsa-ro from COEX's north side; Bongeunsa stn (Line 9)."
+  "notes": "VisitKorea main listing: 05:00-22:00, open all year. Conflict: the VisitSeoul attraction page says hours depend on temple services and also shows an old 'Mon-Fri 09:00-18:00'; a VisitKorea accessibility page says 09:00-18:00 (likely office/facility hours). Free entry. Daytime visit is safe either way. Official site bongeunsa.org was unreachable; tel +82-2-3218-4800."
  },
  {
   "id": "deoksugung",
@@ -1379,10 +1473,13 @@
    "status": "source"
   },
   "hours": {
-   "text": "09:00–18:00",
-   "closedDays": "Mondays, Jan 1",
+   "text": "Tue-Sun 09:00-18:00 (last entry 17:30); Friday likely until 21:00; closed Mondays. Free",
+   "closedDays": "Mondays (unless a public holiday) and Jan 1",
    "lastOrder": null,
-   "status": "unverified"
+   "status": "unverified",
+   "closedWeekdays": [
+    1
+   ]
   },
   "openTime": "09:00",
   "closeTime": "18:00",
@@ -1390,6 +1487,14 @@
   "food": null,
   "fashionTypes": null,
   "sources": [
+   {
+    "label": "Seoul Museum of History - 관람안내 (official)",
+    "url": "https://museum.seoul.go.kr/www/guide/vis/infomation.jsp?sso=ok"
+   },
+   {
+    "label": "VisitKorea - Seoul Museum of History",
+    "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=111432"
+   },
    {
     "label": "KTripTips (KTO) – Seoul Museum of History",
     "url": "https://ktriptips.com/eng/culture/268127"
@@ -1400,7 +1505,7 @@
    }
   ],
   "checkedAt": "2026-11-13",
-  "notes": "Official site page could not be fetched (404). Some sources mention extended Friday hours (21:00 or 22:00) – not verified."
+  "notes": "Mon 2026-11-30 = CLOSED (Monday closure verified). Unverified part is evening hours in Dec: the official page currently shows Tue/Wed/Fri/Sat/Sun 09:00-21:00 & Thu 09:00-18:00, but that is an 'expanded night opening' running 2026-09-15 to 11-30 only. Standard schedule per official/other sources is 09:00-18:00 with Fridays extended to 21:00 (since 2024-04-12) - expect that from Dec 1 but re-check the official page."
  },
  {
   "id": "gyeongbokgung",
@@ -1466,23 +1571,36 @@
   "reasonTh": "จุดชมวิวกรุงโซลบนเขานัมซาน ใกล้เมียงดง เปิดถึงค่ำ เหมาะไปหลังเลิกงาน",
   "suggestedStayMin": 90,
   "budget": {
-   "textTh": "ตั๋วจุดชมวิวผู้ใหญ่ราว 21,000 วอน (บล็อก ก.ย. 2026, ไม่ยืนยัน)",
-   "krwMin": 21000,
-   "krwMax": 21000,
-   "status": "estimate"
+   "textTh": "ตั๋วจุดชมวิวผู้ใหญ่ ₩29,000",
+   "krwMin": 29000,
+   "krwMax": 29000,
+   "status": "source"
   },
   "hours": {
-   "text": "Observatory approx. weekdays 10:00/10:30–22:30, weekends 10:00–23:00 (sources differ)",
-   "closedDays": null,
+   "text": "Observatory Mon-Fri 10:00-22:30, Sat-Sun & holidays 10:00-23:00; last entry 30 min before closing. Adult 29,000 KRW",
+   "closedDays": "None (open year-round; may suspend in bad weather)",
    "lastOrder": null,
-   "status": "unverified"
+   "status": "verified",
+   "closedWeekdays": []
   },
-  "openTime": "10:30",
+  "openTime": "10:00",
   "closeTime": "22:30",
   "indoor": true,
   "food": null,
   "fashionTypes": null,
   "sources": [
+   {
+    "label": "N Seoul Tower official - Hours",
+    "url": "http://www.nseoultower.co.kr/eng/visit/use.asp"
+   },
+   {
+    "label": "N Seoul Tower official - 이용요금",
+    "url": "https://www.nseoultower.co.kr/visit/use2.asp"
+   },
+   {
+    "label": "VisitKorea - N Seoul Tower",
+    "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=88026"
+   },
    {
     "label": "YTN Seoul Tower official (address)",
     "url": "https://www.seoultower.co.kr/"
@@ -1497,6 +1615,6 @@
    }
   ],
   "checkedAt": "2026-11-13",
-  "notes": "Official site did not show hours/prices to the fetcher; values are from third-party 2026 guides. Last entry ~30 min before close per those guides."
+  "notes": "closeTime 22:30 is weekdays; Sat/Sun (Dec 5-6) close 23:00. Last entry ~22:00 weekdays / ~22:30 weekends. Admission: adult (13+) 29,000 KRW; child 3-12 & senior 65+ 23,000 KRW (official + VisitKorea). Older guides citing 21,000/26,000 KRW are outdated."
  }
 ]
