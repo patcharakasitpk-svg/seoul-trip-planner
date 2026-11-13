@@ -11,13 +11,13 @@ import { startOsm, switchToGoogle, onMapMarkerClick, mapViewReady, syncMapView, 
 import { buildMapSpecs } from './ui/mapSpecs';
 import { onRoutesChange } from './services/routes';
 import { onWeatherChange, ensureWeather } from './services/weather';
-import { insertStop, moveStop, newDay, newStop, dinnerSlot, removeStop, updateStop, reorderStops, newPlan, clone } from './core/planOps';
+import { insertStop, moveStop, newDay, newStop, dinnerSlot, removeStop, updateStop, reorderStops, newPlan, clone, defaultInsertIndex, applyTripDates } from './core/planOps';
 import type { Day, Place, Plan, Stop, TravelMode } from './core/types';
 import { suggestOrder } from './core/compare';
 import { decodeFragment, parseJsonPlan, buildShareUrl, exportablePlan } from './storage/share';
 import { saveSettings, loadPlans } from './storage/storage';
 import { TEMPLATES, templateDayStops } from './data/templates';
-import { fmtDateTh, fmtDur, fmtHM, parseHM } from './core/time';
+import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
 import { stopLocationId } from './core/schedule';
 
 const hadSavedPlans = loadPlans() != null;
@@ -80,7 +80,8 @@ function render() {
   $('#right').innerHTML = app.tab === 'today' ? renderToday() : renderDayPanel(app.day);
   $('#modal-root').innerHTML = renderModal();
   document.body.classList.toggle('modal-open', !!app.modal);
-  $('#toast').innerHTML = app.toast ? esc(app.toast.msg) : '';
+  $('#toast').innerHTML = app.toast ? `${esc(app.toast.msg)}${app.toast.undo ? ' <button class="toast-undo" data-act="toast-undo">เลิกทำ</button>' : ''}` : '';
+  $('#toast').classList.toggle('has-action', !!app.toast?.undo);
   $('#toast').classList.toggle('show', !!app.toast);
   renderMapTools();
   syncMapNow();
@@ -132,6 +133,35 @@ function openCompare(dayId: string, newDayValue: Day, title: string, focusUid?: 
   if (!old) return;
   app.modal = { type: 'compare', title, dayId, oldDay: clone(old), newDay: newDayValue, afterConfirm: focusUid, note };
   app.requestRender();
+}
+
+/** เปลี่ยนแผนทันที พร้อมปุ่มเลิกทำ */
+function applyWithUndo(dayId: string, nd: Day, msg: string) {
+  const before = clone(app.findDay(dayId)!);
+  app.modal = null;
+  app.setDay(dayId, nd);
+  app.fitNext = true;
+  app.showToast(msg, () => app.setDay(dayId, before, 'เลิกทำแล้ว'));
+}
+
+/** แตะสถานที่ = เพิ่มเข้าวันที่เลือก (หรือเอาออกถ้ามีอยู่แล้ว) — ไม่ต้องยืนยัน มีปุ่มเลิกทำ */
+function quickToggle(placeId: string) {
+  const day = app.day;
+  const n = app.dayIndex(day.id) + 1;
+  const p = app.getPlace(placeId);
+  if (!p) return;
+  const existing = day.stops.find((s) => s.placeId === placeId);
+  if (existing) {
+    const nd = existing.kind === 'dinner' ? updateStop(day, existing.uid, { placeId: null, stayMin: 60 }) : removeStop(day, existing.uid);
+    applyWithUndo(day.id, nd, `เอา ${p.nameTh} ออกจากวัน ${n}`);
+    return;
+  }
+  const emptyDinner = p.food ? day.stops.find((s) => s.kind === 'dinner' && !s.placeId && !s.skipped) : undefined;
+  const nd = emptyDinner
+    ? updateStop(day, emptyDinner.uid, { placeId, stayMin: app.stayFor(placeId) })
+    : insertStop(day, defaultInsertIndex(day), stopForPlace(placeId));
+  app.focusPlaceId = placeId;
+  applyWithUndo(day.id, nd, emptyDinner ? `ตั้ง ${p.nameTh} เป็นมื้อเย็นวัน ${n}` : `เพิ่ม ${p.nameTh} เข้าวัน ${n}`);
 }
 
 function stopForPlace(placeId: string, kind: Stop['kind'] = 'place'): Stop {
@@ -333,23 +363,19 @@ document.addEventListener('click', (ev) => {
       return;
     }
     case 'add-to-day':
-      app.modal = { type: 'add', placeId: d.place!, dayId: app.activeDayId, index: null };
-      break;
-    case 'add-at': {
-      const m = app.modal;
-      if (m?.type !== 'add') return;
-      const target = app.findDay(m.dayId)!;
-      const st = stopForPlace(m.placeId);
-      openCompare(m.dayId, insertStop(target, Number(d.i), st), `ผลก่อนเพิ่ม ${app.getPlace(m.placeId)?.nameTh ?? ''}`, st.uid);
+    case 'quick-toggle':
+      quickToggle(d.place!);
+      return;
+    case 'toast-undo': {
+      const u = app.toast?.undo;
+      app.toast = null;
+      u?.();
+      app.requestRender();
       return;
     }
-    case 'add-as-dinner': {
-      const m = app.modal;
-      if (m?.type !== 'add') return;
-      const target = app.findDay(m.dayId)!;
-      openCompare(m.dayId, updateStop(target, d.stop!, { placeId: m.placeId, stayMin: app.stayFor(m.placeId), skipped: false }), 'ผลก่อนเลือกร้านมื้อเย็น', d.stop);
+    case 'apply-trip-dates':
+      app.commit((p) => applyTripDates(p), 'ตั้งวันเที่ยวแล้ว');
       return;
-    }
     case 'dinner-options':
       app.modal = { type: 'dinner', dayId, stopUid: d.stop!, zone: null };
       break;
@@ -365,7 +391,7 @@ document.addEventListener('click', (ev) => {
         const idx = nd.stops.findIndex((s) => s.uid === m.stopUid);
         nd = insertStop(nd, idx + 1, stopForPlace(d.shop));
       }
-      openCompare(m.dayId, nd, d.shop ? 'ผลก่อนเลือก: กิน + ช็อปอีกหนึ่งจุด' : 'ผลก่อนเลือกร้านมื้อเย็น', m.stopUid);
+      applyWithUndo(m.dayId, nd, `เลือก ${app.getPlace(d.place)?.nameTh ?? ''} เป็นมื้อเย็นแล้ว${d.shop ? ' + ช็อปอีกหนึ่งจุด' : ''}`);
       return;
     }
     case 'nearby':
@@ -377,7 +403,7 @@ document.addEventListener('click', (ev) => {
       const target = app.findDay(m.dayId)!;
       const idx = target.stops.findIndex((s) => s.uid === m.stopUid);
       const st = stopForPlace(d.place!);
-      openCompare(m.dayId, insertStop(target, idx + 1, st), `ผลก่อนเพิ่ม ${app.getPlace(d.place)?.nameTh ?? ''}`, st.uid);
+      applyWithUndo(m.dayId, insertStop(target, idx + 1, st), `เพิ่ม ${app.getPlace(d.place)?.nameTh ?? ''} แล้ว`);
       return;
     }
     case 'indoor-options':
@@ -387,7 +413,7 @@ document.addEventListener('click', (ev) => {
       const m = app.modal;
       if (m?.type !== 'indoor') return;
       const target = app.findDay(m.dayId)!;
-      openCompare(m.dayId, updateStop(target, d.stop!, { placeId: d.place!, stayMin: app.stayFor(d.place!) }), `ผลถ้าแทนด้วย ${app.getPlace(d.place)?.nameTh ?? ''}`, d.stop);
+      applyWithUndo(m.dayId, updateStop(target, d.stop!, { placeId: d.place!, stayMin: app.stayFor(d.place!) }), `แทนด้วย ${app.getPlace(d.place)?.nameTh ?? ''} แล้ว`);
       return;
     }
     case 'compare-confirm': {
@@ -750,7 +776,7 @@ window.addEventListener('hashchange', () => {
   app.requestRender();
 });
 
-if (window.matchMedia('(max-width: 1023px)').matches) app.tab = 'today';
+if (window.matchMedia('(max-width: 1023px)').matches) app.tab = app.plan.days.some((d) => d.date === seoulNow().date) ? 'today' : 'plan';
 handleHash();
 render();
 if (!hadSavedPlans) app.persist();

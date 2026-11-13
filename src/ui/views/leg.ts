@@ -56,13 +56,14 @@ export function legRow(dayId: string, leg: LegInfo, target: string): string {
   const est = dist != null ? roughEstimateMin(dist, leg.mode) : null;
   const gm = from && to ? gmapsDirUrl(from, to, leg.mode) : null;
 
+  const distHint = dist != null ? `<span class="dist" title="ระยะเส้นตรง ไม่ใช่ระยะเดินทางจริง">≈ ${fmtDist(dist)}</span>` : '';
   const main = canFill
-    ? `<span class="leg-ico">${MODE_ICON[leg.mode]}</span>
+    ? `<span class="leg-ico">${MODE_ICON[leg.mode]}</span>${distHint}
        <label class="leg-fill"><input class="inp xs" type="number" min="0" inputmode="numeric" placeholder="กี่นาที" data-act-change="leg-manual" data-day="${dayId}" data-stop="${target}" aria-label="เวลาเดินทาง (นาที)"> นาที</label>
        ${gm ? `<a class="link small" target="_blank" rel="noopener" href="${esc(gm)}">ดูใน Google Maps ↗</a>` : ''}`
     : missing
       ? `<span class="leg-ico">${MODE_ICON[leg.mode]}</span><span class="muted small">${esc(leg.reason ?? 'ยังไม่มีข้อมูล')}</span>`
-      : `<span class="leg-ico">${MODE_ICON[leg.mode]}</span><b>${fmtDur(leg.travelMin)}</b>${leg.bufferMin ? `<span class="muted small">+ เผื่อ ${leg.bufferMin} นาที</span>` : ''}<span class="src ${leg.source}">${SRC_TEXT[leg.source]}</span>`;
+      : `<span class="leg-ico">${MODE_ICON[leg.mode]}</span>${distHint}<b>${fmtDur(leg.travelMin)}</b>${leg.bufferMin ? `<span class="muted small">+ เผื่อ ${leg.bufferMin} นาที</span>` : ''}<span class="src ${leg.source}">${SRC_TEXT[leg.source]}</span>`;
 
   return `
   <div class="leg ${missing ? 'missing' : ''}">

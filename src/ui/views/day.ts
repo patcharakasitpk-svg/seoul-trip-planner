@@ -6,6 +6,7 @@ import { fmtDateTh, fmtDur, fmtHM } from '../../core/time';
 import { legRow } from './leg';
 import { renderWeather } from './weather';
 import { CATEGORY_ICON } from '../../data/places';
+import { tripDates } from '../../core/planOps';
 
 export function renderDayTabs(): string {
   return `<div class="day-tabs" role="tablist">
@@ -167,7 +168,10 @@ export function renderDayPanel(day: Day): string {
   if (s.end) rows.push(legRow(day.id, s.end.leg, '__end'));
   rows.push(`<div class="endpoint"><span class="time">${s.end ? timeCell(s.end.arrive, s.end.lowerBound) : '--:--'}</span><span class="ep-dot end" style="--c:${dayColor(idx)}"></span><span>ถึง <b>${esc(shortName(end))}</b>${day.endTime ? ` <span class="muted small">(ต้องถึงภายใน ${esc(day.endTime)})</span>` : ''}</span></div>`);
 
+  const trip = tripDates();
+  const noDates = trip.some((t) => !app.plan.days.some((d) => d.date === t));
   return `
+  ${noDates ? `<div class="notice trip">ทริป ${esc(fmtDateTh(trip[0]))} – ${esc(fmtDateTh(trip[trip.length - 1]))} (${trip.length} วัน) <button class="btn sm primary" data-act="apply-trip-dates">ตั้งวันเที่ยวให้ครบ</button></div>` : ''}
   <div class="day-head">
     <h2 style="--c:${dayColor(idx)}">วัน ${idx + 1}</h2>
   </div>

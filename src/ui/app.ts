@@ -46,7 +46,7 @@ class AppState {
   mapFilter: 'all' | 'day' = 'day';
   showLibPins = false;
   modal: Modal | null = null;
-  toast: { msg: string; at: number } | null = null;
+  toast: { msg: string; at: number; undo?: () => void } | null = null;
   saveOk = true;
   storageOk = storageAvailable();
   settings: Settings = loadSettings();
@@ -230,15 +230,15 @@ class AppState {
     this.addPlan(p);
   }
 
-  showToast(msg: string) {
-    this.toast = { msg, at: Date.now() };
+  showToast(msg: string, undo?: () => void) {
+    this.toast = { msg, at: Date.now(), undo };
     const at = this.toast.at;
     setTimeout(() => {
       if (this.toast?.at === at) {
         this.toast = null;
         this.requestRender();
       }
-    }, 3200);
+    }, undo ? 5000 : 3200);
   }
 
   /** ระหว่างนิ้ว/เมาส์กดค้าง ห้าม render (ไม่งั้นปุ่มที่กำลังกดถูกแทนที่ และการคลิกหาย) */

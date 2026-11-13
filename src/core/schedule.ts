@@ -1,5 +1,6 @@
 import type { Day, Leg, Place, RouteResult, Stop } from './types';
 import { parseHM } from './time';
+import { closedOn } from './hours';
 
 export type LegSource = 'user' | 'service' | 'estimate' | 'same' | 'none';
 
@@ -169,6 +170,8 @@ export function computeSchedule(day: Day, ctx: ScheduleCtx): DaySchedule {
       if (close != null && depart != null && depart > close && close > (open ?? 0)) warnings.push(`อยู่เลยเวลาปิด (${place.closeTime})`);
       if (lo != null && start > lo && lo > (open ?? 0)) warnings.push(`ถึงหลังเวลารับออร์เดอร์สุดท้าย (${place.hours?.lastOrder})`);
     }
+    const closed = closedOn(place, day.date);
+    if (closed) warnings.unshift(closed);
     if (place && (place.coordStatus === 'area-center')) warnings.push('หมุดกลางย่าน — อาจต้องเดินต่อถึงร้านจริง');
     if (unselected) warnings.push('ยังไม่ได้เลือกร้าน');
     stops.push({ uid: stop.uid, stop, leg, arrive, wait, start, depart, lowerBound, lateMin, lateUnknown, warnings, locationUnknown: unselected || locUnknown });

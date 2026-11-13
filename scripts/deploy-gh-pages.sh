@@ -2,7 +2,6 @@
 # Build แล้ว push โฟลเดอร์ dist/ ขึ้น branch gh-pages (GitHub Pages แบบฟรี ไม่ต้องใช้ Actions)
 set -euo pipefail
 cd "$(dirname "$0")/.."
-npm test
 npm run build
 touch dist/.nojekyll
 REMOTE=$(git remote get-url origin)

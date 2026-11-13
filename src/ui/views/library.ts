@@ -1,8 +1,9 @@
 import type { Place } from '../../core/types';
 import { app } from '../app';
-import { CATEGORY_ICON, CATEGORY_LABEL, COORD_LABEL, DINING_ZONE_LABEL, FOOD_TYPE_LABEL } from '../../data/places';
-import { esc, fmtKrw, gmapsPlaceUrl } from '../util';
-import { fmtDist, straightLineM } from '../../core/geo';
+import { CATEGORY_ICON, CATEGORY_LABEL, DINING_ZONE_LABEL } from '../../data/places';
+import { esc, gmapsPlaceUrl } from '../util';
+import { closedOn, shortHours, weekdayTh } from '../../core/hours';
+import { fmtDateTh } from '../../core/time';
 import { stopLocationId } from '../../core/schedule';
 
 const CATS: [string, string][] = [
@@ -101,71 +102,69 @@ export function filteredPlaces(): Place[] {
 
 export function renderLibraryList(): string {
   const list = filteredPlaces();
-  const ref = currentRef();
   if (!list.length) return `<p class="empty">ไม่พบสถานที่ตามตัวกรอง</p>`;
-  return `<p class="hint">${list.length} แห่ง · ระยะ = เส้นตรงจาก${esc(ref.label)}</p><div class="place-list">${list.map((p) => placeCard(p, ref.place)).join('')}</div>`;
+  const day = app.day;
+  return `<p class="hint">แตะชื่อเพื่อเพิ่มเข้า <b>วัน ${app.dayIndex(day.id) + 1}</b>${day.date ? ` (${esc(fmtDateTh(day.date))})` : ''} · แตะอีกครั้งเพื่อเอาออก</p><div class="place-list">${list.map((p) => placeCard(p)).join('')}</div>`;
 }
 
-function inPlanDays(placeId: string): number[] {
+function inActiveDay(placeId: string): boolean {
+  return app.day.stops.some((s) => s.placeId === placeId);
+}
+
+function otherDays(placeId: string): number[] {
   const out: number[] = [];
   app.plan.days.forEach((d, i) => {
-    if (d.stops.some((s) => s.placeId === placeId)) out.push(i + 1);
+    if (d.id !== app.activeDayId && d.stops.some((s) => s.placeId === placeId)) out.push(i + 1);
   });
   return out;
 }
 
-export function placeCard(p: Place, ref: Place | undefined, opts: { open?: boolean } = {}): string {
-  const saved = app.plan.saved.includes(p.id);
+export function placeCard(p: Place, opts: { open?: boolean } = {}): string {
   const open = opts.open || app.expanded.has(`card:${p.id}`);
-  const dist = ref && ref.lat != null && p.lat != null && ref.id !== p.id ? straightLineM({ lat: ref.lat, lng: ref.lng! }, { lat: p.lat, lng: p.lng! }) : null;
-  const days = inPlanDays(p.id);
-  const noPin = p.lat == null || p.lng == null;
-  const meta = [esc(p.area), dist != null ? `${fmtDist(dist)}` : null, `${app.stayFor(p.id)} นาที`].filter(Boolean).join(' · ');
+  const inDay = inActiveDay(p.id);
+  const others = otherDays(p.id);
+  const closed = closedOn(p, app.day.date);
+  const hrs = shortHours(p);
+  const meta = [esc(p.area), hrs ? `เปิด ${esc(hrs)}` : null].filter(Boolean).join(' · ');
   return `
-  <article class="place ${open ? 'open' : ''} ${app.focusPlaceId === p.id ? 'focus' : ''}" data-place-card="${esc(p.id)}">
+  <article class="place ${open ? 'open' : ''} ${inDay ? 'in-day' : ''} ${app.focusPlaceId === p.id ? 'focus' : ''}" data-place-card="${esc(p.id)}">
     <div class="place-row">
-      <button class="place-main" data-act="toggle-card" data-place="${esc(p.id)}" aria-expanded="${open}">
+      <button class="place-main" data-act="quick-toggle" data-place="${esc(p.id)}" aria-pressed="${inDay}">
         <span class="cat-ico" aria-hidden="true">${CATEGORY_ICON[p.category] ?? '📍'}</span>
         <span class="place-text">
-          <span class="place-name">${esc(p.nameTh)}${saved ? ' <span class="star">★</span>' : ''}</span>
-          <span class="place-meta">${meta}${days.length ? ` · <span class="in-plan">อยู่ในวัน ${days.join(', ')}</span>` : ''}</span>
+          <span class="place-name">${esc(p.nameTh)}</span>
+          <span class="place-meta">${meta}${closed ? ` · <span class="closed">${esc(closed)}</span>` : ''}${others.length ? ` · <span class="in-plan">วัน ${others.join(', ')}</span>` : ''}</span>
         </span>
       </button>
-      <button class="add-btn" data-act="add-to-day" data-place="${esc(p.id)}" aria-label="เพิ่ม ${esc(p.nameTh)} เข้าแผน" title="เพิ่มเข้าแผน">＋</button>
+      <button class="icon-btn sm info" data-act="toggle-card" data-place="${esc(p.id)}" aria-expanded="${open}" aria-label="ข้อมูล ${esc(p.nameTh)}">ⓘ</button>
+      <button class="add-btn ${inDay ? 'on' : ''}" data-act="quick-toggle" data-place="${esc(p.id)}" aria-label="${inDay ? 'เอาออกจากวันนี้' : 'เพิ่มเข้าวันนี้'}">${inDay ? '✓' : '＋'}</button>
     </div>
-    ${open ? placeDetails(p, saved, noPin) : ''}
+    ${open ? placeDetails(p) : ''}
   </article>`;
 }
 
-function placeDetails(p: Place, saved: boolean, noPin: boolean): string {
-  const names = [p.nameEn, p.nameKo, p.branch ? `สาขา ${p.branch}` : null].filter(Boolean).join(' · ');
-  const budget = p.budget
-    ? `${esc(p.budget.textTh)}${p.budget.krwMin != null || p.budget.krwMax != null ? ` (${fmtKrw(p.budget.krwMin)}–${fmtKrw(p.budget.krwMax)})` : ''} <span class="tag ${p.budget.status === 'source' ? '' : 'warn'}">${p.budget.status === 'source' ? 'จากแหล่งข้อมูล' : p.budget.status === 'estimate' ? 'ประมาณการ' : 'ไม่ทราบ'}</span>`
-    : '<span class="muted">ไม่มีข้อมูล</span>';
-  const hours = p.hours
-    ? `${esc(p.hours.text)}${p.hours.closedDays ? ` · หยุด ${esc(p.hours.closedDays)}` : ''}${p.hours.lastOrder ? ` · สั่งรอบสุดท้าย ${esc(p.hours.lastOrder)}` : ''}${p.hours.status === 'verified' ? '' : ' <span class="tag warn">ยังไม่ยืนยัน</span>'}`
-    : '<span class="muted">ไม่มีข้อมูล — ตรวจก่อนไป</span>';
+function placeDetails(p: Place): string {
+  const h = p.hours;
+  const src = p.sources[0];
+  const th = [
+    shortHours(p) || null,
+    h?.closedWeekdays?.length ? `ปิดทุกวัน${h.closedWeekdays.map(weekdayTh).join('/')}` : h ? 'ไม่มีวันหยุดประจำสัปดาห์ที่ระบุ' : null,
+    h?.lastOrder ? `สั่งรอบสุดท้าย ${h.lastOrder}` : null,
+  ].filter(Boolean).join(' · ');
+  const hoursLine = h ? `${esc(th || 'ดูรายละเอียดด้านล่าง')}<br><span class="muted">${esc(h.text)}</span>` : 'ไม่มีข้อมูล';
+  const verify = h?.status === 'verified'
+    ? `<span class="muted">ตรวจแล้ว${p.checkedAt ? ` ${esc(p.checkedAt)}` : ''}${src ? ` · <a href="${esc(src.url)}" target="_blank" rel="noopener">${esc(src.label)}</a>` : ''}</span>`
+    : `<span class="closed">ยังไม่ยืนยัน</span> — <a href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">เช็กเวลาใน Google Maps ↗</a>`;
   return `
     <div class="place-details">
-      <p class="muted small">${esc(names)}</p>
       <p>${esc(p.reasonTh)}</p>
-      <dl class="dl">
-        ${p.food ? `<dt>ประเภท</dt><dd>${FOOD_TYPE_LABEL[p.food.type] ?? ''} · ${DINING_ZONE_LABEL[p.food.diningZone] ?? ''}</dd>` : ''}
-        ${p.food?.menu?.length ? `<dt>เมนู</dt><dd>${p.food.menu.map(esc).join(', ')}${p.food.minOrder ? ` · ขั้นต่ำ ${esc(p.food.minOrder)}` : ''}</dd>` : ''}
-        <dt>เปิด–ปิด</dt><dd>${hours}</dd>
-        <dt>งบ</dt><dd>${budget}</dd>
-        <dt>เวลาแวะ</dt><dd><input class="inp xs" type="number" min="0" step="5" value="${app.stayFor(p.id)}" data-act-change="stay-override" data-place="${esc(p.id)}" aria-label="เวลาแวะ (นาที)"> นาที</dd>
-        <dt>ที่อยู่</dt><dd>${esc(p.address ?? 'ไม่ทราบ')}</dd>
-        <dt>พิกัด</dt><dd>${p.coordStatus === 'verified' || p.coordStatus === 'given' ? '<span class="muted">ตรวจแล้ว</span>' : `<span class="tag warn">${COORD_LABEL[p.coordStatus]}</span>`}</dd>
-        <dt>แหล่งข้อมูล</dt><dd class="small">${p.sources.length ? p.sources.map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a>`).join(', ') : p.custom ? 'ผู้ใช้เพิ่มเอง' : 'พิกัดตั้งต้นจากผู้ใช้'}${p.checkedAt ? ` · ตรวจ ${esc(p.checkedAt)}` : ''}</dd>
-      </dl>
-      ${p.notes ? `<details class="small muted"><summary>บันทึกการตรวจสอบข้อมูล</summary>${esc(p.notes)}</details>` : ''}
+      <p class="small"><b>เวลาเปิด</b> ${hoursLine}<br>${verify}</p>
+      ${p.food?.menu?.length ? `<p class="small"><b>เมนู</b> ${p.food.menu.slice(0, 3).map(esc).join(', ')}</p>` : ''}
+      ${p.budget && p.budget.textTh ? `<p class="small"><b>งบ</b> ${esc(p.budget.textTh)}${p.budget.status === 'estimate' ? ' (ประมาณ)' : ''}</p>` : ''}
+      ${p.lat == null ? '<p class="small closed">ยังไม่มีพิกัด — ไม่ปักหมุด</p>' : p.coordStatus === 'area-center' ? '<p class="small muted">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อ</p>' : ''}
       <div class="row-btns">
-        <button class="btn primary sm" data-act="add-to-day" data-place="${esc(p.id)}">＋ เพิ่มเข้าแผน</button>
-        <button class="btn sm" data-act="focus-place" data-place="${esc(p.id)}" ${noPin ? 'disabled title="ยังไม่มีพิกัด"' : ''}>ดูบนแผนที่</button>
-        <button class="btn sm" data-act="route-info" data-place="${esc(p.id)}" ${noPin ? 'disabled' : ''}>เส้นทาง</button>
         <a class="btn sm" href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">Google Maps ↗</a>
-        <button class="btn ghost sm" data-act="toggle-save" data-place="${esc(p.id)}">${saved ? '★ เลิกบันทึก' : '☆ บันทึก'}</button>
+        ${p.lat != null ? `<button class="btn sm" data-act="focus-place" data-place="${esc(p.id)}">ดูบนแผนที่</button>` : ''}
       </div>
     </div>`;
 }

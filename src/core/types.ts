@@ -26,7 +26,7 @@ export interface Place {
   reasonTh: string;
   suggestedStayMin: number;
   budget?: { textTh: string; krwMin: number | null; krwMax: number | null; status: 'source' | 'estimate' | 'unknown' } | null;
-  hours?: { text: string; closedDays: string | null; lastOrder: string | null; status: 'verified' | 'unverified' } | null;
+  hours?: { text: string; closedDays: string | null; lastOrder: string | null; status: 'verified' | 'unverified'; /** วันหยุดประจำสัปดาห์ 0=อาทิตย์ */ closedWeekdays?: number[] } | null;
   openTime?: string | null;
   closeTime?: string | null;
   indoor: boolean;

@@ -48,22 +48,15 @@ test('ไม่มี API key: แผนยังใช้ได้ เพิ่
   await expect(page.locator('#map .leaflet-container')).toBeVisible();
   await expect(page.locator('.leaflet-control-attribution')).toContainText('OpenStreetMap');
   await setDay(page, '2026-11-20', '18:00');
-  // เพิ่ม Starfield Library เข้าวัน 1
+  // แตะสถานที่ = เพิ่มเข้าวันทันที (ไม่ต้องยืนยัน) + เลิกทำได้
   await gotoPlaces(page);
   await page.locator('[data-filter="q"]').fill('Starfield Library');
-  await page.locator('[data-place-card="library"] [data-act="add-to-day"]').click();
-  await page.locator('[data-act="add-at"]').first().click();
-  // แสดงผลก่อนยืนยัน และแผนจริงยังไม่เปลี่ยน
-  await expect(page.locator('.modal')).toContainText('แผนเดิม');
-  await expect(page.locator('.modal')).toContainText('ยังไม่มีข้อมูลเวลาเดินทาง');
-  await page.locator('[data-act="modal-close"]').first().click();
-  await gotoPlan(page);
-  await expect(page.locator('.timeline')).not.toContainText('ห้องสมุดสตาร์ฟิลด์');
-  // ทำอีกครั้งแล้วยืนยัน
-  await gotoPlaces(page);
-  await page.locator('[data-place-card="library"] [data-act="add-to-day"]').click();
-  await page.locator('[data-act="add-at"]').first().click();
-  await page.locator('[data-act="compare-confirm"]').click();
+  await page.locator('[data-place-card="library"] .place-main').click();
+  await expect(page.locator('#toast')).toContainText('เพิ่ม');
+  await expect(page.locator('[data-place-card="library"] .add-btn')).toHaveText('✓');
+  await page.locator('[data-act="toast-undo"]').click();
+  await expect(page.locator('[data-place-card="library"] .add-btn')).toHaveText('＋');
+  await page.locator('[data-place-card="library"] .add-btn').click();
   await gotoPlan(page);
   await expect(page.locator('.timeline')).toContainText('ห้องสมุดสตาร์ฟิลด์');
   // ข้อมูลขาด: แสดง "อย่างเร็ว" และไม่สรุปว่าทัน
@@ -84,6 +77,11 @@ test('ไม่มี API key: แผนยังใช้ได้ เพิ่
 test('อากาศจับคู่วันที่เกาหลี เน้นช่วงเย็น และวันนอกช่วงไม่แสดงข้อมูลปลอม', async ({ page }) => {
   await page.goto('/');
   await gotoPlan(page);
+  // แผนใหม่มีวันที่ทริป (30 พ.ย.) ซึ่งเกินช่วงพยากรณ์ของข้อมูลจำลอง → ไม่แสดงตัวเลข
+  await expect(page.locator('.wx')).toContainText('ยังไม่มีพยากรณ์สำหรับวันนี้');
+  // ลบวันที่ → ขอให้เลือกวันที่
+  await page.locator('[data-field="date"]').fill('');
+  await page.locator('[data-field="date"]').dispatchEvent('change');
   await expect(page.locator('.wx')).toContainText('เลือกวันที่เพื่อดูพยากรณ์อากาศ');
   await setDay(page, '2026-11-20', '18:00', '22:00');
   await expect(page.locator('.wx-window')).toContainText('ช่วงที่ออกเที่ยว 18:00');

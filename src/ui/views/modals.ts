@@ -55,7 +55,7 @@ export function renderModal(): string {
       break;
     case 'place': {
       const p = app.getPlace(m.placeId);
-      [title, body] = [p?.nameTh ?? 'สถานที่', p ? placeCard(p, app.getPlace('hotel')) : 'ไม่พบสถานที่'];
+      [title, body] = [p?.nameTh ?? 'สถานที่', p ? `<div class="place-list">${placeCard(p, { open: true })}</div>` : 'ไม่พบสถานที่'];
       break;
     }
     case 'indoor':
@@ -276,7 +276,7 @@ function templatesBody(m: Extract<Modal, { type: 'templates' }>): string {
         <ol>${d.stops
           .map((s) => {
             const p = app.getPlace(s.placeId);
-            return p ? `<li>${CATEGORY_ICON[p.category] ?? ''} ${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <button class="btn ghost xs" data-act="add-to-day" data-place="${esc(p.id)}">＋</button></li>` : '';
+            return p ? `<li>${CATEGORY_ICON[p.category] ?? ''} ${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <button class="btn ghost xs" data-act="quick-toggle" data-place="${esc(p.id)}" aria-label="เพิ่มเข้าวันที่เลือก">＋</button></li>` : '';
           })
           .join('')}</ol>
         <div class="row-btns"><select class="inp xs" data-tpl-target="${i}" aria-label="วันปลายทาง">${app.plan.days.map((dd, k) => `<option value="${dd.id}" ${k === i ? 'selected' : ''}>วัน ${k + 1}</option>`).join('')}</select>

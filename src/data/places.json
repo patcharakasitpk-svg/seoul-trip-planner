@@ -293,7 +293,10 @@
    "text": "Mon–Sat 07:00–16:00; closes early when sold out",
    "closedDays": "Sunday",
    "lastOrder": null,
-   "status": "verified"
+   "status": "verified",
+   "closedWeekdays": [
+    0
+   ]
   },
   "openTime": "07:00",
   "closeTime": "16:00",
@@ -514,7 +517,10 @@
    "text": "Tue–Sun 11:30–21:00",
    "closedDays": "Monday",
    "lastOrder": null,
-   "status": "verified"
+   "status": "verified",
+   "closedWeekdays": [
+    1
+   ]
   },
   "openTime": "11:30",
   "closeTime": "21:00",
@@ -572,7 +578,10 @@
    "text": "Mon–Sat 11:00–15:00 & 17:00–20:00",
    "closedDays": "Sunday",
    "lastOrder": null,
-   "status": "verified"
+   "status": "verified",
+   "closedWeekdays": [
+    0
+   ]
   },
   "openTime": "11:00",
   "closeTime": "20:00",
@@ -1325,7 +1334,10 @@
    "text": "09:00–21:00 (last entry 20:00)",
    "closedDays": "Monday (if a public holiday, next business day)",
    "lastOrder": null,
-   "status": "verified"
+   "status": "verified",
+   "closedWeekdays": [
+    1
+   ]
   },
   "openTime": "09:00",
   "closeTime": "21:00",
@@ -1415,7 +1427,10 @@
    "text": "Nov–Feb 09:00–17:00 (last entry 16:00)",
    "closedDays": "Tuesday (if a public holiday, next business day)",
    "lastOrder": null,
-   "status": "verified"
+   "status": "verified",
+   "closedWeekdays": [
+    2
+   ]
   },
   "openTime": "09:00",
   "closeTime": "17:00",

@@ -1,4 +1,6 @@
 import type { Day, Leg, Plan, Stop, TravelMode } from './types';
+import { TRIP_DATES } from '../config';
+import { addDays, diffDays } from './time';
 
 let counter = 0;
 export function uid(prefix = 's'): string {
@@ -41,7 +43,7 @@ export function newPlan(name = 'แผนเที่ยวโซล'): Plan {
     version: 1,
     id: uid('p'),
     name,
-    days: [newDay(), newDay(), newDay(), newDay()],
+    days: tripDates().map((date) => newDay({ date })),
     customPlaces: [],
     stayOverrides: {},
     saved: [],
@@ -93,4 +95,18 @@ export function reorderStops(day: Day, order: string[]): Day {
 export function defaultInsertIndex(day: Day): number {
   const i = day.stops.findIndex((s) => s.kind === 'dinner');
   return i >= 0 ? i : day.stops.length;
+}
+
+/** รายการวันที่ตามช่วงวันเที่ยวใน config */
+export function tripDates(start = TRIP_DATES.start, end = TRIP_DATES.end): string[] {
+  const n = Math.max(0, diffDays(start, end)) + 1;
+  return Array.from({ length: Math.min(n, 30) }, (_, i) => addDays(start, i));
+}
+
+/** ใส่วันที่ตามช่วงวันเที่ยวให้แผน (คงรายการเดิมในแต่ละวัน) */
+export function applyTripDates(plan: Plan, dates: string[] = tripDates()): void {
+  dates.forEach((date, i) => {
+    if (!plan.days[i]) plan.days.push(newDay());
+    plan.days[i].date = date;
+  });
 }
