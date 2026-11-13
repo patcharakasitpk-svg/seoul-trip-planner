@@ -52,8 +52,8 @@ function settingsCard(day: Day, idx: number): string {
   const open = missingCore || app.expanded.has(`set:${day.id}`);
   const start = app.getPlace(day.startPlaceId);
   const end = app.getPlace(day.endPlaceId);
-  const need = (v: unknown) => (v ? '' : 'need');
-  const needTag = (v: unknown) => (v ? '' : ' <span class="need-tag">ยังไม่ตั้ง</span>');
+  const lbl = (text: string, v: unknown, hint = '') => `<span class="lbl"><span>${text}</span>${v ? (hint ? `<span class="hint-tag">${hint}</span>` : '') : '<span class="need-tag">ยังไม่ตั้ง</span>'}</span>`;
+  const cls = (v: unknown) => (v ? '' : 'need');
   if (!open) {
     return `<button class="day-summary" data-act="toggle-settings" data-day="${day.id}" aria-expanded="false">
       <span><b>${esc(fmtDateTh(day.date))}</b><br><span class="muted">${esc(shortName(start))} ${esc(day.startTime ?? '')} → ${esc(shortName(end))}${day.endTime ? ` (ภายใน ${esc(day.endTime)})` : ''}</span></span>
@@ -63,12 +63,11 @@ function settingsCard(day: Day, idx: number): string {
   return `
   <section class="settings" aria-label="ตั้งค่าวัน ${idx + 1}">
     <div class="field-grid">
-      <label class="${need(day.date)}">วันที่${needTag(day.date)}<input class="inp" type="date" value="${esc(day.date ?? '')}" data-act-change="day-field" data-field="date" data-day="${day.id}"></label>
-      <span></span>
-      <label class="${need(day.startPlaceId)}">ออกจาก<select class="inp" data-act-change="day-field" data-field="startPlaceId" data-day="${day.id}">${placeOptions(day.startPlaceId)}</select></label>
-      <label class="${need(day.startTime)}">เวลาออก${needTag(day.startTime)}<input class="inp" type="time" value="${esc(day.startTime ?? '')}" data-act-change="day-field" data-field="startTime" data-day="${day.id}"></label>
-      <label class="${need(day.endPlaceId)}">กลับไปที่<select class="inp" data-act-change="day-field" data-field="endPlaceId" data-day="${day.id}">${placeOptions(day.endPlaceId)}</select></label>
-      <label>ต้องถึงภายใน <span class="muted">(ไม่บังคับ)</span><input class="inp" type="time" value="${esc(day.endTime ?? '')}" data-act-change="day-field" data-field="endTime" data-day="${day.id}"></label>
+      <label class="full ${cls(day.date)}">${lbl('วันที่', day.date)}<input class="inp" type="date" value="${esc(day.date ?? '')}" data-act-change="day-field" data-field="date" data-day="${day.id}"></label>
+      <label class="${cls(day.startPlaceId)}">${lbl('ออกจาก', day.startPlaceId)}<select class="inp" data-act-change="day-field" data-field="startPlaceId" data-day="${day.id}">${placeOptions(day.startPlaceId)}</select></label>
+      <label class="${cls(day.startTime)}">${lbl('เวลาออก', day.startTime)}<input class="inp" type="time" value="${esc(day.startTime ?? '')}" data-act-change="day-field" data-field="startTime" data-day="${day.id}"></label>
+      <label class="${cls(day.endPlaceId)}">${lbl('กลับไปที่', day.endPlaceId)}<select class="inp" data-act-change="day-field" data-field="endPlaceId" data-day="${day.id}">${placeOptions(day.endPlaceId)}</select></label>
+      <label>${lbl('ถึงภายใน', true, 'ไม่บังคับ')}<input class="inp" type="time" value="${esc(day.endTime ?? '')}" data-act-change="day-field" data-field="endTime" data-day="${day.id}"></label>
     </div>
     <div class="quick">
       <button class="chip" data-act="quick" data-field="startPlaceId" data-v="hotel" data-day="${day.id}">ออกจากโรงแรม</button>
@@ -78,19 +77,21 @@ function settingsCard(day: Day, idx: number): string {
     ${
       more
         ? `<div class="more-settings">
-      <label>เวลาเผื่อต่อช่วง <input class="inp xs" type="number" min="0" max="120" value="${day.bufferMin}" data-act-change="day-field" data-field="bufferMin" data-day="${day.id}"> นาที</label>
+      <div class="set-row"><span>เวลาเผื่อต่อช่วง</span><span><input class="inp xs" type="number" min="0" max="120" value="${day.bufferMin}" data-act-change="day-field" data-field="bufferMin" data-day="${day.id}"> นาที</span></div>
       <div class="prefs">
         <label><input type="checkbox" data-act-change="day-pref" data-field="lessWalking" data-day="${day.id}" ${day.prefs.lessWalking ? 'checked' : ''}> เดินน้อย</label>
         <label><input type="checkbox" data-act-change="day-pref" data-field="fewerTransfers" data-day="${day.id}" ${day.prefs.fewerTransfers ? 'checked' : ''}> เปลี่ยนสายน้อย</label>
         <label><input type="checkbox" data-act-change="day-field" data-field="afterBooth" data-day="${day.id}" ${day.afterBooth ? 'checked' : ''}> เพิ่งเลิกออกบูธ</label>
       </div>
-      <button class="btn ghost xs danger" data-act="remove-day" data-day="${day.id}" ${app.plan.days.length <= 1 ? 'disabled' : ''}>ลบวันนี้</button>
     </div>`
         : ''
     }
     <div class="settings-foot">
-      <button class="link small" data-act="toggle-setmore" data-day="${day.id}">${more ? 'ซ่อนตัวเลือกเพิ่มเติม' : 'ตัวเลือกเพิ่มเติม'}</button>
-      ${missingCore ? '' : `<button class="btn sm primary" data-act="toggle-settings" data-day="${day.id}">เสร็จ</button>`}
+      <button class="link small" data-act="toggle-setmore" data-day="${day.id}">${more ? 'ซ่อนตัวเลือก' : 'ตัวเลือกเพิ่มเติม'}</button>
+      <span class="foot-right">
+        ${more ? `<button class="btn ghost sm danger" data-act="remove-day" data-day="${day.id}" ${app.plan.days.length <= 1 ? 'disabled' : ''}>ลบวันนี้</button>` : ''}
+        ${missingCore ? '' : `<button class="btn sm primary" data-act="toggle-settings" data-day="${day.id}">เสร็จ</button>`}
+      </span>
     </div>
   </section>`;
 }
