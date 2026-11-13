@@ -9,6 +9,8 @@ export interface MarkerSpec {
   /** ป้ายวัน/ลำดับ เช่น [{color, text:'1'}] — สถานที่เดียวหลายวันแสดงหลายป้ายในหมุดเดียว */
   badges: { color: string; text: string }[];
   areaCenter: boolean;
+  /** อยู่ในวันที่แสดง (ใช้สำหรับซูมพอดีจอ) */
+  focus?: boolean;
 }
 
 export interface LineSpec {
@@ -61,7 +63,7 @@ export function mapReady() {
   return !!map;
 }
 
-function markerContent(spec: MarkerSpec): HTMLElement {
+export function markerContent(spec: MarkerSpec): HTMLElement {
   const el = document.createElement('div');
   el.className = `mk mk-${spec.kind}${spec.areaCenter ? ' mk-area' : ''}`;
   el.title = spec.title;
@@ -123,7 +125,8 @@ export function syncMap(specs: MarkerSpec[], lineSpecs: LineSpec[], fit: boolean
       }),
   );
   if (fit) {
-    const pts = specs.filter((s) => s.kind !== 'lib');
+    const f = specs.filter((s) => s.focus);
+    const pts = f.length ? f : specs.filter((s) => s.kind !== 'lib');
     if (pts.length) {
       const b = new google.maps.LatLngBounds();
       pts.forEach((p) => b.extend(p));

@@ -17,6 +17,7 @@ async function mockWeather(page: Page, calls: string[] = []) {
     } });
   });
   await page.route('https://maps.googleapis.com/**', (r) => r.abort());
+  await page.route('https://tile.openstreetmap.org/**', (r) => r.fulfill({ status: 204, body: '' }));
 }
 
 const isMobile = (page: Page) => (page.viewportSize()?.width ?? 1000) < 1024;
@@ -42,7 +43,10 @@ test.beforeEach(async ({ page }) => {
 
 test('ไม่มี API key: แผนยังใช้ได้ เพิ่มสถานที่ผ่านหน้าเปรียบเทียบ และกรอกเวลาเองได้', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('#status-bar')).toContainText('ยังไม่ได้ตั้งค่า Google Maps API Key');
+  // ไม่มีคีย์ → ใช้แผนที่ OpenStreetMap ฟรีแทน
+  if (isMobile(page)) await page.locator('.bottom-nav [data-tab="map"]').click();
+  await expect(page.locator('#map .leaflet-container')).toBeVisible();
+  await expect(page.locator('.leaflet-control-attribution')).toContainText('OpenStreetMap');
   await setDay(page, '2026-11-20', '18:00');
   // เพิ่ม Starfield Library เข้าวัน 1
   await gotoPlaces(page);
@@ -70,7 +74,7 @@ test('ไม่มี API key: แผนยังใช้ได้ เพิ่
   await manual.dispatchEvent('change');
   await expect(page.locator('.stop').first()).toContainText('ถึง 18:45'); // 40 นาที + เวลาเผื่อ 5 นาที (แยกบรรทัด)
   await expect(page.locator('.leg').first()).toContainText('+ เผื่อ 5 นาที');
-  await expect(page.locator('.leg .pill.src.user').first()).toBeVisible();
+  await expect(page.locator('.leg .src.user').first()).toBeVisible();
   // เปลี่ยนเวลาเริ่ม → ตารางเลื่อนตาม
   await page.locator('[data-field="startTime"]').fill('19:00');
   await page.locator('[data-field="startTime"]').dispatchEvent('change');
@@ -110,7 +114,7 @@ test('บันทึก โหลดกลับ และส่งแผนผ
   await page.locator('[data-act="add-item"][data-kind="break"]').click();
   await page.reload();
   await gotoPlan(page);
-  await expect(page.locator('[data-field="startTime"]')).toHaveValue('09:30');
+  await expect(page.locator('.day-summary')).toContainText('09:30');
   await expect(page.locator('.timeline')).toContainText('พัก');
   await page.locator('[data-act="open-share"]').click();
   const url = await page.locator('#share-url').inputValue();
@@ -122,8 +126,8 @@ test('บันทึก โหลดกลับ และส่งแผนผ
   await mockWeather(p2);
   await p2.goto(url);
   await p2.locator('.bottom-nav [data-tab="plan"]').click();
-  await expect(p2.locator('[data-field="startTime"]')).toHaveValue('09:30');
-  await expect(p2.locator('[data-field="date"]')).toHaveValue('2026-11-21');
+  await expect(p2.locator('.day-summary')).toContainText('09:30');
+  await expect(p2.locator('.day-summary')).toContainText('21 พ.ย. 2026');
   // เครื่องที่มีแผนเดิม → ถามเปิดเป็นสำเนา/แทนที่
   await p2.goto('/');
   await p2.goto(url);
@@ -146,7 +150,7 @@ test('หน้าจอไม่มีเนื้อหาล้นแนว�
     const heights = await page.locator('.bottom-nav button').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
     for (const h of heights) expect(h).toBeGreaterThanOrEqual(44);
     await page.locator('.bottom-nav [data-tab="plan"]').click();
-    const moveBtn = await page.locator('[data-act="stop-down"], [data-act="stop-up"]').first().boundingBox();
+    const moveBtn = await page.locator('[data-act="toggle-expand"]').first().boundingBox();
     expect(moveBtn!.height).toBeGreaterThanOrEqual(40);
     // modal ไม่ล้น
     await page.locator('[data-act="open-templates"]').click();
@@ -185,10 +189,11 @@ test('ลบและย้ายจุดได้โดยไม่ต้อ�
   await expect(page.locator('.timeline')).toContainText('ตลาดนัมแดมุน');
   const first = page.locator('.stop .stop-title .t').first();
   const firstText = await first.textContent();
+  await page.locator('[data-act="toggle-expand"]').first().click();
   await page.locator('[data-act="stop-down"]').first().click();
   await expect(page.locator('.stop .stop-title .t').nth(1)).toHaveText(firstText!);
   const count = await page.locator('.stop').count();
-  await page.locator('[data-act="toggle-expand"]').first().click();
+  // รายการที่ย้ายยังเปิดค้างอยู่ → กดลบได้เลย
   await page.locator('[data-act="stop-remove"]').first().click();
   await expect(page.locator('.stop')).toHaveCount(count - 1);
 });

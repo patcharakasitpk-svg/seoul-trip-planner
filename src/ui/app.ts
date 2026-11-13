@@ -44,7 +44,7 @@ class AppState {
   tab: Tab = 'plan';
   filters: Filters = { q: '', cat: '', area: '', budget: '', stay: '', fashion: '', zone: '' };
   mapFilter: 'all' | 'day' = 'day';
-  showLibPins = true;
+  showLibPins = false;
   modal: Modal | null = null;
   toast: { msg: string; at: number } | null = null;
   saveOk = true;

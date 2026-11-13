@@ -31,12 +31,14 @@ export function buildMapSpecs(inp: MapSpecInput): { markers: MarkerSpec[]; lines
     const color = dayColor(di);
     [d.startPlaceId, d.endPlaceId].forEach((id) => {
       const p = inp.getPlace(id);
-      if (p) ensure(p, kindOf(p));
+      const m = p ? ensure(p, kindOf(p)) : null;
+      if (m) m.focus = true;
     });
     d.stops.forEach((st, j) => {
       const p = inp.getPlace(st.placeId);
       if (!p) return;
       const m = ensure(p, kindOf(p));
+      if (m) m.focus = true;
       if (m) m.badges.push({ color, text: inp.mode === 'all' ? `${di + 1}-${j + 1}` : `${j + 1}` });
     });
     const s = inp.schedule(d);

@@ -5,9 +5,9 @@ import { renderLibraryControls, renderLibraryList } from './ui/views/library';
 import { renderDayPanel, renderDayTabs } from './ui/views/day';
 import { renderToday } from './ui/views/today';
 import { renderModal } from './ui/views/modals';
-import { esc, dayColor, gmapsPlaceUrl, MODE_LABEL } from './ui/util';
+import { esc, MODE_LABEL } from './ui/util';
 import { loadGoogle, googleStatus, onGoogleStatus } from './services/google';
-import { initMap, mapReady, onMarkerClick, syncMap, focusOn } from './services/map';
+import { startOsm, switchToGoogle, onMapMarkerClick, mapViewReady, syncMapView, focusMapView, refreshMapSize, mapProvider } from './services/mapView';
 import { buildMapSpecs } from './ui/mapSpecs';
 import { onRoutesChange } from './services/routes';
 import { onWeatherChange, ensureWeather } from './services/weather';
@@ -25,31 +25,30 @@ const $ = (sel: string) => document.querySelector(sel) as HTMLElement;
 
 document.querySelector('#app')!.innerHTML = `
 <header class="topbar">
-  <div class="brand"><span class="logo" aria-hidden="true">🗺️</span><div><b>Seoul Trip Planner</b><div class="small muted" id="plan-name"></div></div></div>
+  <div class="brand"><b>Seoul Trip</b><span class="plan-name" id="plan-name"></span></div>
   <nav class="top-actions">
-    <button class="btn ghost desk-only" data-act="tab" data-tab="today">📅 วันนี้</button>
-    <button class="btn ghost desk-only" data-act="tab" data-tab="plan">🗓️ แผน</button>
-    <button class="btn ghost" data-act="open-templates">📚 แม่แบบ</button>
-    <button class="btn ghost" data-act="open-share">📤 แชร์/บันทึก</button>
-    <button class="btn ghost" data-act="open-settings" aria-label="ตั้งค่า">⚙️</button>
+    <div class="seg desk-only"><button data-act="tab" data-tab="today">วันนี้</button><button data-act="tab" data-tab="plan">แผน</button></div>
+    <button class="btn ghost sm" data-act="open-templates" title="แม่แบบ">แม่แบบ</button>
+    <button class="btn ghost sm" data-act="open-share" title="แชร์และบันทึก">แชร์</button>
+    <button class="icon-btn" data-act="open-settings" aria-label="ตั้งค่า" title="ตั้งค่า">⚙︎</button>
   </nav>
 </header>
 <div id="status-bar" class="status-bar"></div>
 <div id="day-tabs-wrap"></div>
 <main class="layout" id="layout">
-  <aside class="panel lib" id="library" aria-label="คลังสถานที่"><div id="lib-controls"></div><div id="lib-list"></div></aside>
+  <aside class="panel lib" id="library" aria-label="สถานที่"><div id="lib-controls"></div><div id="lib-list"></div></aside>
   <section class="panel mapp" id="map-panel" aria-label="แผนที่">
     <div class="map-tools" id="map-tools"></div>
-    <div class="map-box"><div id="map"></div><div id="map-fallback" class="map-fallback"></div></div>
-    <p class="map-legend small">หมุด: 🏨 โรงแรม · 🏢 COEX · ตัวเลข = ลำดับในวัน (สีประจำวัน) · จุดเทา = สถานที่ในคลัง<br>เส้นทึบ = เส้นทางจริงจากบริการ · <b>เส้นประ = เส้นเชื่อมลำดับ ไม่ใช่เส้นทางจริง</b></p>
+    <div class="map-box"><div id="map"></div></div>
+    <p class="map-legend">ตัวเลข = ลำดับในวัน · เส้นประ = ลำดับการเดินทาง ไม่ใช่เส้นทางจริง</p>
   </section>
   <section class="panel right" id="right" aria-live="polite"></section>
 </main>
 <nav class="bottom-nav" aria-label="เมนูหลัก">
-  <button data-act="tab" data-tab="today"><span>📅</span>วันนี้</button>
-  <button data-act="tab" data-tab="map"><span>🗺️</span>แผนที่</button>
-  <button data-act="tab" data-tab="places"><span>📍</span>สถานที่</button>
-  <button data-act="tab" data-tab="plan"><span>🗓️</span>แผนของฉัน</button>
+  <button data-act="tab" data-tab="today"><span aria-hidden="true">◷</span>วันนี้</button>
+  <button data-act="tab" data-tab="map"><span aria-hidden="true">⌖</span>แผนที่</button>
+  <button data-act="tab" data-tab="places"><span aria-hidden="true">☰</span>สถานที่</button>
+  <button data-act="tab" data-tab="plan"><span aria-hidden="true">▤</span>แผนของฉัน</button>
 </nav>
 <div id="modal-root"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>`;
@@ -64,14 +63,13 @@ function render() {
   const g = googleStatus();
   const st: string[] = [];
   if (!app.online) st.push('<span class="warn">ออฟไลน์ — ดูแผนที่บันทึกไว้ได้ แต่แผนที่ออนไลน์ เส้นทาง และอากาศยังอัปเดตไม่ได้</span>');
-  if (g.status === 'no-key') st.push('<span>ยังไม่ได้ตั้งค่า Google Maps API Key — จัดแผนและกรอกเวลาเดินทางเองได้ <button class="link" data-act="open-settings">ตั้งค่า</button></span>');
-  if (g.status === 'error') st.push(`<span class="warn">Google Maps: ${esc(g.error)} — ส่วนจัดแผนยังใช้ได้</span>`);
+  if (g.status === 'error') st.push(`<span class="warn">Google Maps ใช้ไม่ได้ (${esc(g.error)}) — ใช้แผนที่ OpenStreetMap แทน</span>`);
   if (!app.storageOk) st.push('<span class="warn">บันทึกในเครื่องไม่ได้ — โปรด Export JSON ก่อนปิดหน้า</span>');
   else if (!app.saveOk) st.push('<span class="warn">บันทึกล่าสุดไม่สำเร็จ — โปรด Export JSON</span>');
   $('#status-bar').innerHTML = st.join('');
   $('#day-tabs-wrap').innerHTML = renderDayTabs();
 
-  const sig = JSON.stringify([app.filters.cat, app.filters.area, app.filters.budget, app.filters.stay, app.filters.zone, app.filters.fashion, app.refPoint, app.plan.customPlaces.length, app.activeDayId, app.day.stops.length]);
+  const sig = JSON.stringify([app.expanded.has('filters'), app.filters.cat, app.filters.area, app.filters.budget, app.filters.stay, app.filters.zone, app.filters.fashion, app.refPoint, app.plan.customPlaces.length, app.activeDayId, app.day.stops.length]);
   if (sig !== lastLibControlsSig || !$('#lib-controls').innerHTML) {
     const active = document.activeElement as HTMLElement | null;
     const typing = active?.dataset?.filter === 'q';
@@ -95,32 +93,13 @@ app.renderFn = render;
 function renderMapTools() {
   $('#map-tools').innerHTML = `
     <div class="seg"><button class="${app.mapFilter === 'day' ? 'on' : ''}" data-act="map-filter" data-v="day">วันที่เลือก</button><button class="${app.mapFilter === 'all' ? 'on' : ''}" data-act="map-filter" data-v="all">ทุกวัน</button></div>
-    <label class="small"><input type="checkbox" data-act-change="lib-pins" ${app.showLibPins ? 'checked' : ''}> สถานที่ในคลัง</label>
-    <button class="btn ghost xs" data-act="map-fit">พอดีจอ</button>`;
-  const fb = $('#map-fallback');
-  if (mapReady()) {
-    fb.innerHTML = '';
-    fb.hidden = true;
-    return;
-  }
-  fb.hidden = false;
-  const g = googleStatus();
-  const days = app.mapFilter === 'all' ? app.plan.days : [app.day];
-  fb.innerHTML = `<div class="fb-inner"><p><b>${g.status === 'loading' ? 'กำลังโหลด Google Maps…' : g.status === 'error' ? 'แผนที่ไม่พร้อมใช้งาน' : 'ยังไม่มี Google Maps API Key'}</b></p>
-    <p class="small muted">${g.status === 'error' ? esc(g.error) : 'แผนและเวลายังใช้งานได้ — เปิดตำแหน่งแต่ละจุดใน Google Maps ได้จากรายการนี้'}</p>
-    ${days
-      .map((d) => {
-        const i = app.dayIndex(d.id);
-        return `<h4 style="color:${dayColor(i)}">วัน ${i + 1}</h4><ol>${d.stops
-          .map((s) => app.getPlace(s.placeId))
-          .map((p) => (p ? `<li><a target="_blank" rel="noopener" href="${esc(gmapsPlaceUrl(p))}">${esc(p.nameTh)} ↗</a></li>` : '<li class="muted">รายการที่ไม่มีสถานที่</li>'))
-          .join('')}</ol>`;
-      })
-      .join('')}</div>`;
+    <label class="small"><input type="checkbox" data-act-change="lib-pins" ${app.showLibPins ? 'checked' : ''}> แสดงสถานที่ทั้งหมด</label>
+    <button class="btn ghost xs" data-act="map-fit">พอดีจอ</button>
+    <span class="muted small map-src">${mapProvider() === 'google' ? 'Google Maps' : 'OpenStreetMap (ฟรี)'}</span>`;
 }
 
 function syncMapNow() {
-  if (!mapReady()) return;
+  if (!mapViewReady()) return;
   const { markers, lines } = buildMapSpecs({
     days: app.mapFilter === 'all' ? app.plan.days : [app.day],
     allDays: app.plan.days,
@@ -129,11 +108,11 @@ function syncMapNow() {
     schedule: (d) => app.schedule(d),
     libraryPlaces: app.showLibPins ? app.places() : null,
   });
-  syncMap(markers, lines, app.fitNext);
+  syncMapView(markers, lines, app.fitNext);
   app.fitNext = false;
 }
 
-onMarkerClick((id) => {
+onMapMarkerClick((id) => {
   app.focusPlaceId = id;
   app.modal = { type: 'place', placeId: id };
   app.requestRender();
@@ -220,7 +199,14 @@ document.addEventListener('click', (ev) => {
   switch (act) {
     case 'tab':
       app.tab = d.tab as Tab;
-      if (app.tab === 'map') app.fitNext = true;
+      if (app.tab === 'map') {
+        app.fitNext = true;
+        setTimeout(() => {
+          refreshMapSize();
+          app.fitNext = true;
+          app.requestRender();
+        }, 50);
+      }
       window.scrollTo({ top: 0 });
       break;
     case 'select-day':
@@ -253,6 +239,21 @@ document.addEventListener('click', (ev) => {
     case 'stop-skip':
       if (day) app.updateDay(dayId, (x) => updateStop(x, d.stop!, { skipped: !x.stops.find((s) => s.uid === d.stop)?.skipped }));
       return;
+    case 'toggle-filters':
+    case 'toggle-card':
+    case 'toggle-leg':
+    case 'toggle-settings':
+    case 'toggle-setmore':
+    case 'toggle-wx': {
+      const key = act === 'toggle-filters' ? 'filters' : act === 'toggle-card' ? `card:${d.place}` : act === 'toggle-leg' ? `leg:${d.stop}` : act === 'toggle-settings' ? `set:${d.day}` : act === 'toggle-setmore' ? `setmore:${d.day}` : `wx:${d.day}`;
+      app.expanded.has(key) ? app.expanded.delete(key) : app.expanded.add(key);
+      if (act === 'toggle-filters') lastLibControlsSig = '';
+      break;
+    }
+    case 'clear-filters':
+      Object.assign(app.filters, { area: '', budget: '', stay: '', zone: '', fashion: '' });
+      lastLibControlsSig = '';
+      break;
     case 'toggle-expand':
       app.expanded.has(d.stop!) ? app.expanded.delete(d.stop!) : app.expanded.add(d.stop!);
       break;
@@ -325,7 +326,10 @@ document.addEventListener('click', (ev) => {
       if (!window.matchMedia('(min-width: 1024px)').matches) app.tab = 'map';
       if (app.modal?.type === 'place') app.modal = null;
       app.requestRender();
-      setTimeout(() => focusOn(p.lat!, p.lng!), 60);
+      setTimeout(() => {
+        refreshMapSize();
+        focusMapView(p.lat!, p.lng!);
+      }, 60);
       return;
     }
     case 'add-to-day':
@@ -581,6 +585,7 @@ document.addEventListener('change', (ev) => {
   switch (actc) {
     case 'day-field': {
       const f = d.field!;
+      if (f !== 'weatherRef') app.expanded.add(`set:${dayId}`);
       let v: unknown = el.type === 'checkbox' ? el.checked : el.value;
       if (f === 'bufferMin') v = Math.max(0, Math.min(120, Number(el.value) || 0));
       if (v === '') v = null;
@@ -752,15 +757,15 @@ if (!hadSavedPlans) app.persist();
 
 const apiKey = app.settings.apiKey || (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined);
 const mapId = app.settings.mapId || (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined) || 'DEMO_MAP_ID';
+try {
+  startOsm(document.getElementById('map')!);
+  app.fitNext = true;
+} catch (e) {
+  console.warn('OSM init failed', e);
+}
+app.requestRender();
 loadGoogle(apiKey).then(async (ok) => {
-  if (ok) {
-    try {
-      await initMap(document.getElementById('map')!, mapId);
-      app.fitNext = true;
-    } catch (e) {
-      console.warn('map init failed', e);
-    }
-  }
+  if (ok && (await switchToGoogle(document.getElementById('map')!, mapId))) app.fitNext = true;
   app.requestRender();
 });
 
