@@ -1,0 +1,32 @@
+export interface LatLng {
+  lat: number;
+  lng: number;
+}
+
+/** ระยะเส้นตรง (เมตร) — ไม่ใช่ระยะเดินหรือเส้นทางจริง */
+export function straightLineM(a: LatLng, b: LatLng): number {
+  const R = 6371000;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+export function fmtDist(m: number | null | undefined): string {
+  if (m == null) return 'ไม่ทราบ';
+  return m < 1000 ? `${Math.round(m)} ม.` : `${(m / 1000).toFixed(1)} กม.`;
+}
+
+/**
+ * ค่าประมาณหยาบจากระยะเส้นตรง — ใช้เมื่อผู้ใช้กดเลือกเองเท่านั้น และติดป้าย "ประมาณการ"
+ * เดิน: 4.5 กม./ชม. × ตัวคูณเส้นทาง 1.3
+ * ขนส่งสาธารณะ: 15 นาที (เดิน+รอ) + 25 กม./ชม. × 1.4
+ * รถยนต์: 5 นาที + 20 กม./ชม. × 1.4 (ไม่รวมรอเรียกรถ)
+ */
+export function roughEstimateMin(distM: number, mode: 'WALKING' | 'TRANSIT' | 'DRIVING'): number {
+  const km = distM / 1000;
+  if (mode === 'WALKING') return Math.max(1, Math.round(((km * 1.3) / 4.5) * 60));
+  if (mode === 'TRANSIT') return Math.round(15 + ((km * 1.4) / 25) * 60);
+  return Math.round(5 + ((km * 1.4) / 20) * 60);
+}

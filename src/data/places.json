@@ -1,0 +1,1487 @@
+[
+ {
+  "id": "musinsa-standard-hongdae",
+  "nameTh": "มูซินซา สแตนดาร์ด ฮงแด",
+  "nameEn": "MUSINSA STANDARD Hongdae",
+  "nameKo": "무신사 스탠다드 홍대",
+  "branch": "Hongdae",
+  "category": "fashion",
+  "area": "Hongdae",
+  "address": "B1–2F, 144 Yanghwa-ro, Mapo-gu, Seoul (서울 마포구 양화로 144)",
+  "lat": 37.5552548,
+  "lng": 126.9223997,
+  "coordStatus": "verified",
+  "coordSource": "OSM way 842095635 (building at 144 Yanghwa-ro)",
+  "reasonTh": "ร้านเสื้อผ้าเบสิกราคาจับต้องได้ของแบรนด์ในเครือ Musinsa มี 3 ชั้น (B1 ชาย, 1F สินค้าหลักตามฤดูกาล, 2F หญิง)",
+  "suggestedStayMin": 45,
+  "budget": {
+   "textTh": "เสื้อผ้าเบสิก ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "11:00–23:00 daily",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "11:00",
+  "closeTime": "23:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": [
+   "basics",
+   "casual"
+  ],
+  "sources": [
+   {
+    "label": "VisitSeoul (KR) – Musinsa Standard Hongdae",
+    "url": "https://korean.visitseoul.net/shopping/MusinsaStandardHongdae/KOPjuf6ry"
+   },
+   {
+    "label": "Musinsa content post (11:00–23:00, reopening)",
+    "url": "https://www.musinsa.com/content/1443470723543047006"
+   },
+   {
+    "label": "OSM building",
+    "url": "https://www.openstreetmap.org/way/842095635"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Store is in the same building as Mercure Ambassador Seoul Hongdae (OSM). Near Hongik Univ. stn exit 9. Older article listed 11:00–21:00; current VisitSeoul and Musinsa post say 11:00–23:00. Musinsa says the store reopened after expansion on 2025-11-28; floor details may have changed. No price source."
+ },
+ {
+  "id": "yennaljip-hongdae",
+  "nameTh": "เยตนัลจิบ (ร้านหมูย่างถ่านฮงแด)",
+  "nameEn": "Yennaljip (Yetnaljip) – charcoal pork BBQ",
+  "nameKo": "옛날집",
+  "branch": null,
+  "category": "food",
+  "area": "Hongdae",
+  "address": "143 Eoulmadang-ro, Mapo-gu, Seoul (서울 마포구 어울마당로 143; lot 동교동 169-6)",
+  "lat": 37.5565247,
+  "lng": 126.9256713,
+  "coordStatus": "verified",
+  "coordSource": "OSM node 4928008585 (옛날집, 143 Eoulmadang-ro)",
+  "reasonTh": "ร้านหมูย่างถ่าน (ย่างถ่านก่อนเสิร์ฟ) ใกล้สถานีฮงอิกแด เปิดถึงดึก มีสามชั้น คอหมู หมูคอ (กัลแมกิซัล) และเมนูข้าว/ซุปราคาประหยัด",
+  "suggestedStayMin": 75,
+  "budget": {
+   "textTh": "เนื้อหมู 150 ก. ราว 16,900–24,900 วอน/ที่ (ต้องสั่งหลายที่สำหรับ 2 คน) + ข้าว/ซุป 5,000–8,000 วอน",
+   "krwMin": 16900,
+   "krwMax": 24900,
+   "status": "source"
+  },
+  "hours": {
+   "text": "16:00–03:30 daily (DiningCode); MangoPlate says 15:00–03:00",
+   "closedDays": null,
+   "lastOrder": "03:00",
+   "status": "unverified"
+  },
+  "openTime": "16:00",
+  "closeTime": "03:30",
+  "indoor": true,
+  "food": {
+   "type": "bbq",
+   "menu": [
+    "생삼겹살 pork belly 150g ₩16,900",
+    "생목살 pork neck 150g ₩16,900",
+    "돼지갈비 pork galbi 200g ₩16,900",
+    "갈매기살 skirt 150g ₩18,900",
+    "항정살 jowl 150g ₩24,900",
+    "김치찌개 ₩8,000",
+    "냉면 ₩8,000",
+    "다슬기된장밥 ₩7,000"
+   ],
+   "mealMin": 75,
+   "minOrder": null,
+   "diningZone": "other"
+  },
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "DiningCode – 옛날집 (menu, hours)",
+    "url": "https://www.diningcode.com/profile.php?rid=5BX8lRHhe63c"
+   },
+   {
+    "label": "MangoPlate – Yetnaljib",
+    "url": "https://www.mangoplate.com/en/restaurants/iQpenLkuPc"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/4928008585"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Verified Korean name is 옛날집 (some listings: 옛날집참숯구이). Serves charcoal pork/beef BBQ (참숯 초벌 삼겹살, 갈매기살, 항정살). Hours conflict between sources (16:00–03:30 LO 03:00 vs 15:00–03:00); one blog wrote 143-1. Closed on Chuseok holidays per one blog mention. No minimum order stated. diningZone forced to 'near-hotel' because schema has no Hongdae zone: it is NOT walkable from the hotel — direct Line 2 City Hall→Hongik Univ. (5 stops). mealMin is an estimate."
+ },
+ {
+  "id": "oliveyoung-myeongdong-global",
+  "nameTh": "โอลีฟยัง เมียงดง โกลบอล (แฟล็กชิป)",
+  "nameEn": "OLIVE YOUNG Myeongdong Global",
+  "nameKo": "올리브영 명동 글로벌",
+  "branch": "Myeongdong Global (flagship)",
+  "category": "beauty",
+  "area": "Myeongdong",
+  "address": "1F–2F, 53 Myeongdong-gil, Jung-gu, Seoul (서울 중구 명동길 53)",
+  "lat": 37.5641193,
+  "lng": 126.9851661,
+  "coordStatus": "verified",
+  "coordSource": "OSM way 1010216722 (building 53 Myeongdong-gil); Olive Young node 4761517621 adjacent",
+  "reasonTh": "สาขาเรือธงสำหรับนักท่องเที่ยว 2 ชั้น สกินแคร์/เมคอัพครบ มีเลานจ์บริการต่างชาติและคืนภาษีทันทีเมื่อซื้อ 15,000 วอนขึ้นไป",
+  "suggestedStayMin": 60,
+  "budget": {
+   "textTh": "ขึ้นกับสินค้า; คืนภาษีทันทีเมื่อซื้อ ≥15,000 วอน (ต้องใช้พาสปอร์ต)",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "10:00–22:30 daily incl. holidays",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "10:00",
+  "closeTime": "22:30",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "Olive Young Myeongdong Global official site",
+    "url": "https://myeongdongtown.oliveyoung.com/en"
+   },
+   {
+    "label": "OSM building",
+    "url": "https://www.openstreetmap.org/way/1010216722"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Official page: 1F skincare/suncare/masks, 2F makeup/hair/men/fragrance + Global Service Lounge & GTF duty-free desk. No restroom in store. Note: a separate larger 'Central Myeongdong Town' store opened 2026-03-26 ~200 m away (MTN news) — not included because its address was not verified."
+ },
+ {
+  "id": "daiso-myeongdong-main",
+  "nameTh": "ไดโซ เมียงดง สาขาหลัก",
+  "nameEn": "Daiso Myeongdong Main Branch",
+  "nameKo": "다이소 명동본점",
+  "branch": "Myeongdong (명동본점)",
+  "category": "beauty",
+  "area": "Myeongdong",
+  "address": "43 Myeongdong-gil, Jung-gu, Seoul 04534 (서울 중구 명동길 43)",
+  "lat": 37.5638801,
+  "lng": 126.9845342,
+  "coordStatus": "verified",
+  "coordSource": "OSM node 6535860659 (Daiso, branch 명동본점, level -1); OSM address point for 43 Myeongdong-gil (node 14208241525) is ~10 m away",
+  "reasonTh": "ร้านของใช้ราคาถูก มีสกินแคร์/เครื่องสำอางแบรนด์เกาหลีราคาประหยัด และของฝากราคาไม่แพง ใจกลางถนนเมียงดง",
+  "suggestedStayMin": 40,
+  "budget": {
+   "textTh": "สินค้าส่วนใหญ่ราคาต่ำ (ไม่มีราคาจากแหล่งข้อมูล)",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "10:00–22:00 daily",
+   "closedDays": "Seollal & Chuseok holidays",
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "KTripTips (KTO) – Daiso Myeong-dong Branch",
+    "url": "https://www.ktriptips.com/eng/shopping/2959618"
+   },
+   {
+    "label": "Trazy – largest Daiso stores in Seoul",
+    "url": "https://blog.trazy.com/guide-to-the-largest-daiso-stores-in-seoul/"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/6535860659"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Floor info conflicts: Trazy calls the 43 Myeongdong-gil store a 12-floor flagship, but Creatrip lists it as B1, OSM tags it level -1, and the well-known 12-floor Daiso is the separate 'Myeongdong Station' branch at 134-1 Toegye-ro (KTripTips 2959641). Treat this entry as the basement-level main branch on Myeongdong-gil. Nearest: Myeongdong stn (Line 4) exit 6 per Trazy."
+ },
+ {
+  "id": "myeongdong-kyoja",
+  "nameTh": "มยองดงเกียวจา (สาขาหลัก)",
+  "nameEn": "Myeongdong Kyoja (Main)",
+  "nameKo": "명동교자 본점",
+  "branch": "Main (본점)",
+  "category": "food",
+  "area": "Myeongdong",
+  "address": "29 Myeongdong 10-gil, Jung-gu, Seoul 04537 (서울 중구 명동10길 29)",
+  "lat": 37.5625608,
+  "lng": 126.9856037,
+  "coordStatus": "verified",
+  "coordSource": "OSM node 4397381096 (명동교자, branch 본점, 29 Myeongdong 10-gil)",
+  "reasonTh": "ร้านคัลกุกซุ (บะหมี่ตัดมือในน้ำซุปไก่) และเกี๊ยวนึ่งชื่อดังตั้งแต่ปี 1966 กินเร็ว เดินจากโรงแรมได้",
+  "suggestedStayMin": 40,
+  "budget": {
+   "textTh": "คัลกุกซุ 12,000 วอน (ขึ้นราคาปี 2025 ตามข่าวเม.ย. 2026)",
+   "krwMin": 12000,
+   "krwMax": 12000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:30–21:00 or 21:30 daily (sources differ)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified"
+  },
+  "openTime": "10:30",
+  "closeTime": "21:00",
+  "indoor": true,
+  "food": {
+   "type": "noodle",
+   "menu": [
+    "칼국수 kalguksu",
+    "만두 steamed dumplings",
+    "비빔국수 bibim-guksu"
+   ],
+   "mealMin": 30,
+   "minOrder": null,
+   "diningZone": "near-hotel"
+  },
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "Asiae (2026-04-14) – kalguksu price 12,000 won",
+    "url": "https://www.asiae.co.kr/en/visual-news/article/2026041415530926441"
+   },
+   {
+    "label": "OSM node (opening_hours Mo-Su 10:30-21:30)",
+    "url": "https://www.openstreetmap.org/node/4397381096"
+   },
+   {
+    "label": "Time Out Seoul",
+    "url": "https://timeout.com/seoul/restaurants/myeongdong-kyoja"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Official site mdkj.co.kr blocked automated access. Closing time conflicts: OSM 21:30; several 2025–26 guides 21:00 with last order ~20:30 (not confirmed, so lastOrder null). Dumpling/bibim-guksu prices not confirmed for 2026. Long lines at peak; shared/fast seating. mealMin estimate."
+ },
+ {
+  "id": "hadongkwan-myeongdong",
+  "nameTh": "ฮาดงกวาน (ร้านแม่ เมียงดง)",
+  "nameEn": "Hadongkwan (Myeongdong main)",
+  "nameKo": "하동관",
+  "branch": "Myeongdong main",
+  "category": "food",
+  "area": "Myeongdong",
+  "address": "12 Myeongdong 9-gil, Jung-gu, Seoul 04538 (서울 중구 명동9길 12)",
+  "lat": 37.5643349,
+  "lng": 126.9850054,
+  "coordStatus": "verified",
+  "coordSource": "OSM node 4735382022 (하동관, 12 Myeongdong 9-gil)",
+  "reasonTh": "ร้านซุปเนื้อโกมทังน้ำใสเก่าแก่ตั้งแต่ปี 1939 (มิชลินไกด์ระดับราคา ₩) เหมาะเป็นมื้อเช้า/กลางวันใกล้โรงแรม",
+  "suggestedStayMin": 40,
+  "budget": {
+   "textTh": "โกมทังราว 15,000–19,000 วอน (ประมาณจากข้อมูลเก่า ไม่ยืนยันปี 2026)",
+   "krwMin": 15000,
+   "krwMax": 19000,
+   "status": "estimate"
+  },
+  "hours": {
+   "text": "Mon–Sat 07:00–16:00; closes early when sold out",
+   "closedDays": "Sunday",
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "07:00",
+  "closeTime": "16:00",
+  "indoor": true,
+  "food": {
+   "type": "one-dish",
+   "menu": [
+    "곰탕 gomtang (beef bone/brisket soup)",
+    "extra meat/intestine options (공 sizes)"
+   ],
+   "mealMin": 30,
+   "minOrder": null,
+   "diningZone": "near-hotel"
+  },
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "MICHELIN Guide – Hadongkwan",
+    "url": "https://guide.michelin.com/kr/ko/seoul-capital-area/kr-seoul/restaurant/hadongkwan"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/4735382022"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Michelin: prepay system, may share tables, sells out. OSM tag says 16:30 close. Price is an estimate: one undated source 15,000/18,000; a COEX-branch review mentions 19,000 for large. Sizes are ordered by '공' number per Insight article."
+ },
+ {
+  "id": "hadongkwan-coex",
+  "nameTh": "ฮาดงกวาน สาขาโคเอ็กซ์",
+  "nameEn": "Hadongkwan COEX Mall",
+  "nameKo": "하동관 코엑스점",
+  "branch": "Starfield COEX Mall B1 (J-101)",
+  "category": "food",
+  "area": "COEX/Samseong",
+  "address": "B1 J-101, Starfield COEX Mall, 513 Yeongdong-daero, Gangnam-gu, Seoul (서울 강남구 영동대로 513 코엑스몰 지하1층)",
+  "lat": 37.5125275,
+  "lng": 127.0588489,
+  "coordStatus": "area-center",
+  "coordSource": "OSM node 12192149532 (하동관, 513 Yeongdong-daero, unit 지하1층 J-101)",
+  "reasonTh": "โกมทังสูตรเดียวกับร้านแม่ในเมียงดง แต่อยู่ในห้าง COEX และเปิดถึง 22:00 เหมาะกินหลังเลิกงานบูธ",
+  "suggestedStayMin": 35,
+  "budget": {
+   "textTh": "ราว 15,000–19,000 วอน (ประมาณ; รีวิวหนึ่งระบุไซซ์พิเศษ 19,000)",
+   "krwMin": 15000,
+   "krwMax": 19000,
+   "status": "estimate"
+  },
+  "hours": {
+   "text": "10:30–22:00 daily (official mall listing)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "10:30",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": {
+   "type": "one-dish",
+   "menu": [
+    "곰탕 gomtang"
+   ],
+   "mealMin": 30,
+   "minOrder": null,
+   "diningZone": "near-coex"
+  },
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "Starfield COEX Mall – Hadongkwan store page",
+    "url": "https://www.starfield.co.kr/coexmall/tenant/tenantDetail/TN201708291105560352.do"
+   },
+   {
+    "label": "Starfield COEX Mall official tenant list",
+    "url": "https://www.starfield.co.kr/coexmall/tenant/categoryInfo.do"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/12192149532"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Phone 02-551-5959 (mall page). Coordinate is OSM's shared address point for 513 Yeongdong-daero (all COEX tenants share it) – unit-level position inside the mall not verified. Mall-listed hours may be mall default; restaurant may have break/sell-out times. | พิกัดเป็นจุดที่อยู่รวมของ COEX Mall ไม่ใช่ตำแหน่งร้านภายในห้าง"
+ },
+ {
+  "id": "misari-chogyeguksu-coex",
+  "nameTh": "มีซารี มิลบิต โชเกกุกซุ (โคเอ็กซ์)",
+  "nameEn": "Misari Milbit Chogyeguksu (COEX Mall)",
+  "nameKo": "미사리밀빛초계국수",
+  "branch": "Starfield COEX Mall B1",
+  "category": "food",
+  "area": "COEX/Samseong",
+  "address": "B1, Starfield COEX Mall, 513 Yeongdong-daero, Gangnam-gu, Seoul (서울 강남구 영동대로 513)",
+  "lat": 37.5125275,
+  "lng": 127.0588489,
+  "coordStatus": "area-center",
+  "coordSource": "OSM address point for 513 Yeongdong-daero (shared by COEX Mall tenants, e.g. node 12192149532); store itself not mapped in OSM",
+  "reasonTh": "ร้านบะหมี่ โชเกกุกซุ (บะหมี่เย็นไก่) และคัลกุกซุ ในห้าง COEX กินง่ายราคาไม่สูง",
+  "suggestedStayMin": 35,
+  "budget": {
+   "textTh": "เกี๊ยว 8,000 วอน (ตามเว็บห้าง); ราคาบะหมี่ไม่ระบุ",
+   "krwMin": 8000,
+   "krwMax": null,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:30–22:00 daily (official mall listing)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "10:30",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": {
+   "type": "noodle",
+   "menu": [
+    "초계국수 chogye-guksu (cold chicken noodle)",
+    "칼국수 kalguksu",
+    "만두 dumplings ₩8,000"
+   ],
+   "mealMin": 30,
+   "minOrder": null,
+   "diningZone": "near-coex"
+  },
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "Starfield COEX Mall – Misari Milbit Chogyeguksu store page",
+    "url": "https://www.starfield.co.kr/coexmall/tenant/tenantDetail/TN201708291105570571.do"
+   },
+   {
+    "label": "Starfield COEX Mall official tenant list",
+    "url": "https://www.starfield.co.kr/coexmall/tenant/categoryInfo.do"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Phone 02-6002-6566. Only the dumpling price is listed officially. Coordinate is building-level only. Different branch exists at 31 Euljiro 44-gil (OSM) – not this one. | พิกัดเป็นจุดที่อยู่รวมของ COEX Mall ไม่ใช่ตำแหน่งร้านภายในห้าง"
+ },
+ {
+  "id": "gwanghwamun-seokgalbi-coex",
+  "nameTh": "ควังฮวามุน ซอกกัลบี (โคเอ็กซ์)",
+  "nameEn": "Gwanghwamun Seokgalbi (COEX Mall)",
+  "nameKo": "광화문석갈비",
+  "branch": "Starfield COEX Mall 1F",
+  "category": "food",
+  "area": "COEX/Samseong",
+  "address": "1F, Starfield COEX Mall, 513 Yeongdong-daero, Gangnam-gu, Seoul (서울 강남구 영동대로 513)",
+  "lat": 37.5125275,
+  "lng": 127.0588489,
+  "coordStatus": "area-center",
+  "coordSource": "OSM address point for 513 Yeongdong-daero (shared by COEX Mall tenants); store not mapped in OSM",
+  "reasonTh": "ร้านกัลบีย่างบนหิน (ไม่ต้องย่างเองที่โต๊ะ กลิ่นไม่ติดเสื้อ) ในห้าง COEX มีชุดอาหารกลางวันสำหรับ 1 คน",
+  "suggestedStayMin": 60,
+  "budget": {
+   "textTh": "ชุดกลางวัน 1 คน: หมู 18,900 / เนื้อ 26,900 วอน (เว็บห้าง)",
+   "krwMin": 18900,
+   "krwMax": 26900,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:30–22:00 daily (official mall listing)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "10:30",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": {
+   "type": "bbq",
+   "menu": [
+    "[점심] 돼찬밥 pork galbi 1-person set ₩18,900",
+    "[점심] 소찬밥 beef galbi 1-person set ₩26,900",
+    "한우고추장육회 ₩22,900"
+   ],
+   "mealMin": 50,
+   "minOrder": null,
+   "diningZone": "near-coex"
+  },
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "Starfield COEX Mall – Gwanghwamun Seokgalbi store page",
+    "url": "https://www.starfield.co.kr/coexmall/tenant/tenantDetail/TN202005061700485161.do"
+   },
+   {
+    "label": "Starfield COEX Mall official tenant list",
+    "url": "https://www.starfield.co.kr/coexmall/tenant/categoryInfo.do"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Phone 02-539-0107; reservations possible per mall page. Lunch-set hours not stated. Not table-grill BBQ — pre-grilled galbi served (store tagline about no smell on clothes). Coordinate building-level only. | พิกัดเป็นจุดที่อยู่รวมของ COEX Mall ไม่ใช่ตำแหน่งร้านภายในห้าง"
+ },
+ {
+  "id": "woo-lae-oak",
+  "nameTh": "อูแรอก (นังมยอนเปียงยาง)",
+  "nameEn": "Woo Lae Oak",
+  "nameKo": "우래옥",
+  "branch": "Main",
+  "category": "food",
+  "area": "Euljiro",
+  "address": "62-29 Changgyeonggung-ro, Jung-gu, Seoul 04546 (서울 중구 창경궁로 62-29)",
+  "lat": 37.5680711,
+  "lng": 126.9987424,
+  "coordStatus": "verified",
+  "coordSource": "OSM node 5174270062 (우래옥, 62-29 Changgyeonggung-ro)",
+  "reasonTh": "ร้านนังมยอน (บะหมี่เย็น) สไตล์เปียงยางเก่าแก่ตั้งแต่ปี 1946 ติดมิชลินไกด์ อยู่ใกล้สถานีอึลจีโร 4-กา บนสาย 2 ทางกลับโรงแรม",
+  "suggestedStayMin": 60,
+  "budget": {
+   "textTh": "นังมยอน 18,000 วอน (ข่าว SBS Biz มิ.ย. 2026)",
+   "krwMin": 18000,
+   "krwMax": 18000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "Tue–Sun 11:30–21:00",
+   "closedDays": "Monday",
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "11:30",
+  "closeTime": "21:00",
+  "indoor": true,
+  "food": {
+   "type": "noodle",
+   "menu": [
+    "평양냉면 Pyongyang naengmyeon",
+    "불고기 bulgogi"
+   ],
+   "mealMin": 45,
+   "minOrder": null,
+   "diningZone": "between"
+  },
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "MICHELIN Guide – Woo Lae Oak",
+    "url": "https://guide.michelin.com/kr/ko/seoul-capital-area/kr-seoul/restaurant/woo-lae-oak"
+   },
+   {
+    "label": "SBS Biz (2026-06-02) – naengmyeon prices",
+    "url": "https://biz.sbs.co.kr/amp/article/20000314156"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/5174270062"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Real route COEX→hotel: Samseong (Line 2) → Seongsu → Wangsimni → Sindang → Dongdaemun History & Culture Park → Euljiro 4-ga → Euljiro 3-ga → Euljiro 1-ga → City Hall (18 stops on the northern arc), or Bongeunsa (Line 9) → Express Bus Terminal → Line 3 → Chungmuro → Line 4 → Myeongdong/Hoehyeon. Get off at Euljiro 4-ga (Line 2/5; exit 4 per Siksin), eat, then Line 2 three stops to City Hall or Euljiro 1-ga. Some sources say 11:20 open; Michelin says 11:30. Weekday waits ~30 min reported. mealMin estimate."
+ },
+ {
+  "id": "pildong-myeonok",
+  "nameTh": "พิลดงมยอนอก",
+  "nameEn": "Pildong Myeonok",
+  "nameKo": "필동면옥",
+  "branch": null,
+  "category": "food",
+  "area": "Chungmuro",
+  "address": "26 Seoae-ro, Jung-gu, Seoul 04624 (서울 중구 서애로 26)",
+  "lat": 37.5603894,
+  "lng": 126.9969309,
+  "coordStatus": "verified",
+  "coordSource": "OSM node 5486785947 (필동면옥, 26 Seoae-ro)",
+  "reasonTh": "ร้านนังมยอนเปียงยางติดมิชลินไกด์ (ราคา ₩) ใกล้สถานีชุงมูโร เหมาะแวะบนเส้นทางสาย 9 → สาย 3 กลับเมียงดง",
+  "suggestedStayMin": 45,
+  "budget": {
+   "textTh": "ไม่มีราคาปี 2026 จากแหล่งข้อมูล (ร้านนังมยอนชื่อดังในโซลราว 15,000–18,000 วอน)",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "Mon–Sat 11:00–15:00 & 17:00–20:00",
+   "closedDays": "Sunday",
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "11:00",
+  "closeTime": "20:00",
+  "indoor": true,
+  "food": {
+   "type": "noodle",
+   "menu": [
+    "평양냉면 Pyongyang naengmyeon",
+    "수육 boiled pork slices (Michelin highlight)"
+   ],
+   "mealMin": 35,
+   "minOrder": null,
+   "diningZone": "between"
+  },
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "MICHELIN Guide – Pildong Myeonok",
+    "url": "https://guide.michelin.com/kr/ko/seoul-capital-area/kr-seoul/restaurant/pildong-myeonok"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/5486785947"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Real route COEX→hotel: Samseong (Line 2) → Seongsu → Wangsimni → Sindang → Dongdaemun History & Culture Park → Euljiro 4-ga → Euljiro 3-ga → Euljiro 1-ga → City Hall (18 stops on the northern arc), or Bongeunsa (Line 9) → Express Bus Terminal → Line 3 → Chungmuro → Line 4 → Myeongdong/Hoehyeon. Pildong Myeonok is a short walk from Chungmuro stn (Line 3/4); from there Line 4 is 1 stop to Myeongdong / 2 to Hoehyeon. Break 15:00–17:00. Price not verified. mealMin estimate."
+ },
+ {
+  "id": "jinokhwa-dakhanmari",
+  "nameTh": "จินอกฮวา ฮัลแม วอนโจ ทักฮันมารี",
+  "nameEn": "Jinokhwa Halmae Wonjo Dakhanmari",
+  "nameKo": "진옥화할매원조닭한마리",
+  "branch": null,
+  "category": "food",
+  "area": "Dongdaemun",
+  "address": "18 Jong-ro 40ga-gil, Jongno-gu, Seoul 03197 (서울 종로구 종로40가길 18)",
+  "lat": 37.5703933,
+  "lng": 127.0058915,
+  "coordStatus": "verified",
+  "coordSource": "OSM node 4757180326 (18 Jong-ro 40ga-gil)",
+  "reasonTh": "ต้นตำรับทักฮันมารี (ไก่ทั้งตัวต้มในหม้อ ใส่ต๊อกและเส้นตอนท้าย) เปิดตั้งแต่ 1978 เปิดถึงตี 1",
+  "suggestedStayMin": 60,
+  "budget": {
+   "textTh": "ไก่ 1 ตัว (กิน 2 คน) ราว 30,000–33,000 วอน + เส้น/ต๊อก ~2,000 วอน (ข่าวเกาหลี, ไม่ระบุปี)",
+   "krwMin": 30000,
+   "krwMax": 33000,
+   "status": "estimate"
+  },
+  "hours": {
+   "text": "10:30–01:00 (next day), open all year",
+   "closedDays": null,
+   "lastOrder": "23:30",
+   "status": "verified"
+  },
+  "openTime": "10:30",
+  "closeTime": "01:00",
+  "indoor": true,
+  "food": {
+   "type": "one-dish",
+   "menu": [
+    "닭한마리 whole chicken hot pot",
+    "떡사리 rice cake add-on",
+    "국수사리 noodle add-on",
+    "kimchi"
+   ],
+   "mealMin": 50,
+   "minOrder": "Ordered per whole chicken (one pot) – practical minimum ~2 people; not stated as a rule",
+   "diningZone": "between"
+  },
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "KTripTips (KTO) – Jinokhwa",
+    "url": "https://www.ktriptips.com/eng/food/1336685"
+   },
+   {
+    "label": "Time Out Seoul",
+    "url": "https://www.timeout.com/seoul/restaurants/jin-ok-hwa-halmae-wonjo-dakhanmari-restaurant"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/4757180326"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Real route COEX→hotel: Samseong (Line 2) → Seongsu → Wangsimni → Sindang → Dongdaemun History & Culture Park → Euljiro 4-ga → Euljiro 3-ga → Euljiro 1-ga → City Hall (18 stops on the northern arc), or Bongeunsa (Line 9) → Express Bus Terminal → Line 3 → Chungmuro → Line 4 → Myeongdong/Hoehyeon. Best route: Line 2 Samseong → Dongdaemun History & Culture Park, transfer to Line 4 one stop to Dongdaemun (exit 8 per Time Out), eat, then Line 4 straight back to Myeongdong/Hoehyeon (no extra transfer). Prices conflict: Time Out (older) 20,000; Korean articles 30,000 / 33,000 — treated as estimate. Seating may be 2F per one source."
+ },
+ {
+  "id": "gwangjang",
+  "nameTh": "ตลาดควังจัง",
+  "nameEn": "Gwangjang Market",
+  "nameKo": "광장시장",
+  "branch": null,
+  "category": "market",
+  "area": "Jongno",
+  "address": "88 Changgyeonggung-ro, Jongno-gu, Seoul (서울 종로구 창경궁로 88)",
+  "lat": 37.570189,
+  "lng": 126.9994995,
+  "coordStatus": "verified",
+  "coordSource": "OSM way 607083156 (광장시장 marketplace); building way 1124654273 at 88 Changgyeonggung-ro",
+  "reasonTh": "ตลาดอาหารเก่าแก่ ขึ้นชื่อเรื่องบินแดต็อก (แพนเค้กถั่วเขียว) มายักคิมบับ ยุกฮเว และคัลกุกซุ ราคาย่อมเยากว่าเมียงดง",
+  "suggestedStayMin": 75,
+  "budget": {
+   "textTh": "มื้อทั่วไปราว 6,000–15,000 วอน/คน (คู่มือบุคคลที่สาม)",
+   "krwMin": 6000,
+   "krwMax": 15000,
+   "status": "estimate"
+  },
+  "hours": {
+   "text": "Food alley roughly 09:00–23:00 daily (stall-dependent); fabric/clothing sections close earlier and some close Sundays",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified"
+  },
+  "openTime": "09:00",
+  "closeTime": "23:00",
+  "indoor": true,
+  "food": {
+   "type": "market",
+   "menu": [
+    "빈대떡 bindaetteok",
+    "마약김밥 mayak gimbap",
+    "육회 yukhoe",
+    "칼국수 kalguksu"
+   ],
+   "mealMin": 45,
+   "minOrder": null,
+   "diningZone": "between"
+  },
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "seoultourism.org (third-party) – Gwangjang guide",
+    "url": "https://www.seoultourism.org/?p=1096"
+   },
+   {
+    "label": "OSM marketplace",
+    "url": "https://www.openstreetmap.org/way/607083156"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Real route COEX→hotel: Samseong (Line 2) → Seongsu → Wangsimni → Sindang → Dongdaemun History & Culture Park → Euljiro 4-ga → Euljiro 3-ga → Euljiro 1-ga → City Hall (18 stops on the northern arc), or Bongeunsa (Line 9) → Express Bus Terminal → Line 3 → Chungmuro → Line 4 → Myeongdong/Hoehyeon. From Line 2 get off at Euljiro 4-ga and walk north on Changgyeonggung-ro (~500 m, map estimate; passes Woo Lae Oak) or use Jongno 5-ga (Line 1) exit 8. Hours/prices from third-party guides; stall hours vary (e.g. Park Bindaetteok 08:00–22:00 per one guide). Base id kept as 'gwangjang'."
+ },
+ {
+  "id": "namdaemun",
+  "nameTh": "ตลาดนัมแดมุน",
+  "nameEn": "Namdaemun Market",
+  "nameKo": "남대문시장",
+  "branch": null,
+  "category": "market",
+  "area": "Namdaemun",
+  "address": "21 Namdaemunsijang 4-gil, Jung-gu, Seoul (서울 중구 남대문시장4길 21)",
+  "lat": 37.5592777,
+  "lng": 126.9773485,
+  "coordStatus": "verified",
+  "coordSource": "OSM way 78503350 (남대문시장 marketplace area)",
+  "reasonTh": "ตลาดใหญ่ใกล้โรงแรม (สถานีฮเวฮยอน ทางออก 5) มีซอยคัลกุกซุ ซอยปลาคัลชีตุ๋น และโฮต็อกผัก ของถูกและของฝาก",
+  "suggestedStayMin": 75,
+  "budget": {
+   "textTh": "คัลกุกซุ <10,000; คัลชีโจริม ~12,000–15,000/คน; โฮต็อก ~2,000 วอน (คู่มือบุคคลที่สาม)",
+   "krwMin": 2000,
+   "krwMax": 15000,
+   "status": "estimate"
+  },
+  "hours": {
+   "text": "Most shops approx. 09:00–17:00 Mon–Sat (many open earlier; some wholesale overnight)",
+   "closedDays": "Mostly closed Sundays; much closed on Seollal/Chuseok",
+   "lastOrder": null,
+   "status": "unverified"
+  },
+  "openTime": "09:00",
+  "closeTime": "17:00",
+  "indoor": false,
+  "food": {
+   "type": "market",
+   "menu": [
+    "칼국수 골목 kalguksu alley",
+    "갈치조림 골목 braised hairtail",
+    "야채호떡 vegetable hotteok"
+   ],
+   "mealMin": 40,
+   "minOrder": "Galchi-jorim usually min. 2 servings (third-party guide)",
+   "diningZone": "near-hotel"
+  },
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "seoultourism.org (third-party, checked Sep 2026)",
+    "url": "https://www.seoultourism.org/?p=1626"
+   },
+   {
+    "label": "OSM marketplace",
+    "url": "https://www.openstreetmap.org/way/78503350"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Walkable from hotel (~400 m, map estimate). Address '21 Namdaemunsijang 4-gil' appears in several listings; market spans many streets. One source claims closure only on 1st/3rd Sundays — conflicting. Base id kept as 'namdaemun'."
+ },
+ {
+  "id": "myeongdong",
+  "nameTh": "ถนนเมียงดง (ช้อปปิ้ง + สตรีทฟู้ดยามเย็น)",
+  "nameEn": "Myeongdong shopping street & evening street food",
+  "nameKo": "명동거리",
+  "branch": null,
+  "category": "market",
+  "area": "Myeongdong",
+  "address": "Myeongdong-gil & Myeongdong 8-gil area, Jung-gu, Seoul (서울 중구 명동길 일대)",
+  "lat": 37.5638414,
+  "lng": 126.9850488,
+  "coordStatus": "verified",
+  "coordSource": "OSM way 198691077 (Myeongdong-gil street segment) – area-level point",
+  "reasonTh": "ย่านช้อปเครื่องสำอาง/แฟชั่นเดินจากโรงแรมได้ ตอนเย็นมีรถเข็นสตรีทฟู้ดเรียงตามถนนหลัก",
+  "suggestedStayMin": 90,
+  "budget": {
+   "textTh": "สตรีทฟู้ดส่วนใหญ่ ~3,000–6,000 วอน/ชิ้น; ของพรีเมียมสูงกว่า (บล็อกท่องเที่ยว)",
+   "krwMin": 3000,
+   "krwMax": 6000,
+   "status": "estimate"
+  },
+  "hours": {
+   "text": "Street-food stalls roughly from ~16:00 to ~22:00 (sources differ); shops mostly ~10:00–22:00",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified"
+  },
+  "openTime": "16:00",
+  "closeTime": "22:00",
+  "indoor": false,
+  "food": {
+   "type": "market",
+   "menu": [
+    "tteokbokki",
+    "grilled skewers",
+    "egg bread (gyeranppang)",
+    "hotteok"
+   ],
+   "mealMin": 45,
+   "minOrder": null,
+   "diningZone": "near-hotel"
+  },
+  "fashionTypes": [
+   "basics",
+   "streetwear",
+   "accessories"
+  ],
+  "sources": [
+   {
+    "label": "Creatrip – Myeongdong street food",
+    "url": "https://creatrip.com/en/blog/15177"
+   },
+   {
+    "label": "OSM street",
+    "url": "https://www.openstreetmap.org/way/198691077"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Area entry, not a single venue. Street-food hours and prices from travel blogs only; prices in Myeongdong reported higher than Gwangjang. Base id kept as 'myeongdong'."
+ },
+ {
+  "id": "mangwon",
+  "nameTh": "ตลาดมังวอน",
+  "nameEn": "Mangwon Market",
+  "nameKo": "망원시장",
+  "branch": null,
+  "category": "market",
+  "area": "Mangwon",
+  "address": "Around 14 Poeun-ro 8-gil, Mapo-gu, Seoul (서울 마포구 포은로8길 14 일대) – sources differ",
+  "lat": 37.5566206,
+  "lng": 126.9060503,
+  "coordStatus": "verified",
+  "coordSource": "OSM way 31856777 (망원시장 marketplace)",
+  "reasonTh": "ตลาดสดท้องถิ่นของคนโซลย่านมังวอน มีร้านของกินและของสดหลายร้าน อยู่ไม่ไกลจากฮงแด",
+  "suggestedStayMin": 60,
+  "budget": {
+   "textTh": "ไม่ได้ตรวจสอบราคา",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "About 09:00/10:00–21:00/22:00, varies by stall",
+   "closedDays": "Many stalls closed/short hours on public holidays",
+   "lastOrder": null,
+   "status": "unverified"
+  },
+  "openTime": "10:00",
+  "closeTime": "21:00",
+  "indoor": false,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "Time Out Seoul – Mangwon Market",
+    "url": "https://www.timeout.com/seoul/attractions/mangwon-market"
+   },
+   {
+    "label": "OSM marketplace",
+    "url": "https://www.openstreetmap.org/way/31856777"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Mangwon stn (Line 6) exit 2. Address conflicts (14 Poeun-ro 8-gil / 27 Poeun-ro 6-gil / 30 Mangwon-ro 8-gil). food=null because no menu/price source verified and it is outside all three dining zones. Base id kept as 'mangwon'."
+ },
+ {
+  "id": "musinsa-standard-myeongdong-jungang",
+  "nameTh": "มูซินซา สแตนดาร์ด เมียงดงจุงอัง",
+  "nameEn": "MUSINSA STANDARD Myeongdong Jungang",
+  "nameKo": "무신사 스탠다드 명동중앙점",
+  "branch": "Myeongdong Jungang (opened 2026-09-08)",
+  "category": "fashion",
+  "area": "Myeongdong",
+  "address": "40 Myeongdong 8-gil, Jung-gu, Seoul (서울 중구 명동8길 40), 1F–4F",
+  "lat": null,
+  "lng": null,
+  "coordStatus": "unverified",
+  "coordSource": null,
+  "reasonTh": "สาขาใหม่ 4 ชั้น (~500 พยอง) เสื้อผ้าเบสิกราคาคุ้ม มีบริการสกรีนเสื้อยืด 'Seoul T-shirt' ร่วมกับกรุงโซล เดินจากโรงแรมได้",
+  "suggestedStayMin": 45,
+  "budget": {
+   "textTh": "เสื้อยืดคัสตอม 29,900 วอน (ข่าวกรุงโซล)",
+   "krwMin": 29900,
+   "krwMax": 29900,
+   "status": "source"
+  },
+  "hours": {
+   "text": "11:00–22:00 daily",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "11:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": [
+   "basics",
+   "casual"
+  ],
+  "sources": [
+   {
+    "label": "Seoul Mediahub (2026-09-09)",
+    "url": "https://mediahub.seoul.go.kr/archives/2019325"
+   },
+   {
+    "label": "NewDaily (2026-09-08)",
+    "url": "https://biz.newdaily.co.kr/site/data/html/2026/09/08/2026090800118.html"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Nominatim had no building for 40 Myeongdong 8-gil. OSM has an unaddressed 'Musinsa Standard' node 14248123267 at 37.5619443,126.9849272 on Myeongdong 8-gil, but it can't be confirmed as this branch (the older 2024 Myeongdong store in 'Myeongdong N Building' also exists, address not verified), so coords left null."
+ },
+ {
+  "id": "starfield-coex-mall",
+  "nameTh": "สตาร์ฟิลด์ โคเอ็กซ์ มอลล์",
+  "nameEn": "Starfield COEX Mall",
+  "nameKo": "스타필드 코엑스몰",
+  "branch": null,
+  "category": "fashion",
+  "area": "COEX/Samseong",
+  "address": "513 Yeongdong-daero, Gangnam-gu, Seoul (서울 강남구 영동대로 513)",
+  "lat": 37.5125275,
+  "lng": 127.0588489,
+  "coordStatus": "area-center",
+  "coordSource": "OSM address point for 513 Yeongdong-daero (e.g. node 12192149532)",
+  "reasonTh": "ห้างใต้ดินติดที่ทำงาน มีแบรนด์แฟชั่นราคาคุ้ม SPAO, 8 Seconds, UNIQLO, H&M, ZARA, ABC-Mart, Daiso และโอลีฟยังอยู่ชั้น B1",
+  "suggestedStayMin": 90,
+  "budget": {
+   "textTh": "ขึ้นกับร้าน",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "Mall 10:30–22:00 daily (some stores differ, e.g. ZARA 10:00)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "10:30",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": [
+   "basics",
+   "casual",
+   "sportswear",
+   "shoes",
+   "accessories"
+  ],
+  "sources": [
+   {
+    "label": "Starfield COEX Mall official",
+    "url": "https://www.starfield.co.kr/coexmall/main.do"
+   },
+   {
+    "label": "Starfield COEX Mall official tenant list",
+    "url": "https://www.starfield.co.kr/coexmall/tenant/categoryInfo.do"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Official tenant list (checked 2026-11-13): SPAO B1 (02-6002-3064), 8 Seconds B1, UNIQLO B1, H&M B1, ZARA B1 10:00–22:00, ABC-MART Grand Stage B1, ASUNG DAISO B1, Olive Young B1, OLIVEBETTER B1 10:00–22:00 — all 10:30–22:00 unless noted. App base coord 37.511850,127.059240 is ~80 m from OSM's address point – both fine for the complex. Base id kept as 'coex'. | พิกัดเป็นจุดที่อยู่รวมของ COEX Mall ไม่ใช่ตำแหน่งร้านภายในห้าง"
+ },
+ {
+  "id": "oliveyoung-coex",
+  "nameTh": "โอลีฟยัง สาขาโคเอ็กซ์มอลล์",
+  "nameEn": "OLIVE YOUNG Starfield COEX Mall",
+  "nameKo": "올리브영 코엑스몰",
+  "branch": "Starfield COEX Mall B1",
+  "category": "beauty",
+  "area": "COEX/Samseong",
+  "address": "B1, Starfield COEX Mall, 513 Yeongdong-daero, Gangnam-gu, Seoul",
+  "lat": 37.5125275,
+  "lng": 127.0588489,
+  "coordStatus": "area-center",
+  "coordSource": "OSM address point for 513 Yeongdong-daero (shared by COEX tenants); unit not mapped",
+  "reasonTh": "ซื้อสกินแคร์/เครื่องสำอางได้ใกล้บูธที่ COEX ไม่ต้องรอไปเมียงดง",
+  "suggestedStayMin": 30,
+  "budget": {
+   "textTh": "ขึ้นกับสินค้า",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "10:30–22:00 daily (official mall listing)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "10:30",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "Starfield COEX Mall official tenant list",
+    "url": "https://www.starfield.co.kr/coexmall/tenant/categoryInfo.do"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Phone 02-551-5290 per mall listing. A separate OLIVEBETTER (Olive Young's new wellness format) is also on B1, 10:00–22:00. Coordinate building-level only. | พิกัดเป็นจุดที่อยู่รวมของ COEX Mall ไม่ใช่ตำแหน่งร้านภายในห้าง"
+ },
+ {
+  "id": "oliveyoung-hongdae-town",
+  "nameTh": "โอลีฟยัง ฮงแดทาวน์",
+  "nameEn": "OLIVE YOUNG Hongdae Town",
+  "nameKo": "올리브영 홍대타운",
+  "branch": "Hongdae Town",
+  "category": "beauty",
+  "area": "Hongdae",
+  "address": "57 Hongik-ro 6-gil, Mapo-gu, Seoul 04050 (서울 마포구 홍익로6길 57)",
+  "lat": 37.5566061,
+  "lng": 126.9244308,
+  "coordStatus": "verified",
+  "coordSource": "OSM node 12121499331 (올리브영, branch 홍대타운, 57 Hongik-ro 6-gil)",
+  "reasonTh": "สาขาใหญ่อันดับต้น ๆ (~991 ตร.ม. ชั้น 1–3) เน้นโซนทดลองสินค้า อยู่ระหว่างทางออก 8–9 สถานีฮงอิกแด คืนภาษีได้",
+  "suggestedStayMin": 45,
+  "budget": {
+   "textTh": "ขึ้นกับสินค้า",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "10:00–23:00 daily",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "10:00",
+  "closeTime": "23:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "KTripTips (KTO) – Olive Young Hongdae Town",
+    "url": "https://www.ktriptips.com/eng/shopping/4014137"
+   },
+   {
+    "label": "KED Global – opening (Apr 2024)",
+    "url": "https://www.kedglobal.com/newsView/ked202404250011"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/12121499331"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "OSM opening_hours Mo-Su,PH 10:00-23:00 matches KTripTips. One aggregator lists 10:00–22:30 — minor conflict."
+ },
+ {
+  "id": "gotomall",
+  "nameTh": "โกโตมอลล์ (สถานีรถด่วนกังนัม)",
+  "nameEn": "GOTO Mall (Express Bus Terminal underground shopping)",
+  "nameKo": "고투몰",
+  "branch": null,
+  "category": "fashion",
+  "area": "Express Bus Terminal",
+  "address": "Underground, Sinbanpo-ro (지하 200), Seocho-gu, Seoul; official site lists 194 Sinbanpo-ro (서울 서초구 신반포로 194)",
+  "lat": 37.5057653,
+  "lng": 127.0046194,
+  "coordStatus": "verified",
+  "coordSource": "OSM node 5614711178 (강남터미널지하쇼핑몰 고투몰)",
+  "reasonTh": "ทางเดินใต้ดินยาวรวมร้านเสื้อผ้า รองเท้า เครื่องประดับราคาถูกหลายร้อยร้าน อยู่บนเส้นทางสาย 9 → สาย 3 กลับเมียงดง",
+  "suggestedStayMin": 60,
+  "budget": {
+   "textTh": "ราคาถูก/ต่อรองได้บางร้าน (ไม่มีราคาจากแหล่งข้อมูล)",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "Approx. 10:00–22:00 (travel sites; not confirmed on official site)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified"
+  },
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": [
+   "basics",
+   "accessories",
+   "shoes"
+  ],
+  "sources": [
+   {
+    "label": "GOTO Mall official",
+    "url": "https://www.gotomall.kr/"
+   },
+   {
+    "label": "KoreaToDo – Express Bus Terminal shopping",
+    "url": "https://www.koreatodo.com/express-bus-terminal-shopping"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/5614711178"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Official site shows address and exits 8-1/8-2 of Express Bus Terminal stn (Lines 3/7/9) but no hours/closed day; store inquiries 02-535-8182. Given app coordinate 37.505770,127.004620 matches OSM node (<1 m). Route: Bongeunsa (Line 9) → Express Bus Terminal → Line 3 to Chungmuro → Line 4 to Myeongdong/Hoehyeon. Base id kept as 'gotomall'."
+ },
+ {
+  "id": "hongdae",
+  "nameTh": "ย่านช้อปปิ้งฮงแด",
+  "nameEn": "Hongdae shopping streets",
+  "nameKo": "홍대거리",
+  "branch": null,
+  "category": "fashion",
+  "area": "Hongdae",
+  "address": "Around Hongik Univ. stn (Line 2) exits 8/9, Yanghwa-ro & Eoulmadang-ro, Mapo-gu",
+  "lat": null,
+  "lng": null,
+  "coordStatus": "unverified",
+  "coordSource": null,
+  "reasonTh": "ย่านวัยรุ่นมีร้านแฟชั่นสตรีทราคาไม่แพง ร้านเครื่องสำอาง และ Musinsa Standard/Olive Young สาขาใหญ่ รวมถึงร้านหมูย่างเปิดดึก",
+  "suggestedStayMin": 120,
+  "budget": {
+   "textTh": "ขึ้นกับร้าน",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "Shops roughly late morning to ~22:00–23:00; varies",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified"
+  },
+  "openTime": null,
+  "closeTime": null,
+  "indoor": false,
+  "food": null,
+  "fashionTypes": [
+   "streetwear",
+   "basics",
+   "accessories",
+   "shoes"
+  ],
+  "sources": [
+   {
+    "label": "Creatrip – Hongdae Shopping Guide",
+    "url": "https://creatrip.com/en/blog/4570"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Area entry; no single coordinate. Use the app's existing 'hongdae' base coordinate, or anchor on Musinsa Standard Hongdae (37.5552548,126.9223997) / Olive Young Hongdae Town (37.5566061,126.9244308). Direct Line 2 from City Hall (5 stops)."
+ },
+ {
+  "id": "library",
+  "nameTh": "ห้องสมุดสตาร์ฟิลด์ (บยอลมาดัง)",
+  "nameEn": "Starfield Library",
+  "nameKo": "별마당도서관",
+  "branch": "Starfield COEX Mall",
+  "category": "sight",
+  "area": "COEX/Samseong",
+  "address": "B1–1F, Starfield COEX Mall, 513 Yeongdong-daero, Gangnam-gu, Seoul",
+  "lat": 37.5100608,
+  "lng": 127.0601622,
+  "coordStatus": "verified",
+  "coordSource": "OSM way 837196099 (별마당도서관)",
+  "reasonTh": "ห้องสมุดเปิดสาธารณะกลางห้าง COEX ชั้นหนังสือสูงตระหง่าน (~70,000 เล่ม) เข้าฟรี ถ่ายรูปสวย ติดที่ทำงาน",
+  "suggestedStayMin": 30,
+  "budget": {
+   "textTh": "ฟรี",
+   "krwMin": 0,
+   "krwMax": 0,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:30–22:00 daily",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "10:30",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "Starfield official – Starfield Library",
+    "url": "https://www.starfield.co.kr/coexmall/starfieldLibrary/library.do"
+   },
+   {
+    "label": "OSM",
+    "url": "https://www.openstreetmap.org/way/837196099"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Official page lists no closed days. Given app coord 37.510170,127.060090 is ~14 m from OSM centroid – OK. Base id kept as 'library'."
+ },
+ {
+  "id": "museum",
+  "nameTh": "พิพิธภัณฑ์แห่งชาติเกาหลี",
+  "nameEn": "National Museum of Korea",
+  "nameKo": "국립중앙박물관",
+  "branch": null,
+  "category": "sight",
+  "area": "Yongsan",
+  "address": "137 Seobinggo-ro, Yongsan-gu, Seoul 04383 (서울 용산구 서빙고로 137)",
+  "lat": 37.523953,
+  "lng": 126.9803196,
+  "coordStatus": "verified",
+  "coordSource": "OSM way 168364800 (국립중앙박물관)",
+  "reasonTh": "พิพิธภัณฑ์ใหญ่ที่สุดของเกาหลี นิทรรศการถาวรเข้าฟรี เปิดถึง 21:00 วันพุธและเสาร์",
+  "suggestedStayMin": 150,
+  "budget": {
+   "textTh": "นิทรรศการถาวรฟรี; นิทรรศการพิเศษบางรายการเก็บเงิน",
+   "krwMin": 0,
+   "krwMax": null,
+   "status": "source"
+  },
+  "hours": {
+   "text": "Mon/Tue/Thu/Fri/Sun 09:30–17:30 (last entry 17:00); Wed & Sat 09:30–21:00 (last entry 20:30)",
+   "closedDays": "Jan 1, Seollal, Chuseok; galleries closed 1st Monday of Mar/Jun/Sep/Dec (next: Mon 2026-12-07)",
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "09:30",
+  "closeTime": "17:30",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "National Museum of Korea – official visitor info",
+    "url": "https://www.museum.go.kr/ENG/contents/E0101010000.do"
+   },
+   {
+    "label": "OSM",
+    "url": "https://www.openstreetmap.org/way/168364800"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Opening moved from 10:00 to 09:30 on 2026-03-16 (official). Ichon stn (Line 4 / Gyeongui-Jungang) – Line 4 direct from Hoehyeon/Myeongdong. Base id kept as 'museum'."
+ },
+ {
+  "id": "bongeunsa",
+  "nameTh": "วัดบงอึนซา",
+  "nameEn": "Bongeunsa Temple",
+  "nameKo": "봉은사",
+  "branch": null,
+  "category": "sight",
+  "area": "COEX/Samseong",
+  "address": "531 Bongeunsa-ro, Gangnam-gu, Seoul 06087 (서울 강남구 봉은사로 531)",
+  "lat": 37.5151321,
+  "lng": 127.0567944,
+  "coordStatus": "verified",
+  "coordSource": "OSM way 74010857 (봉은사 place_of_worship)",
+  "reasonTh": "วัดพุทธเก่าแก่ตรงข้าม COEX มีพระพุทธรูปองค์ใหญ่ เดินจากที่ทำงานได้ เข้าฟรี",
+  "suggestedStayMin": 45,
+  "budget": {
+   "textTh": "ฟรี",
+   "krwMin": 0,
+   "krwMax": 0,
+   "status": "source"
+  },
+  "hours": {
+   "text": "05:00–22:00 daily (KTO); other sources differ",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified"
+  },
+  "openTime": "05:00",
+  "closeTime": "22:00",
+  "indoor": false,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "KTripTips (KTO) – Bongeunsa",
+    "url": "https://ktriptips.com/eng/tourspot/264594"
+   },
+   {
+    "label": "OSM",
+    "url": "https://www.openstreetmap.org/way/74010857"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Hours conflict across sites (04:00–20:00, 03:00–22:00). Across Bongeunsa-ro from COEX's north side; Bongeunsa stn (Line 9)."
+ },
+ {
+  "id": "deoksugung",
+  "nameTh": "พระราชวังด็อกซุกุง",
+  "nameEn": "Deoksugung Palace",
+  "nameKo": "덕수궁",
+  "branch": null,
+  "category": "sight",
+  "area": "City Hall",
+  "address": "99 Sejong-daero, Jung-gu, Seoul 04519 (서울 중구 세종대로 99)",
+  "lat": 37.5661668,
+  "lng": 126.9751703,
+  "coordStatus": "verified",
+  "coordSource": "OSM way 26658458 (덕수궁)",
+  "reasonTh": "พระราชวังใกล้โรงแรม (สถานีซิตี้ฮอลล์) เปิดถึง 21:00 เหมาะเดินตอนเย็นหลังเลิกงาน ค่าเข้าเพียง 1,000 วอน",
+  "suggestedStayMin": 60,
+  "budget": {
+   "textTh": "ผู้ใหญ่ 1,000 วอน",
+   "krwMin": 1000,
+   "krwMax": 1000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "09:00–21:00 (last entry 20:00)",
+   "closedDays": "Monday (if a public holiday, next business day)",
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "09:00",
+  "closeTime": "21:00",
+  "indoor": false,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "KTripTips (KTO) – Deoksugung",
+    "url": "https://www.ktriptips.com/eng/tourspot/264316"
+   },
+   {
+    "label": "OSM",
+    "url": "https://www.openstreetmap.org/way/26658458"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "One blog says royal palaces are free until 2026-11-15 (Korea Grand Festival) – single source, unverified. Inner halls (Seokjojeon etc.) have shorter hours."
+ },
+ {
+  "id": "seoul-museum-of-history",
+  "nameTh": "พิพิธภัณฑ์ประวัติศาสตร์โซล",
+  "nameEn": "Seoul Museum of History",
+  "nameKo": "서울역사박물관",
+  "branch": null,
+  "category": "sight",
+  "area": "Jongno",
+  "address": "55 Saemunan-ro, Jongno-gu, Seoul 03177 (서울 종로구 새문안로 55)",
+  "lat": 37.5704789,
+  "lng": 126.9705257,
+  "coordStatus": "verified",
+  "coordSource": "OSM relation 8448914 (서울역사박물관)",
+  "reasonTh": "พิพิธภัณฑ์เล่าประวัติเมืองโซลตั้งแต่ยุคโชซอน เข้าฟรี อยู่ใกล้ควังฮวามุน/ด็อกซุกุง",
+  "suggestedStayMin": 75,
+  "budget": {
+   "textTh": "ฟรี",
+   "krwMin": 0,
+   "krwMax": 0,
+   "status": "source"
+  },
+  "hours": {
+   "text": "09:00–18:00",
+   "closedDays": "Mondays, Jan 1",
+   "lastOrder": null,
+   "status": "unverified"
+  },
+  "openTime": "09:00",
+  "closeTime": "18:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "KTripTips (KTO) – Seoul Museum of History",
+    "url": "https://ktriptips.com/eng/culture/268127"
+   },
+   {
+    "label": "OSM",
+    "url": "https://www.openstreetmap.org/relation/8448914"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Official site page could not be fetched (404). Some sources mention extended Friday hours (21:00 or 22:00) – not verified."
+ },
+ {
+  "id": "gyeongbokgung",
+  "nameTh": "พระราชวังคย็องบกกุง",
+  "nameEn": "Gyeongbokgung Palace",
+  "nameKo": "경복궁",
+  "branch": null,
+  "category": "sight",
+  "area": "Jongno",
+  "address": "161 Sajik-ro, Jongno-gu, Seoul 03045 (서울 종로구 사직로 161)",
+  "lat": 37.579754,
+  "lng": 126.9766818,
+  "coordStatus": "verified",
+  "coordSource": "OSM relation 5501517 (경복궁)",
+  "reasonTh": "พระราชวังหลักของราชวงศ์โชซอน ค่าเข้าผู้ใหญ่ 3,000 วอน (พฤศจิกายนเปิด 09:00–17:00)",
+  "suggestedStayMin": 120,
+  "budget": {
+   "textTh": "ผู้ใหญ่ 3,000 วอน (อายุต่ำกว่า 19 และ 65+ ฟรี)",
+   "krwMin": 3000,
+   "krwMax": 3000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "Nov–Feb 09:00–17:00 (last entry 16:00)",
+   "closedDays": "Tuesday (if a public holiday, next business day)",
+   "lastOrder": null,
+   "status": "verified"
+  },
+  "openTime": "09:00",
+  "closeTime": "17:00",
+  "indoor": false,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "KTripTips (KTO) – Gyeongbokgung",
+    "url": "https://www.ktriptips.com/eng/tourspot/264337"
+   },
+   {
+    "label": "OSM",
+    "url": "https://www.openstreetmap.org/relation/5501517"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Free hanbok entry is widely reported but not verified here. One blog claims free admission to 2026-11-15 – unverified. Gyeongbokgung stn (Line 3)."
+ },
+ {
+  "id": "n-seoul-tower",
+  "nameTh": "เอ็นโซลทาวเวอร์ (นัมซาน)",
+  "nameEn": "N Seoul Tower",
+  "nameKo": "N서울타워",
+  "branch": null,
+  "category": "sight",
+  "area": "Namsan",
+  "address": "105 Namsangongwon-gil, Yongsan-gu, Seoul 04340 (서울 용산구 남산공원길 105)",
+  "lat": 37.5512692,
+  "lng": 126.9882959,
+  "coordStatus": "verified",
+  "coordSource": "OSM relation 16474080 (남산서울타워)",
+  "reasonTh": "จุดชมวิวกรุงโซลบนเขานัมซาน ใกล้เมียงดง เปิดถึงค่ำ เหมาะไปหลังเลิกงาน",
+  "suggestedStayMin": 90,
+  "budget": {
+   "textTh": "ตั๋วจุดชมวิวผู้ใหญ่ราว 21,000 วอน (บล็อก ก.ย. 2026, ไม่ยืนยัน)",
+   "krwMin": 21000,
+   "krwMax": 21000,
+   "status": "estimate"
+  },
+  "hours": {
+   "text": "Observatory approx. weekdays 10:00/10:30–22:30, weekends 10:00–23:00 (sources differ)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified"
+  },
+  "openTime": "10:30",
+  "closeTime": "22:30",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "sources": [
+   {
+    "label": "YTN Seoul Tower official (address)",
+    "url": "https://www.seoultower.co.kr/"
+   },
+   {
+    "label": "Trvlogue – Namsan Tower guide 2026",
+    "url": "https://www.trvlogue.com/en/seoul-namsan-tower-guide"
+   },
+   {
+    "label": "OSM",
+    "url": "https://www.openstreetmap.org/relation/16474080"
+   }
+  ],
+  "checkedAt": "2026-11-13",
+  "notes": "Official site did not show hours/prices to the fetcher; values are from third-party 2026 guides. Last entry ~30 min before close per those guides."
+ }
+]
