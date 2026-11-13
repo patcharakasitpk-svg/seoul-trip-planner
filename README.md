@@ -55,11 +55,11 @@ npm run test:e2e             # ทดสอบบนเบราว์เซอ�
 
 รัน `npm run build` แล้วอัปโหลดโฟลเดอร์ `dist/` (ตั้งค่า `base: './'` ไว้แล้ว จึงวางใน path ย่อยได้)
 
-- **GitHub Pages:**
-  1. push repo ขึ้น GitHub
-  2. ไปที่ Settings → Pages → ตั้ง Source เป็น *GitHub Actions*
-  3. workflow `.github/workflows/deploy-pages.yml` จะรัน test, build และ deploy ให้อัตโนมัติ
-  4. ถ้าต้องการใช้คีย์ ให้ใส่ `VITE_GOOGLE_MAPS_API_KEY` และ `VITE_GOOGLE_MAPS_MAP_ID` ใน Secrets
+- **GitHub Pages (ฟรี):**
+  1. ตั้ง remote `origin` เป็น repo บน GitHub (repo สาธารณะจึงใช้ Pages ฟรีได้)
+  2. รัน `npm run deploy` ระบบจะรัน test, build แล้ว push `dist/` ขึ้น branch `gh-pages`
+  3. ครั้งแรกให้ไปที่ Settings → Pages → Source: *Deploy from a branch* → `gh-pages` / `(root)`
+  4. ถ้าต้องการใช้คีย์ Google ให้ใส่ `VITE_GOOGLE_MAPS_API_KEY` ใน `.env.local` ก่อน deploy หรือใส่ภายหลังผ่านปุ่ม ⚙️ ในหน้าเว็บ
 - **Netlify / Cloudflare Pages / Vercel:** ตั้ง build command เป็น `npm run build`, output เป็น `dist` และตั้ง env `VITE_GOOGLE_MAPS_API_KEY`
 - เพิ่มโดเมนที่ได้ (เช่น `https://<user>.github.io/*`) ใน HTTP referrer ของคีย์
 
