@@ -29,6 +29,17 @@ export function gmapsPlaceUrl(p: Place): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q || placeQuery(p))}`;
 }
 
+/**
+ * ลิงก์ดูรูปสถานที่ใน Google รูปภาพ — ใช้ชื่อเกาหลีเป็นหลัก (ได้รูปตรงร้าน/สาขามากกว่าชื่ออังกฤษ)
+ * สถานที่ที่เพิ่มจากการค้นหา Google ใช้ลิงก์ Google Maps (มีแท็บรูปของสถานที่นั้น)
+ */
+export function photosUrl(p: Place): string {
+  const gm = p.sources.find((s) => s.url.includes('query_place_id='));
+  if (gm) return gm.url;
+  const q = p.nameKo ? p.nameKo.replace(/\s*\(.*?\)\s*/g, ' ').trim() : `${p.nameEn} ${p.area && p.area !== 'เพิ่มเอง' ? p.area : ''} Seoul`.trim();
+  return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(q)}`;
+}
+
 /** origin = null → ใช้ตำแหน่งปัจจุบันของผู้ใช้ */
 export function gmapsDirUrl(from: Place | null, to: Place, mode: TravelMode): string {
   const p = new URLSearchParams({ api: '1', destination: placeQuery(to), travelmode: GM_MODE[mode] });

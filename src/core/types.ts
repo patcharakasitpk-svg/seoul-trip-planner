@@ -1,7 +1,7 @@
 export type Category = 'base' | 'food' | 'fashion' | 'beauty' | 'market' | 'sight';
 
-/** given = พิกัดตั้งต้นจากผู้ใช้, verified = ตรวจกับแหล่งข้อมูล, area-center = กลางย่าน, user = ผู้ใช้เพิ่มเอง, unverified = ยังไม่ปักหมุด */
-export type CoordStatus = 'given' | 'verified' | 'area-center' | 'user' | 'unverified';
+/** given = พิกัดตั้งต้นจากผู้ใช้, verified = ตรวจกับแหล่งข้อมูล, area-center = กลางย่าน, approx = มีพิกัดจากแหล่งเดียว (ปักหมุดเส้นประ), user = ผู้ใช้เพิ่มเอง, unverified = ยังไม่ปักหมุด */
+export type CoordStatus = 'given' | 'verified' | 'area-center' | 'approx' | 'user' | 'unverified';
 
 export interface Source {
   label: string;

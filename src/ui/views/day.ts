@@ -1,7 +1,7 @@
 import type { Day, Place } from '../../core/types';
 import type { DaySchedule, StopTiming } from '../../core/schedule';
 import { app } from '../app';
-import { dayColor, esc, gmapsPlaceUrl } from '../util';
+import { dayColor, esc, gmapsPlaceUrl, photosUrl } from '../util';
 import { fmtDateTh, fmtDur, fmtHM } from '../../core/time';
 import { legRow } from './leg';
 import { renderWeather } from './weather';
@@ -137,7 +137,7 @@ function stopRow(day: Day, t: StopTiming, i: number, total: number, dayIdx: numb
         <label>นัดเวลา 🔒 <input class="inp xs" type="time" value="${esc(s.lockedTime ?? '')}" data-act-change="stop-field" data-field="lockedTime" data-day="${day.id}" data-stop="${s.uid}" aria-label="เวลานัดที่ล็อก"></label>
       </div>
       ${warns.length > 1 ? `<ul class="warns">${warns.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}
-      ${p?.coordStatus === 'area-center' ? '<p class="muted small">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อถึงร้านจริง</p>' : ''}
+      ${p?.coordStatus === 'area-center' ? '<p class="muted small">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อถึงร้านจริง</p>' : p?.coordStatus === 'approx' ? '<p class="muted small">พิกัดจากแหล่งเดียว (หมุดเส้นประ) — เช็กใน Google Maps ก่อนไป</p>' : ''}
       <label class="block small">หมายเหตุ <textarea class="inp" rows="2" maxlength="500" data-act-change="stop-field" data-field="note" data-day="${day.id}" data-stop="${s.uid}">${esc(s.note)}</textarea></label>
       ${s.kind === 'break' || s.kind === 'buffer' ? `<label class="block small">ชื่อรายการ <input class="inp" value="${esc(s.title ?? '')}" maxlength="80" data-act-change="stop-field" data-field="title" data-day="${day.id}" data-stop="${s.uid}"></label>` : ''}
       <div class="row-btns">
@@ -146,7 +146,7 @@ function stopRow(day: Day, t: StopTiming, i: number, total: number, dayIdx: numb
         ${s.kind === 'dinner' ? `<button class="btn sm" data-act="dinner-options" data-day="${day.id}" data-stop="${s.uid}">${p ? 'เปลี่ยนร้าน' : 'เลือกร้าน'}</button><button class="btn sm" data-act="stop-skip" data-day="${day.id}" data-stop="${s.uid}">${s.skipped ? 'ไม่ข้าม' : 'ข้ามมื้อนี้'}</button>` : ''}
         ${isFood && p ? `<button class="btn sm" data-act="nearby" data-want="shop" data-day="${day.id}" data-stop="${s.uid}">ช็อปใกล้ร้านนี้</button>` : ''}
         ${isShop ? `<button class="btn sm" data-act="nearby" data-want="eat" data-day="${day.id}" data-stop="${s.uid}">กินใกล้จุดนี้</button>` : ''}
-        ${p ? `<button class="btn sm" data-act="focus-place" data-place="${esc(p.id)}">แผนที่</button><a class="btn sm" target="_blank" rel="noopener" href="${esc(gmapsPlaceUrl(p))}">Google Maps ↗</a>` : ''}
+        ${p ? `<button class="btn sm" data-act="focus-place" data-place="${esc(p.id)}">แผนที่</button><a class="btn sm" target="_blank" rel="noopener" href="${esc(photosUrl(p))}">📷 ดูรูป</a><a class="btn sm" target="_blank" rel="noopener" href="${esc(gmapsPlaceUrl(p))}">Google Maps ↗</a>` : ''}
         <select class="inp sm" data-act-change="stop-move-day" data-day="${day.id}" data-stop="${s.uid}" aria-label="ย้ายไปวันอื่น"><option value="">ย้ายไปวัน…</option>${app.plan.days.map((dd, k) => (dd.id === day.id ? '' : `<option value="${dd.id}">วัน ${k + 1}${dd.date ? ` · ${esc(fmtDateTh(dd.date))}` : ''}</option>`)).join('')}</select>
         <button class="btn sm danger" data-act="stop-remove" data-day="${day.id}" data-stop="${s.uid}">ลบ</button>
       </div>

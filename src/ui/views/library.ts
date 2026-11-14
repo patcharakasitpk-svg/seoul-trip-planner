@@ -1,7 +1,7 @@
 import type { Place } from '../../core/types';
 import { app } from '../app';
 import { CATEGORY_ICON, CATEGORY_LABEL, DINING_ZONE_LABEL } from '../../data/places';
-import { esc, gmapsPlaceUrl } from '../util';
+import { esc, gmapsPlaceUrl, photosUrl } from '../util';
 import { closedOn, shortHours, weekdayTh } from '../../core/hours';
 import { stationBlock } from './transit';
 import { fmtDateTh } from '../../core/time';
@@ -201,8 +201,9 @@ function placeDetails(p: Place): string {
       ${stationBlock(p, app.getPlace(app.day.startPlaceId) ?? app.getPlace('hotel'))}
       ${p.food?.menu?.length ? `<p class="small"><b>เมนู</b> ${p.food.menu.slice(0, 3).map(esc).join(', ')}</p>` : ''}
       ${p.budget && p.budget.textTh ? `<p class="small"><b>งบ</b> ${esc(p.budget.textTh)}${p.budget.status === 'estimate' ? ' (ประมาณ)' : ''}</p>` : ''}
-      ${p.lat == null ? '<p class="small closed">ยังไม่มีพิกัด — ไม่ปักหมุด</p>' : p.coordStatus === 'area-center' ? '<p class="small muted">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อ</p>' : ''}
+      ${p.lat == null ? '<p class="small closed">ยังไม่มีพิกัด — ไม่ปักหมุด</p>' : p.coordStatus === 'area-center' ? '<p class="small muted">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อ</p>' : p.coordStatus === 'approx' ? `<p class="small muted">หมุดเส้นประ = พิกัดจากแหล่งเดียว${p.coordSource ? ` (${esc(p.coordSource)})` : ''} — เช็กใน Google Maps ก่อนไป</p>` : ''}
       <div class="row-btns">
+        <a class="btn sm" href="${esc(photosUrl(p))}" target="_blank" rel="noopener">📷 ดูรูป</a>
         <a class="btn sm" href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">Google Maps ↗</a>
         ${p.lat != null ? `<button class="btn sm" data-act="focus-place" data-place="${esc(p.id)}">ดูบนแผนที่</button>` : ''}
       </div>

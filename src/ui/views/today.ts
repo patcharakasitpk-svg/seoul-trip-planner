@@ -1,5 +1,5 @@
 import { app } from '../app';
-import { esc, gmapsDirUrl, kakaoToUrl, MODE_ICON, MODE_LABEL } from '../util';
+import { esc, gmapsDirUrl, kakaoToUrl, MODE_ICON, MODE_LABEL, photosUrl } from '../util';
 import { fmtDateTh, fmtDur, fmtHM, seoulNow } from '../../core/time';
 import { renderWeather } from './weather';
 import { routeSummary, stepsText } from './leg';
@@ -36,6 +36,7 @@ export function renderToday(): string {
         <a class="btn primary big" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(null, p, next.leg.mode))}">🧭 นำทางจากตำแหน่งปัจจุบัน</a>
         ${prevPlace ? `<a class="btn" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(prevPlace, p, next.leg.mode))}">เส้นทางจาก ${esc(prevPlace.nameTh)}</a>` : ''}
         ${kakaoToUrl(p) ? `<a class="btn" target="_blank" rel="noopener" href="${esc(kakaoToUrl(p)!)}">KakaoMap</a>` : ''}
+        <a class="btn" target="_blank" rel="noopener" href="${esc(photosUrl(p))}">📷 ดูรูปหน้าร้าน</a>
       </div>` : ''}
     </section>`;
   }

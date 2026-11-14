@@ -32,8 +32,11 @@ export function buildPublicPlaces(): Place[] {
         reasonTh: base.reasonTh,
       });
     } else {
-      const coordsOk = r.lat != null && r.lng != null && r.coordStatus !== 'unverified';
-      out.set(r.id, { ...r, lat: coordsOk ? r.lat : null, lng: coordsOk ? r.lng : null, coordStatus: coordsOk ? r.coordStatus : 'unverified', kind: r.kind ?? 'place' });
+      const hasCoords = r.lat != null && r.lng != null;
+      // ยังไม่ยืนยัน 2 แหล่ง แต่มีพิกัดจากแหล่งจริง (ระบุ coordSource) → ปักหมุดแบบเส้นประ ไม่ใช่พิกัดที่สร้างขึ้นเอง
+      const status = !hasCoords ? 'unverified' : r.coordStatus === 'unverified' ? (r.coordSource ? 'approx' : 'unverified') : r.coordStatus;
+      const pin = status !== 'unverified';
+      out.set(r.id, { ...r, lat: pin ? r.lat : null, lng: pin ? r.lng : null, coordStatus: status, kind: r.kind ?? 'place' });
     }
   }
   return [...out.values()].map((p) => (p.transit || !TRANSIT[p.id] ? p : { ...p, transit: TRANSIT[p.id] }));
@@ -59,6 +62,7 @@ export const COORD_LABEL: Record<string, string> = {
   given: 'พิกัดตั้งต้น',
   verified: 'พิกัดตรวจสอบแล้ว',
   'area-center': 'หมุดกลางย่าน — อาจต้องเดินต่อถึงร้านจริง',
+  approx: 'พิกัดจากแหล่งเดียว (หมุดเส้นประ) — เช็กใน Google Maps ก่อนไป',
   user: 'พิกัดที่ผู้ใช้กรอก',
   unverified: 'ยังไม่ตรวจสอบพิกัด — ยังไม่ปักหมุด',
 };

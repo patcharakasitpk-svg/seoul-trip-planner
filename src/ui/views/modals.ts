@@ -1,6 +1,6 @@
 import type { Day, Place, TravelMode } from '../../core/types';
 import { app, type Modal } from '../app';
-import { esc, dayColor, MODE_ICON, MODE_LABEL, gmapsDirUrl, kakaoToUrl } from '../util';
+import { esc, dayColor, MODE_ICON, MODE_LABEL, gmapsDirUrl, kakaoToUrl, photosUrl } from '../util';
 import { diffDays as diffSchedules } from '../../core/compare';
 import { fmtDur, fmtHM, fmtDateTh, parseHM } from '../../core/time';
 import { routeSummary, stepsText, straightDist } from './leg';
@@ -279,7 +279,7 @@ function templatesBody(m: Extract<Modal, { type: 'templates' }>): string {
             const lock = s.lockedTime ? `🔒 ${esc(s.lockedTime)} ` : '';
             const tip = s.note ? `<br><span class="muted small">${esc(s.note)}</span>` : '';
             if (!p) return s.breakTitle ? `<li>☕ ${lock}${esc(s.breakTitle)} <span class="muted small">~${s.stayMin} นาที</span>${tip}</li>` : '';
-            return `<li>${CATEGORY_ICON[p.category] ?? ''} ${lock}${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <button class="btn ghost xs" data-act="quick-toggle" data-place="${esc(p.id)}" aria-label="เพิ่มเข้าวันที่เลือก">＋</button>${tip}</li>`;
+            return `<li>${CATEGORY_ICON[p.category] ?? ''} ${lock}${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <a class="btn ghost xs" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(p.nameTh)}">📷</a> <button class="btn ghost xs" data-act="quick-toggle" data-place="${esc(p.id)}" aria-label="เพิ่มเข้าวันที่เลือก">＋</button>${tip}</li>`;
           })
           .join('')}</ol>
         <div class="row-btns"><select class="inp xs" data-tpl-target="${i}" aria-label="วันปลายทาง">${app.plan.days.map((dd, k) => `<option value="${dd.id}" ${k === i ? 'selected' : ''}>วัน ${k + 1}</option>`).join('')}</select>

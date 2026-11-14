@@ -27,7 +27,7 @@ export function buildMapSpecs(inp: MapSpecInput): { markers: MarkerSpec[]; lines
     if (p.lat == null || p.lng == null) return null; // ไม่ปักหมุดพิกัดที่ยังไม่ตรวจสอบ
     let m = markers.get(p.id);
     if (!m) {
-      m = { id: p.id, lat: p.lat, lng: p.lng, kind, title: p.nameTh, badges: [], areaCenter: p.coordStatus === 'area-center' };
+      m = { id: p.id, lat: p.lat, lng: p.lng, kind, title: p.nameTh, badges: [], areaCenter: p.coordStatus === 'area-center' || p.coordStatus === 'approx' };
       markers.set(p.id, m);
     } else if (kind !== 'lib' && m.kind === 'lib') m.kind = kind;
     return m;
