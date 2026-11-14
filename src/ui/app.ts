@@ -7,6 +7,7 @@ import { peekRoute, requestRoute, routeKey, setWanted, type RouteReq } from '../
 import { matchDayWeather, type DayWeather } from '../core/weather';
 import { ensureWeather, getWeather } from '../services/weather';
 import { fmtHM } from '../core/time';
+import type { SearchResult } from '../services/placeSearch';
 
 export type Tab = 'today' | 'map' | 'places' | 'plan';
 
@@ -36,6 +37,16 @@ export interface Filters {
   zone: string;
 }
 
+/** ผลค้นหาสถานที่จาก Google / OpenStreetMap (ชั่วคราว ไม่บันทึกลงแผน) */
+export interface WebSearch {
+  q: string;
+  status: 'loading' | 'done' | 'error';
+  provider?: 'google' | 'osm';
+  results: SearchResult[];
+  note?: string;
+  focus: number | null;
+}
+
 export const SEOUL_CENTER = { lat: 37.5663, lng: 126.9779, name: 'กลางกรุงโซล (ศาลากลาง)' };
 
 class AppState {
@@ -55,6 +66,9 @@ class AppState {
   expanded = new Set<string>();
   focusPlaceId: string | null = null;
   fitNext = true;
+  search: WebSearch | null = null;
+  /** ครั้งถัดไปให้แผนที่ซูมพอดีผลค้นหา */
+  fitSearch = false;
 
   private needs = new Map<string, RouteReq>();
   private placeCache: { custom: Place[]; map: Map<string, Place>; list: Place[] } | null = null;

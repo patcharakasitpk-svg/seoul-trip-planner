@@ -23,12 +23,12 @@ npm run test:e2e             # ทดสอบบนเบราว์เซอ�
 ## Google Maps และบริการเส้นทาง
 
 1. ไปที่ Google Cloud Console → สร้างโปรเจกต์ → **ผูก Billing account** (Maps Platform ต้องมี Billing แม้ใช้ไม่เกินโควตาฟรี)
-2. เปิด API สองตัว: **Maps JavaScript API** และ **Routes API**
+2. เปิด API สามตัว: **Maps JavaScript API**, **Routes API** และ **Places API (New)** (ใช้ค้นหาสถานที่ด้วยชื่อ)
    - แอปใช้ `Route.computeRoutes` ของ Routes library ใน Maps JS
    - ไม่ใช้ DirectionsService เพราะเป็น Legacy ตั้งแต่ 2025-03-01
 3. สร้าง API Key แล้ว**จำกัดคีย์**:
    - Application restriction: *Websites (HTTP referrers)* เช่น `https://<user>.github.io/*` และ `http://localhost:5173/*`
-   - API restriction: เฉพาะ Maps JavaScript API + Routes API
+   - API restriction: เฉพาะ Maps JavaScript API + Routes API + Places API (New)
    - ตั้ง quota และ budget alert ใน Billing
 4. (แนะนำ) สร้าง **Map ID** ใน Map Management สำหรับหมุดแบบ Advanced Marker ระหว่างพัฒนาใช้ `DEMO_MAP_ID` ได้
 5. ใส่คีย์ได้ 2 ทาง:
@@ -42,6 +42,13 @@ npm run test:e2e             # ทดสอบบนเบราว์เซอ�
 - **ขนส่งสาธารณะ:** ขอเส้นทางทีละช่วง ใช้วันที่และเวลาออกจริงตามเวลาเกาหลี (Asia/Seoul) ขอได้ตั้งแต่ 7 วันย้อนหลังถึง 100 วันล่วงหน้า
 - **ค่าโดยสาร:** แสดงเฉพาะเมื่อบริการส่งข้อมูลมา
 - **ทางออกสถานี:** บริการไม่ได้ระบุหมายเลข แอปจึงแสดงว่า "ไม่ทราบ"
+
+## ค้นหาสถานที่ใดก็ได้
+
+พิมพ์ชื่อในช่องค้นหา (ไทย/อังกฤษ/เกาหลี) แล้วกด Enter หรือปุ่ม 🔎 → ผลขึ้นเป็นรายการและหมุด 📍 บนแผนที่ → กด ＋ เพื่อเพิ่มเข้าวันที่เลือก (บันทึกเป็น "สถานที่ที่เพิ่มเอง" ติดไปกับลิงก์แชร์/JSON)
+
+- มีคีย์ Google: ใช้ `Place.searchByText` (Places API New) ขอเฉพาะ id, ชื่อ, ที่อยู่, พิกัด, ประเภท · ถ้าเรียกไม่ได้จะสลับไปใช้ OpenStreetMap พร้อมแจ้งเตือน
+- ไม่มีคีย์: ใช้ [Nominatim](https://operations.osmfoundation.org/policies/nominatim/) ของ OpenStreetMap (ฟรี ค้นเฉพาะเมื่อกดค้นหา ไม่ทำ autocomplete ตามนโยบาย) ร้านเล็ก/ร้านใหม่อาจหาไม่เจอ
 
 ## อากาศ (Open-Meteo)
 

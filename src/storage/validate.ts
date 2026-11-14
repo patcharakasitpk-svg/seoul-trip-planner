@@ -102,7 +102,10 @@ function customPlace(p: unknown): Place | null {
     reasonTh: str(p.reasonTh, 300) || 'ผู้ใช้เพิ่มเอง',
     suggestedStayMin: clampNum(p.suggestedStayMin, 0, 1440, 60),
     indoor: p.indoor === true,
-    sources: [],
+    sources: (Array.isArray(p.sources) ? p.sources : [])
+      .slice(0, 3)
+      .filter((x: unknown) => isObj(x) && typeof x.url === 'string' && /^https:\/\/(www\.google\.com\/maps|www\.openstreetmap\.org)\//.test(x.url))
+      .map((x: any) => ({ label: str(x.label, 40) || 'แหล่งข้อมูล', url: str(x.url, 500) })),
     custom: true,
   };
 }

@@ -5,6 +5,8 @@ import { esc, gmapsPlaceUrl } from '../util';
 import { closedOn, shortHours, weekdayTh } from '../../core/hours';
 import { fmtDateTh } from '../../core/time';
 import { stopLocationId } from '../../core/schedule';
+import { findExisting, resultMapsUrl } from '../../services/placeSearch';
+import { isGoogleReady } from '../../services/google';
 
 const CATS: [string, string][] = [
   ['', 'ทั้งหมด'],
@@ -48,7 +50,7 @@ export function renderLibraryControls(): string {
   return `
   <div class="lib-head">
     <div class="search-row">
-      <input type="search" class="inp" placeholder="ค้นหาร้าน ย่าน เมนู" data-filter="q" value="${esc(f.q)}" aria-label="ค้นหา">
+      <input type="search" class="inp" placeholder="ค้นหาร้าน ย่าน เมนู หรือชื่อสถานที่ใดก็ได้" data-filter="q" value="${esc(f.q)}" aria-label="ค้นหา" enterkeyhint="search">
       <button class="btn ghost sm ${n ? 'on' : ''}" data-act="toggle-filters" aria-expanded="${open}">ตัวกรอง${n ? ` (${n})` : ''}</button>
     </div>
     <div class="chips" role="tablist">
@@ -102,9 +104,45 @@ export function filteredPlaces(): Place[] {
 
 export function renderLibraryList(): string {
   const list = filteredPlaces();
-  if (!list.length) return `<p class="empty">ไม่พบสถานที่ตามตัวกรอง</p>`;
+  const web = renderWebSearch();
+  if (!list.length) return `${web}<p class="empty">ไม่พบสถานที่ในรายการแนะนำ${app.filters.q.trim() ? ' — ลองค้นหาบนแผนที่ด้านบน' : 'ตามตัวกรอง'}</p>`;
   const day = app.day;
-  return `<p class="hint">แตะชื่อเพื่อเพิ่มเข้า <b>วัน ${app.dayIndex(day.id) + 1}</b>${day.date ? ` (${esc(fmtDateTh(day.date))})` : ''} · แตะอีกครั้งเพื่อเอาออก</p><div class="place-list">${list.map((p) => placeCard(p)).join('')}</div>`;
+  return `${web}<p class="hint">แตะชื่อเพื่อเพิ่มเข้า <b>วัน ${app.dayIndex(day.id) + 1}</b>${day.date ? ` (${esc(fmtDateTh(day.date))})` : ''} · แตะอีกครั้งเพื่อเอาออก</p><div class="place-list">${list.map((p) => placeCard(p)).join('')}</div>`;
+}
+
+/** ค้นหาสถานที่ใดก็ได้จาก Google Maps / OpenStreetMap */
+export function renderWebSearch(): string {
+  const q = app.filters.q.trim();
+  const s = app.search;
+  const src = isGoogleReady() ? 'Google Maps' : 'OpenStreetMap';
+  const btn = q ? `<button class="btn sm web-search-btn" data-act="web-search">🔎 ค้นหา “${esc(q)}” บน ${src}</button>` : '';
+  if (!s) return btn ? `<div class="web-search">${btn}</div>` : '';
+  const head = `<div class="web-search-head"><b>ผลค้นหา “${esc(s.q)}”</b>${s.provider ? ` <span class="muted small">จาก ${s.provider === 'google' ? 'Google Maps' : 'OpenStreetMap'}</span>` : ''}<button class="btn ghost xs" data-act="web-search-clear">ปิด</button></div>`;
+  const again = q && q !== s.q ? btn : '';
+  let body = '';
+  if (s.status === 'loading') body = '<p class="muted small">กำลังค้นหา…</p>';
+  else if (s.status === 'error') body = `<p class="closed small">${esc(s.note ?? 'ค้นหาไม่สำเร็จ')}</p>`;
+  else if (!s.results.length) body = '<p class="muted small">ไม่พบสถานที่ — ลองพิมพ์ชื่อภาษาอังกฤษหรือเกาหลี หรือเติมชื่อย่าน</p>';
+  else {
+    const n = app.dayIndex(app.day.id) + 1;
+    body = `${s.note ? `<p class="warn-text small">${esc(s.note)}</p>` : ''}<div class="place-list">${s.results
+      .map((r, i) => {
+        const ex = findExisting(app.plan.customPlaces, r);
+        const inDay = !!ex && app.day.stops.some((st) => st.placeId === ex.id);
+        return `<article class="place search-result ${s.focus === i ? 'focus' : ''}" data-search-card="${i}">
+        <div class="place-row">
+          <button class="place-main" data-act="web-search-focus" data-i="${i}">
+            <span class="cat-ico" aria-hidden="true">📍</span>
+            <span class="place-text"><span class="place-name">${esc(r.name)}</span><span class="place-meta">${esc(r.address ?? '')}</span></span>
+          </button>
+          <a class="icon-btn sm info" href="${esc(resultMapsUrl(r))}" target="_blank" rel="noopener" aria-label="เปิด ${esc(r.name)} ใน Google Maps" title="เปิดใน Google Maps">↗</a>
+          <button class="add-btn ${inDay ? 'on' : ''}" data-act="web-search-add" data-i="${i}" aria-label="${inDay ? 'อยู่ในวันนี้แล้ว' : `เพิ่มเข้าวัน ${n}`}">${inDay ? '✓' : '＋'}</button>
+        </div>
+      </article>`;
+      })
+      .join('')}</div><p class="muted small">＋ = เพิ่มเข้าวัน ${n} (บันทึกเป็น "สถานที่ที่เพิ่มเอง") · แตะชื่อเพื่อดูหมุด</p>`;
+  }
+  return `<div class="web-search">${head}${again}${body}</div>`;
 }
 
 function inActiveDay(placeId: string): boolean {

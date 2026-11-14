@@ -19,6 +19,8 @@ import { saveSettings, loadPlans } from './storage/storage';
 import { TEMPLATES, templateDayStops } from './data/templates';
 import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
 import { stopLocationId } from './core/schedule';
+import { searchPlaces, placeFromResult, findExisting } from './services/placeSearch';
+import { SEARCH_PREFIX } from './ui/mapSpecs';
 
 const hadSavedPlans = loadPlans() != null;
 const $ = (sel: string) => document.querySelector(sel) as HTMLElement;
@@ -108,16 +110,70 @@ function syncMapNow() {
     getPlace: app.getPlace,
     schedule: (d) => app.schedule(d),
     libraryPlaces: app.showLibPins ? app.places() : null,
+    searchResults: app.search?.results ?? null,
+    focusSearch: app.fitSearch,
   });
-  syncMapView(markers, lines, app.fitNext);
+  syncMapView(markers, lines, app.fitNext || app.fitSearch);
   app.fitNext = false;
+  app.fitSearch = false;
 }
 
 onMapMarkerClick((id) => {
+  if (id.startsWith(SEARCH_PREFIX)) {
+    showSearchResult(Number(id.slice(SEARCH_PREFIX.length)));
+    return;
+  }
   app.focusPlaceId = id;
   app.modal = { type: 'place', placeId: id };
   app.requestRender();
 });
+
+/* ---------------- ค้นหาสถานที่ใดก็ได้ (Google / OSM) ---------------- */
+let searchAbort: AbortController | null = null;
+const isDesktop = () => window.matchMedia('(min-width: 1024px)').matches;
+
+async function runWebSearch() {
+  const q = app.filters.q.trim();
+  if (!q) return;
+  searchAbort?.abort();
+  const ctl = new AbortController();
+  searchAbort = ctl;
+  app.search = { q, status: 'loading', results: [], focus: null };
+  app.requestRender();
+  try {
+    const r = await searchPlaces(q, ctl.signal);
+    if (ctl.signal.aborted) return;
+    app.search = { q, status: 'done', provider: r.provider, results: r.results, note: r.note, focus: null };
+    app.fitSearch = r.results.length > 0;
+    if (r.results.length && isDesktop()) setTimeout(refreshMapSize, 0);
+  } catch (e) {
+    if (ctl.signal.aborted) return;
+    console.warn('place search failed', e);
+    app.search = { q, status: 'error', results: [], focus: null, note: app.online ? 'ค้นหาไม่สำเร็จ ลองใหม่อีกครั้ง' : 'ออฟไลน์ — ค้นหาไม่ได้' };
+  }
+  app.requestRender();
+}
+
+/** แตะหมุดผลค้นหาบนแผนที่ → ไปที่การ์ดในรายการ */
+function showSearchResult(i: number) {
+  if (!app.search?.results[i]) return;
+  app.search.focus = i;
+  if (!isDesktop()) app.tab = 'places';
+  app.requestRender();
+  setTimeout(() => document.querySelector(`[data-search-card="${i}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 30);
+}
+
+function addSearchResult(i: number) {
+  const r = app.search?.results[i];
+  if (!r) return;
+  let place = findExisting(app.plan.customPlaces, r);
+  if (!place) {
+    const created = placeFromResult(r, `custom-${app.newUid('c')}`);
+    app.commit((p) => p.customPlaces.push(created));
+    place = created;
+  }
+  quickToggle(place.id);
+}
 
 /* ---------------- QR ---------------- */
 function drawQr() {
@@ -362,6 +418,29 @@ document.addEventListener('click', (ev) => {
       }, 60);
       return;
     }
+    case 'web-search':
+      runWebSearch();
+      return;
+    case 'web-search-clear':
+      searchAbort?.abort();
+      app.search = null;
+      break;
+    case 'web-search-focus': {
+      const i = Number(d.i);
+      const r = app.search?.results[i];
+      if (!r || !app.search) return;
+      app.search.focus = i;
+      if (!isDesktop()) app.tab = 'map';
+      app.requestRender();
+      setTimeout(() => {
+        refreshMapSize();
+        focusMapView(r.lat, r.lng);
+      }, 60);
+      return;
+    }
+    case 'web-search-add':
+      addSearchResult(Number(d.i));
+      return;
     case 'add-to-day':
     case 'quick-toggle':
       quickToggle(d.place!);
@@ -740,6 +819,11 @@ document.addEventListener('submit', (ev) => {
 
 document.addEventListener('keydown', (ev) => {
   if (ev.key === 'Escape' && app.modal) closeModal();
+  const el = ev.target as HTMLElement;
+  if (ev.key === 'Enter' && el?.dataset?.filter === 'q' && !ev.isComposing) {
+    ev.preventDefault();
+    runWebSearch();
+  }
 });
 
 window.addEventListener('online', () => {

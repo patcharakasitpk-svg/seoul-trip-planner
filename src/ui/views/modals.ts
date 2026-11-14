@@ -340,7 +340,7 @@ function settingsBody(): string {
     <p>สถานะ Google Maps: <b>${{ 'no-key': 'ยังไม่มีคีย์', loading: 'กำลังโหลด', ready: 'พร้อมใช้งาน', error: 'ผิดพลาด' }[g.status]}</b> ${g.error ? `<span class="warn-text small">${esc(g.error)}</span>` : ''}</p>
     <label>Google Maps API Key <input class="inp" name="apiKey" value="${esc(app.settings.apiKey ?? '')}" autocomplete="off" spellcheck="false"></label>
     <label>Map ID (สำหรับหมุดแบบ Advanced) <input class="inp" name="mapId" value="${esc(app.settings.mapId ?? '')}" placeholder="DEMO_MAP_ID"></label>
-    <p class="muted small">คีย์เก็บเฉพาะในเบราว์เซอร์เครื่องนี้ ไม่อยู่ในลิงก์แชร์/ไฟล์ JSON · ผู้ดูแลเว็บตั้งค่า VITE_GOOGLE_MAPS_API_KEY ตอน build ได้ · จำกัดคีย์ด้วย HTTP referrer และเปิดเฉพาะ Maps JavaScript API + Routes API</p>
+    <p class="muted small">คีย์เก็บเฉพาะในเบราว์เซอร์เครื่องนี้ ไม่อยู่ในลิงก์แชร์/ไฟล์ JSON · ผู้ดูแลเว็บตั้งค่า VITE_GOOGLE_MAPS_API_KEY ตอน build ได้ · จำกัดคีย์ด้วย HTTP referrer และเปิดเฉพาะ Maps JavaScript API + Routes API + Places API (New) (ใช้ค้นหาสถานที่ด้วยชื่อ)</p>
     <div class="modal-actions"><button type="button" class="btn" data-act="modal-close">ยกเลิก</button><button class="btn primary">บันทึกและโหลดใหม่</button></div>
   </form>`;
 }

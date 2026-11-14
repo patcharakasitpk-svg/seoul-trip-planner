@@ -59,19 +59,20 @@ export function syncOsm(specs: MarkerSpec[], lines: LineSpec[], fit: boolean) {
       }).addTo(layer);
     }
     // จุดในคลังวางก่อน ให้หมุดของแผนอยู่ด้านบน
-    const ordered = [...specs].sort((a, b) => (a.kind === 'lib' ? 0 : 1) - (b.kind === 'lib' ? 0 : 1));
+    const rank = (k: MarkerSpec['kind']) => (k === 'lib' ? 0 : k === 'search' ? 2 : 1);
+    const ordered = [...specs].sort((a, b) => rank(a.kind) - rank(b.kind));
     for (const s of ordered) {
       const html = markerContent(s);
       html.classList.add('mk-osm');
       const icon = L.divIcon({ html: html.outerHTML, className: 'osm-icon', iconSize: [0, 0] });
-      L.marker([s.lat, s.lng], { icon, title: s.title, zIndexOffset: s.kind === 'lib' ? 0 : 1000, keyboard: true })
+      L.marker([s.lat, s.lng], { icon, title: s.title, zIndexOffset: s.kind === 'lib' ? 0 : s.kind === 'search' ? 2000 : 1000, keyboard: true })
         .on('click', () => clickHandler(s.id))
         .addTo(layer);
     }
   }
   if (fit) {
     const f = specs.filter((s) => s.focus);
-    const pts = f.length ? f : specs.filter((s) => s.kind !== 'lib');
+    const pts = f.length ? f : specs.filter((s) => s.kind !== 'lib' && s.kind !== 'search');
     if (pts.length > 1) map.fitBounds(L.latLngBounds(pts.map((p) => [p.lat, p.lng] as [number, number])), { padding: [36, 36], maxZoom: 15 });
     else if (pts.length === 1) map.setView([pts[0].lat, pts[0].lng], 15);
   }

@@ -338,3 +338,14 @@ label.block { display: block; margin: .4rem 0; }
 .settings-foot { gap: .5rem; }
 .foot-right { display: inline-flex; gap: .4rem; align-items: center; }
 .notice.trip { justify-content: space-between; }
+
+/* ค้นหาสถานที่ใดก็ได้ */
+.web-search { margin: .4rem 0 .6rem; padding: .5rem; border: 1px solid var(--line, #e3e5e8); border-radius: 10px; }
+.web-search:has(.web-search-head) { background: color-mix(in srgb, #e8453c 4%, transparent); }
+.web-search-btn { width: 100%; justify-content: flex-start; }
+.web-search-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0 .4rem; margin-bottom: .3rem; }
+.web-search-head b { flex: 1 1 0; min-width: 0; overflow-wrap: anywhere; }
+.web-search-head .btn { flex: none; white-space: nowrap; }
+.web-search-head .muted { order: 3; flex-basis: 100%; }
+.search-result .icon-btn { text-decoration: none; }
+.mk-search { border-color: #e8453c; }

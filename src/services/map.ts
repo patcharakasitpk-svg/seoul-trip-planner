@@ -4,7 +4,7 @@ export interface MarkerSpec {
   id: string; // placeId
   lat: number;
   lng: number;
-  kind: 'hotel' | 'venue' | 'stop' | 'lib';
+  kind: 'hotel' | 'venue' | 'stop' | 'lib' | 'search';
   title: string;
   /** ป้ายวัน/ลำดับ เช่น [{color, text:'1'}] — สถานที่เดียวหลายวันแสดงหลายป้ายในหมุดเดียว */
   badges: { color: string; text: string }[];
@@ -70,6 +70,7 @@ export function markerContent(spec: MarkerSpec): HTMLElement {
   if (spec.kind === 'hotel') el.innerHTML = '<span class="mk-ico">🏨</span>';
   else if (spec.kind === 'venue') el.innerHTML = '<span class="mk-ico">🏢</span>';
   else if (spec.kind === 'lib') el.innerHTML = '';
+  else if (spec.kind === 'search') el.innerHTML = '<span class="mk-ico">📍</span>';
   for (const b of spec.badges.slice(0, 4)) {
     const s = document.createElement('span');
     s.className = 'mk-badge';
@@ -99,9 +100,9 @@ export function syncMap(specs: MarkerSpec[], lineSpecs: LineSpec[], fit: boolean
       ex.position = { lat: s.lat, lng: s.lng };
       ex.content = markerContent(s);
       ex.title = s.title;
-      ex.zIndex = s.kind === 'lib' ? 1 : 10;
+      ex.zIndex = s.kind === 'lib' ? 1 : s.kind === 'search' ? 20 : 10;
     } else {
-      const m = new AdvMarker({ map, position: { lat: s.lat, lng: s.lng }, content: markerContent(s), title: s.title, zIndex: s.kind === 'lib' ? 1 : 10, gmpClickable: true });
+      const m = new AdvMarker({ map, position: { lat: s.lat, lng: s.lng }, content: markerContent(s), title: s.title, zIndex: s.kind === 'lib' ? 1 : s.kind === 'search' ? 20 : 10, gmpClickable: true });
       m.addListener('click', () => clickHandler(s.id));
       markers.set(s.id, m);
     }
@@ -126,7 +127,7 @@ export function syncMap(specs: MarkerSpec[], lineSpecs: LineSpec[], fit: boolean
   );
   if (fit) {
     const f = specs.filter((s) => s.focus);
-    const pts = f.length ? f : specs.filter((s) => s.kind !== 'lib');
+    const pts = f.length ? f : specs.filter((s) => s.kind !== 'lib' && s.kind !== 'search');
     if (pts.length) {
       const b = new google.maps.LatLngBounds();
       pts.forEach((p) => b.extend(p));
