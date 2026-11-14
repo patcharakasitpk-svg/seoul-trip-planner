@@ -1,5 +1,5 @@
 import type { Day, Leg, Plan, Stop, TravelMode } from './types';
-import { TRIP_DATES } from '../config';
+import { TRIP_DATES, TRIP_STAYS } from '../config';
 import { addDays, diffDays } from './time';
 
 let counter = 0;
@@ -39,6 +39,12 @@ export function newDay(partial: Partial<Day> = {}): Day {
 }
 
 export function newPlan(name = 'แผนเที่ยวโซล'): Plan {
+  const p = basePlan(name);
+  applyStays(p);
+  return p;
+}
+
+function basePlan(name: string): Plan {
   return {
     version: 1,
     id: uid('p'),
@@ -108,5 +114,29 @@ export function applyTripDates(plan: Plan, dates: string[] = tripDates()): void 
   dates.forEach((date, i) => {
     if (!plan.days[i]) plan.days.push(newDay());
     plan.days[i].date = date;
+  });
+  applyStays(plan);
+}
+
+/** ตั้งที่พักนอกโซล (เช่น ซูวอนคืนวันเสาร์): จบวันที่โรงแรมนั้น และเริ่มวันถัดไปจากที่นั่น */
+export function applyStays(plan: Plan): void {
+  for (const st of TRIP_STAYS) {
+    const i = plan.days.findIndex((d) => d.date === st.date);
+    if (i < 0) continue;
+    plan.days[i].endPlaceId = st.hotelId;
+    plan.days[i].weatherRef = st.hotelId;
+    if (plan.days[i + 1]) {
+      plan.days[i + 1].startPlaceId = st.hotelId;
+      plan.days[i + 1].weatherRef = st.hotelId;
+    }
+  }
+}
+
+/** แผนยังไม่ตรงกับช่วงวันเที่ยว/ที่พักใน config หรือไม่ */
+export function tripSetupNeeded(plan: Plan): boolean {
+  if (tripDates().some((t) => !plan.days.some((d) => d.date === t))) return true;
+  return TRIP_STAYS.some((st) => {
+    const i = plan.days.findIndex((d) => d.date === st.date);
+    return i >= 0 && (plan.days[i].endPlaceId !== st.hotelId || (plan.days[i + 1] && plan.days[i + 1].startPlaceId !== st.hotelId));
   });
 }

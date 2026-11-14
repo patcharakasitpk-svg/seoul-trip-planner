@@ -6,7 +6,7 @@ import { fmtDateTh, fmtDur, fmtHM } from '../../core/time';
 import { legRow } from './leg';
 import { renderWeather } from './weather';
 import { CATEGORY_ICON } from '../../data/places';
-import { tripDates } from '../../core/planOps';
+import { tripDates, tripSetupNeeded } from '../../core/planOps';
 
 export function renderDayTabs(): string {
   return `<div class="day-tabs" role="tablist">
@@ -28,7 +28,7 @@ export function placeOptions(selected: string | null, allowNone = true): string 
     ${group('สถานที่อื่น', ps.filter((p) => !(p.kind === 'hotel' || p.kind === 'venue')))}`;
 }
 
-const shortName = (p: Place | undefined) => (p ? (p.id === 'hotel' ? 'โรงแรม' : p.id === 'coex' ? 'COEX' : p.nameTh) : '?');
+const shortName = (p: Place | undefined) => (p ? (p.id === 'hotel' ? 'โรงแรม' : p.id === 'coex' ? 'COEX' : p.id === 'novotel-suwon' ? 'Novotel ซูวอน' : p.nameTh) : '?');
 
 function timeCell(t: number | null, lower: boolean) {
   return t == null ? '--:--' : `${lower ? '<span class="lb" title="อย่างเร็ว — มีช่วงที่ยังไม่มีข้อมูล">≥</span>' : ''}${fmtHM(t)}`;
@@ -73,6 +73,7 @@ function settingsCard(day: Day, idx: number): string {
       <button class="chip" data-act="quick" data-field="startPlaceId" data-v="hotel" data-day="${day.id}">ออกจากโรงแรม</button>
       <button class="chip" data-act="quick" data-field="startPlaceId" data-v="coex" data-day="${day.id}">ออกจาก COEX</button>
       <button class="chip" data-act="quick" data-field="endPlaceId" data-v="hotel" data-day="${day.id}">กลับโรงแรม</button>
+      ${app.getPlace('novotel-suwon') ? `<button class="chip" data-act="quick" data-field="endPlaceId" data-v="novotel-suwon" data-day="${day.id}">นอน Novotel ซูวอน</button><button class="chip" data-act="quick" data-field="startPlaceId" data-v="novotel-suwon" data-day="${day.id}">ออกจาก Novotel ซูวอน</button>` : ''}
     </div>
     ${
       more
@@ -170,9 +171,9 @@ export function renderDayPanel(day: Day): string {
   rows.push(`<div class="endpoint"><span class="time">${s.end ? timeCell(s.end.arrive, s.end.lowerBound) : '--:--'}</span><span class="ep-dot end" style="--c:${dayColor(idx)}"></span><span>ถึง <b>${esc(shortName(end))}</b>${day.endTime ? ` <span class="muted small">(ต้องถึงภายใน ${esc(day.endTime)})</span>` : ''}</span></div>`);
 
   const trip = tripDates();
-  const noDates = trip.some((t) => !app.plan.days.some((d) => d.date === t));
+  const noDates = tripSetupNeeded(app.plan);
   return `
-  ${noDates ? `<div class="notice trip">ทริป ${esc(fmtDateTh(trip[0]))} – ${esc(fmtDateTh(trip[trip.length - 1]))} (${trip.length} วัน) <button class="btn sm primary" data-act="apply-trip-dates">ตั้งวันเที่ยวให้ครบ</button></div>` : ''}
+  ${noDates ? `<div class="notice trip">ทริป ${esc(fmtDateTh(trip[0]))} – ${esc(fmtDateTh(trip[trip.length - 1]))} (${trip.length} วัน) · คืนเสาร์ 5 ธ.ค. นอน Novotel ซูวอน <button class="btn sm primary" data-act="apply-trip-dates">ตั้งวันเที่ยวให้ครบ</button></div>` : ''}
   <div class="day-head">
     <h2 style="--c:${dayColor(idx)}">วัน ${idx + 1}</h2>
   </div>
