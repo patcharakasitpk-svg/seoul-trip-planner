@@ -392,3 +392,38 @@ body[data-tab="fx"] .layout, body[data-tab="fx"] #day-tabs-wrap { display: none;
 .fx-table span { color: var(--muted); }
 .fx-rate p { margin: .2rem 0; }
 .fx-rate-form { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+
+/* ---------- ของที่จะซื้อ ---------- */
+.money-seg { display: flex; max-width: 460px; margin: .9rem auto 0; padding: 0 .9rem; }
+.money-seg button { flex: 1; min-height: 40px; }
+.shop-wrap { max-width: 460px; margin: 0 auto; padding: .8rem .9rem 96px; display: flex; flex-direction: column; gap: .6rem; }
+.shop-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: .4rem; background: var(--accent-soft); border-radius: 14px; padding: .7rem .8rem; }
+.shop-sum div { display: flex; flex-direction: column; }
+.shop-sum b { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.shop-sum .good, .shop-verdict.korea { color: #0e8a5f; }
+.shop-add { min-height: 48px; font-size: 1rem; }
+.shop-item { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: .5rem .7rem .6rem; display: flex; flex-direction: column; gap: .15rem; }
+.shop-item.bought { opacity: .55; }
+.shop-item.bought .shop-add-price, .shop-item.bought .shop-add-thai { display: none; }
+.shop-item.bought .shop-name { text-decoration: line-through; }
+.shop-head { display: flex; align-items: center; gap: .5rem; }
+.shop-check { flex: none; width: 30px; height: 30px; border-radius: 8px; border: 2px solid var(--line-2); background: var(--surface); color: #fff; font-weight: 700; cursor: pointer; }
+.shop-check.on { background: #0e8a5f; border-color: #0e8a5f; }
+.shop-name { flex: 1; min-width: 0; text-align: left; border: 0; background: none; font-family: inherit; font-weight: 600; font-size: 1.02rem; line-height: 1.3; color: var(--text); padding: .35rem 0; cursor: pointer; overflow-wrap: anywhere; }
+.shop-price, .shop-add-price, .shop-add-thai { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; width: 100%; min-height: 40px; padding: .35rem .5rem; border: 0; border-radius: 10px; background: none; font: inherit; color: var(--text); text-align: left; cursor: pointer; font-variant-numeric: tabular-nums; }
+.shop-price span { min-width: 0; overflow-wrap: anywhere; }
+.shop-price b { white-space: nowrap; font-weight: 600; }
+.shop-price.best { background: #e9f7f0; }
+.shop-price.thai { background: var(--bg, #f5f6f8); }
+.shop-add-price, .shop-add-thai { color: var(--accent); justify-content: flex-start; }
+.shop-verdict { margin: .2rem .5rem 0; font-size: .88rem; font-weight: 600; }
+.shop-verdict.thai { color: var(--warn); }
+.shop-form { display: flex; flex-direction: column; gap: .45rem; padding: .5rem; background: var(--accent-soft); border-radius: 12px; }
+.shop-form-row { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+.shop-form-row label { display: flex; align-items: center; gap: .25rem; font-size: .85rem; color: var(--muted); }
+.shop-form-row .inp { min-width: 0; }
+.shop-form-row label .inp { width: 6.5rem; }
+.shop-form-row label .inp.qty { width: 4rem; }
+.shop-form.price .shop-form-row > .inp { flex: 1 1 9rem; }
+.shop-form.price label.krw { flex: 1 1 8rem; }
+.shop-form.price label.krw .inp { width: 100%; font-size: 1.1rem; }

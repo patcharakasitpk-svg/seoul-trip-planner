@@ -269,3 +269,51 @@ test('แปลงเงิน: พิมพ์วอนเห็นบาทท
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);
 });
+
+test('ของที่จะซื้อ: เพิ่ม/เทียบราคา/แก้/ลบ/เลิกทำ', async ({ page }) => {
+  await page.route('https://api.frankfurter.dev/**', (r) => r.fulfill({ json: { amount: 1, base: 'THB', date: '2026-11-13', rates: { KRW: 40 } } }));
+  await page.goto('/');
+  await page.locator('[data-act="tab"][data-tab="fx"]').filter({ visible: true }).first().click();
+  await page.locator('[data-act="money-view"][data-v="shop"]').click();
+  // เพิ่มของ
+  await page.locator('[data-act="shop-add"]').click();
+  const f = page.locator('form[data-form="shop-item"]');
+  await expect(f.locator('[name="name"]')).toBeFocused();
+  await f.locator('[name="name"]').fill('กันแดด');
+  await f.locator('[name="thb"]').fill('580');
+  await f.locator('[name="qty"]').fill('2');
+  await f.locator('[name="name"]').press('Enter');
+  const card = page.locator('[data-shop-item]', { hasText: 'กันแดด' });
+  await expect(card).toBeVisible();
+  // ราคาร้านในเกาหลี
+  for (const [store, krw] of [['Olive Young', '18000'], ['Daiso', '21000']]) {
+    await card.locator('[data-act="shop-price-add"]').click();
+    const pf = page.locator('form[data-form="shop-price"]');
+    await pf.locator('[name="store"]').fill(store);
+    await pf.locator('[name="krw"]').fill(krw);
+    await pf.locator('[name="krw"]').press('Enter');
+  }
+  await expect(card.locator('.shop-price.best')).toContainText('Olive Young');
+  await expect(card).toContainText('ถูกกว่าไทย ฿130/ชิ้น');
+  await expect(card).toContainText('2 ชิ้นประหยัด ฿260');
+  // ร้านล่าสุดถูกเติมให้อัตโนมัติ
+  await card.locator('[data-act="shop-price-add"]').click();
+  await expect(page.locator('form[data-form="shop-price"] [name="store"]')).toHaveValue('Daiso');
+  await page.locator('form[data-form="shop-price"] [data-act="shop-form-cancel"]').click();
+  // แก้ราคา Daiso → ถูกสุดย้าย
+  await card.locator('[data-act="shop-price-edit"]', { hasText: 'Daiso' }).click();
+  await page.locator('form[data-form="shop-price"] [name="krw"]').fill('15000');
+  await page.locator('form[data-form="shop-price"] [name="krw"]').press('Enter');
+  await expect(card.locator('.shop-price.best')).toContainText('Daiso');
+  // ลบ + เลิกทำ
+  await card.locator('[data-act="shop-del"]').click();
+  await expect(page.locator('[data-shop-item]', { hasText: 'กันแดด' })).toHaveCount(0);
+  await page.locator('[data-act="toast-undo"]').click();
+  await expect(page.locator('[data-shop-item]', { hasText: 'กันแดด' })).toBeVisible();
+  // เก็บในเครื่อง: รีโหลดแล้วยังอยู่
+  await page.reload();
+  await page.locator('[data-act="tab"][data-tab="fx"]').filter({ visible: true }).first().click();
+  await page.locator('[data-act="money-view"][data-v="shop"]').click();
+  await expect(page.locator('[data-shop-item]', { hasText: 'กันแดด' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+});

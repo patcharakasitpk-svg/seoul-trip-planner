@@ -11,7 +11,7 @@ import { startOsm, switchToGoogle, onMapMarkerClick, mapViewReady, syncMapView, 
 import { buildMapSpecs } from './ui/mapSpecs';
 import { onRoutesChange } from './services/routes';
 import { onWeatherChange, ensureWeather } from './services/weather';
-import { moveStopToDay, insertStop, moveStop, newDay, newStop, dinnerSlot, removeStop, updateStop, reorderStops, newPlan, clone, defaultInsertIndex, applyTripDates } from './core/planOps';
+import { moveStopToDay, insertStop, moveStop, newDay, newStop, dinnerSlot, removeStop, updateStop, reorderStops, newPlan, clone, defaultInsertIndex, applyTripDates , uid } from './core/planOps';
 import type { Day, Place, Plan, Stop, TravelMode } from './core/types';
 import { suggestOrder } from './core/compare';
 import { decodeFragment, parseJsonPlan, buildShareUrl, exportablePlan } from './storage/share';
@@ -26,6 +26,8 @@ import { RoomSync, inviteUrl, newRoomId, roomFromHash, toRoomDoc, fromRoomDoc, s
 import { SYNC_DB_URL } from './config';
 import { loadFx, saveFx, needsRefresh, fetchRate, activeRate, parseAmount } from './services/fx';
 import { renderFx, fxResult, formatTyping, type FxUi } from './ui/views/fx';
+import { loadShop, saveShop, type ShopStore } from './services/shop';
+import { renderShop, storeSuggestions, type ShopUi } from './ui/views/shop';
 import { safeGet, safeSet } from './storage/storage';
 
 const hadSavedPlans = loadPlans() != null;
@@ -206,10 +208,36 @@ function renderFxPage() {
   }
   if (needsRefresh(fxStore) && app.online && !fxUi.loading) void refreshFx();
   // วาดใหม่เฉพาะเมื่อโครงเปลี่ยน — ระหว่างพิมพ์อัปเดตแค่ผลลัพธ์ (แป้นพิมพ์มือถือไม่หุบ)
-  const sig = JSON.stringify([fxUi.dir, fxUi.editingRate, fxUi.loading, fxStore, app.online]);
+  const sig = JSON.stringify([moneyView, fxUi.dir, fxUi.editingRate, fxUi.loading, fxStore, app.online, moneyView === 'shop' ? [shop, shopUi] : 0]);
   if (sig === fxSig) return;
   fxSig = sig;
-  $('#fx').innerHTML = renderFx(fxUi, fxStore, app.online);
+  const sw = `<div class="seg money-seg" role="tablist"><button class="${moneyView === 'fx' ? 'on' : ''}" data-act="money-view" data-v="fx" role="tab" aria-selected="${moneyView === 'fx'}">แปลงเงิน</button><button class="${moneyView === 'shop' ? 'on' : ''}" data-act="money-view" data-v="shop" role="tab" aria-selected="${moneyView === 'shop'}">ของที่จะซื้อ</button></div>`;
+  const placeNames = app.places().filter((p) => p.category === 'fashion' || p.category === 'beauty' || p.category === 'market' || p.custom).map((p) => p.nameEn);
+  $('#fx').innerHTML = sw + (moneyView === 'fx' ? renderFx(fxUi, fxStore, app.online) : renderShop(shop, activeRate(fxStore), shopUi, storeSuggestions(shop, placeNames)));
+  (document.querySelector('#fx [data-autofocus]') as HTMLInputElement | null)?.focus();
+}
+
+/* ---------------- ของที่จะซื้อ (เก็บเฉพาะเครื่องนี้) ---------------- */
+let moneyView: 'fx' | 'shop' = 'fx';
+let shop: ShopStore = loadShop();
+const shopUi: ShopUi = { adding: false, editItem: null, priceFor: null, editPrice: null };
+const closeShopForms = () => Object.assign(shopUi, { adding: false, editItem: null, priceFor: null, editPrice: null });
+
+/** แก้รายการ: บันทึกลงเครื่อง + ปุ่มเลิกทำ (ถ้ามีข้อความ) */
+function shopCommit(mut: (s: ShopStore) => void, msg?: string, undoable = false) {
+  const before = clone(shop);
+  const next = clone(shop);
+  mut(next);
+  shop = next;
+  saveShop(shop);
+  if (msg)
+    app.showToast(msg, undoable ? () => {
+      shop = before;
+      saveShop(shop);
+      app.showToast('เลิกทำแล้ว');
+      app.requestRender();
+    } : undefined);
+  app.requestRender();
 }
 
 async function refreshFx(manual = false) {
@@ -750,6 +778,55 @@ document.addEventListener('click', (ev) => {
     case 'open-share':
       app.modal = { type: 'share' };
       break;
+    case 'money-view':
+      moneyView = d.v === 'shop' ? 'shop' : 'fx';
+      closeShopForms();
+      break;
+    case 'shop-add':
+      closeShopForms();
+      shopUi.adding = true;
+      break;
+    case 'shop-edit':
+      closeShopForms();
+      shopUi.editItem = d.item ?? null;
+      break;
+    case 'shop-form-cancel':
+      closeShopForms();
+      break;
+    case 'shop-bought':
+      shopCommit((s) => {
+        const it = s.items.find((x) => x.id === d.item);
+        if (it) it.bought = !it.bought;
+      });
+      return;
+    case 'shop-del': {
+      const it = shop.items.find((x) => x.id === d.item);
+      if (!it) return;
+      closeShopForms();
+      shopCommit((s) => void (s.items = s.items.filter((x) => x.id !== d.item)), `ลบ ${it.name} แล้ว`, true);
+      return;
+    }
+    case 'shop-price-add':
+      closeShopForms();
+      shopUi.priceFor = d.item ?? null;
+      break;
+    case 'shop-price-edit':
+      closeShopForms();
+      shopUi.priceFor = d.item ?? null;
+      shopUi.editPrice = d.price ?? null;
+      break;
+    case 'shop-price-del':
+      closeShopForms();
+      shopCommit((s) => {
+        const it = s.items.find((x) => x.id === d.item);
+        if (it) it.prices = it.prices.filter((p) => p.id !== d.price);
+      }, 'ลบราคาแล้ว', true);
+      return;
+    case 'shop-clear-bought': {
+      const n = shop.items.filter((x) => x.bought).length;
+      confirmThen(`ลบ ${n} รายการที่ซื้อแล้ว?`, 'ลบ', () => shopCommit((s) => void (s.items = s.items.filter((x) => !x.bought)), `ลบ ${n} รายการแล้ว`, true));
+      return;
+    }
     case 'fx-swap': {
       // สลับทิศ: ผลลัพธ์เดิมกลายเป็นจำนวนตั้งต้น
       const rate = activeRate(fxStore);
@@ -1058,6 +1135,38 @@ document.addEventListener('submit', (ev) => {
     };
     app.modal = null;
     app.commit((p) => p.customPlaces.push(place), 'เพิ่มสถานที่แล้ว');
+  } else if (kind === 'shop-item') {
+    const name = String(fd.get('name') ?? '').trim().slice(0, 80);
+    if (!name) return;
+    const thbV = parseAmount(String(fd.get('thb') ?? ''));
+    const qty = Math.min(99, Math.max(1, Math.round(Number(fd.get('qty')) || 1)));
+    const label = String(fd.get('thbLabel') ?? '').trim().slice(0, 30);
+    const editId = form.dataset.item;
+    closeShopForms();
+    shopCommit((s) => {
+      const fields = { name, qty, thb: thbV && thbV > 0 ? thbV : null, thbLabel: label };
+      const it = editId ? s.items.find((x) => x.id === editId) : undefined;
+      if (it) Object.assign(it, fields);
+      else if (s.items.length < 200) s.items.push({ id: uid('si'), prices: [], bought: false, ...fields });
+    }, editId ? undefined : `เพิ่ม ${name} แล้ว — กด “＋ ราคาร้านในเกาหลี” เพื่อเทียบราคา`);
+  } else if (kind === 'shop-price') {
+    const store = String(fd.get('store') ?? '').trim().slice(0, 60);
+    const krw = parseAmount(String(fd.get('krw') ?? ''));
+    if (!store || !krw || krw <= 0) {
+      app.showToast('ใส่ชื่อร้านและราคาวอน');
+      return;
+    }
+    const itemId = form.dataset.item!;
+    const priceId = form.dataset.price;
+    closeShopForms();
+    shopCommit((s) => {
+      s.lastStore = store;
+      const it = s.items.find((x) => x.id === itemId);
+      if (!it) return;
+      const pr = priceId ? it.prices.find((x) => x.id === priceId) : undefined;
+      if (pr) Object.assign(pr, { store, krw });
+      else if (it.prices.length < 20) it.prices.push({ id: uid('sp'), store, krw });
+    });
   } else if (kind === 'fx-rate') {
     const v = parseFloat(String(fd.get('rate') ?? '').replace(/,/g, ''));
     if (!(v > 1 && v < 200)) {
