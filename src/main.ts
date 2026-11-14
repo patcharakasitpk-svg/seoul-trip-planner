@@ -24,6 +24,8 @@ import { searchPlaces, placeFromResult, findExisting } from './services/placeSea
 import { SEARCH_PREFIX } from './ui/mapSpecs';
 import { RoomSync, inviteUrl, newRoomId, roomFromHash, toRoomDoc, fromRoomDoc, shouldApplyRemote, type RoomDoc, type SyncState } from './services/sync';
 import { SYNC_DB_URL } from './config';
+import { loadFx, saveFx, needsRefresh, fetchRate, activeRate, parseAmount } from './services/fx';
+import { renderFx, fxResult, formatTyping, type FxUi } from './ui/views/fx';
 import { safeGet, safeSet } from './storage/storage';
 
 const hadSavedPlans = loadPlans() != null;
@@ -33,7 +35,7 @@ document.querySelector('#app')!.innerHTML = `
 <header class="topbar">
   <div class="brand"><b>Seoul Trip</b><span class="plan-name" id="plan-name"></span></div>
   <nav class="top-actions">
-    <div class="seg desk-only"><button data-act="tab" data-tab="today">วันนี้</button><button data-act="tab" data-tab="plan">แผน</button></div>
+    <div class="seg desk-only"><button data-act="tab" data-tab="today">วันนี้</button><button data-act="tab" data-tab="plan">แผน</button><button data-act="tab" data-tab="fx">₩→฿</button></div>
     <button class="btn ghost sm" data-act="open-templates" title="แม่แบบ">แม่แบบ</button>
     <button class="btn ghost sm" data-act="open-share" title="แชร์และบันทึก">แชร์</button>
     <button class="icon-btn" data-act="open-settings" aria-label="ตั้งค่า" title="ตั้งค่า">⚙︎</button>
@@ -50,11 +52,13 @@ document.querySelector('#app')!.innerHTML = `
   </section>
   <section class="panel right" id="right" aria-live="polite"></section>
 </main>
+<section id="fx" class="fx" aria-label="แปลงสกุลเงิน"></section>
 <nav class="bottom-nav" aria-label="เมนูหลัก">
   <button data-act="tab" data-tab="today"><span aria-hidden="true">◷</span>วันนี้</button>
   <button data-act="tab" data-tab="map"><span aria-hidden="true">⌖</span>แผนที่</button>
   <button data-act="tab" data-tab="places"><span aria-hidden="true">☰</span>สถานที่</button>
   <button data-act="tab" data-tab="plan"><span aria-hidden="true">▤</span>แผนของฉัน</button>
+  <button data-act="tab" data-tab="fx"><span aria-hidden="true">₩</span>แปลงเงิน</button>
 </nav>
 <div id="modal-root"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>`;
@@ -99,6 +103,7 @@ function render() {
   $('#toast').innerHTML = app.toast ? `${esc(app.toast.msg)}${app.toast.undo ? ' <button class="toast-undo" data-act="toast-undo">เลิกทำ</button>' : ''}` : '';
   $('#toast').classList.toggle('has-action', !!app.toast?.undo);
   $('#toast').classList.toggle('show', !!app.toast);
+  renderFxPage();
   renderMapTools();
   syncMapNow();
   if (app.modal?.type === 'share') drawQr();
@@ -187,6 +192,45 @@ function addSearchResult(i: number) {
     place = created;
   }
   quickToggle(place.id);
+}
+
+/* ---------------- แปลงเงิน วอน ↔ บาท ---------------- */
+let fxStore = loadFx();
+const fxUi: FxUi = { dir: 'krw2thb', amount: '', editingRate: false, loading: false };
+let fxSig = '';
+
+function renderFxPage() {
+  if (app.tab !== 'fx') {
+    fxSig = '';
+    return;
+  }
+  if (needsRefresh(fxStore) && app.online && !fxUi.loading) void refreshFx();
+  // วาดใหม่เฉพาะเมื่อโครงเปลี่ยน — ระหว่างพิมพ์อัปเดตแค่ผลลัพธ์ (แป้นพิมพ์มือถือไม่หุบ)
+  const sig = JSON.stringify([fxUi.dir, fxUi.editingRate, fxUi.loading, fxStore, app.online]);
+  if (sig === fxSig) return;
+  fxSig = sig;
+  $('#fx').innerHTML = renderFx(fxUi, fxStore, app.online);
+}
+
+async function refreshFx(manual = false) {
+  fxUi.loading = true;
+  app.requestRender();
+  const r = await fetchRate();
+  fxUi.loading = false;
+  if (r) {
+    fxStore = { ...fxStore, ...r, fetchedAt: Date.now() };
+    saveFx(fxStore);
+    if (manual) app.showToast('อัปเดตอัตราแลกเปลี่ยนแล้ว');
+  } else if (manual) app.showToast('อัปเดตอัตราไม่ได้ — ใช้อัตราล่าสุดที่จำไว้');
+  app.requestRender();
+}
+
+function setFxAmount(v: string) {
+  fxUi.amount = v;
+  const inp = document.getElementById('fx-in') as HTMLInputElement | null;
+  if (inp && inp.value !== v) inp.value = v;
+  const out = document.getElementById('fx-out');
+  if (out) out.textContent = fxResult(fxUi, fxStore);
 }
 
 /* ---------------- ซิงก์สดกับเพื่อน ---------------- */
@@ -706,6 +750,32 @@ document.addEventListener('click', (ev) => {
     case 'open-share':
       app.modal = { type: 'share' };
       break;
+    case 'fx-swap': {
+      // สลับทิศ: ผลลัพธ์เดิมกลายเป็นจำนวนตั้งต้น
+      const rate = activeRate(fxStore);
+      const n = parseAmount(fxUi.amount);
+      const raw = rate && n != null ? (fxUi.dir === 'krw2thb' ? n / rate : n * rate) : null;
+      fxUi.dir = fxUi.dir === 'krw2thb' ? 'thb2krw' : 'krw2thb';
+      // ใช้ค่าละเอียด (บาททศนิยม 2 ตำแหน่ง) สลับไปกลับแล้วไม่เพี้ยน
+      fxUi.amount = raw != null ? formatTyping(fxUi.dir === 'thb2krw' ? raw.toFixed(2).replace(/\.00$/, '') : String(Math.round(raw))) : '';
+      break;
+    }
+    case 'fx-set':
+      setFxAmount(d.v ? formatTyping(d.v) : '');
+      (document.getElementById('fx-in') as HTMLInputElement | null)?.blur();
+      return;
+    case 'fx-edit':
+      fxUi.editingRate = true;
+      break;
+    case 'fx-auto':
+      fxStore = { ...fxStore, custom: null };
+      saveFx(fxStore);
+      fxUi.editingRate = false;
+      app.showToast('ใช้อัตราอัตโนมัติแล้ว');
+      break;
+    case 'fx-refresh':
+      void refreshFx(true);
+      return;
     case 'sync-start':
       startSharing();
       return;
@@ -938,6 +1008,12 @@ document.addEventListener('change', (ev) => {
 
 document.addEventListener('input', (ev) => {
   const el = ev.target as HTMLInputElement;
+  if (el.id === 'fx-in') {
+    const f = formatTyping(el.value);
+    if (f !== el.value) el.value = f;
+    setFxAmount(f);
+    return;
+  }
   if (el.dataset.filter === 'q') {
     app.filters.q = el.value;
     $('#lib-list').innerHTML = renderLibraryList();
@@ -982,6 +1058,17 @@ document.addEventListener('submit', (ev) => {
     };
     app.modal = null;
     app.commit((p) => p.customPlaces.push(place), 'เพิ่มสถานที่แล้ว');
+  } else if (kind === 'fx-rate') {
+    const v = parseFloat(String(fd.get('rate') ?? '').replace(/,/g, ''));
+    if (!(v > 1 && v < 200)) {
+      app.showToast('อัตราไม่ถูกต้อง — ใส่จำนวนวอนต่อ 1 บาท เช่น 39.5');
+      return;
+    }
+    fxStore = { ...fxStore, custom: v };
+    saveFx(fxStore);
+    fxUi.editingRate = false;
+    app.showToast(`ใช้อัตรา 1 บาท = ${v} วอน`);
+    app.requestRender();
   } else if (kind === 'settings') {
     const apiKey = String(fd.get('apiKey') ?? '').trim();
     const mapId = String(fd.get('mapId') ?? '').trim();

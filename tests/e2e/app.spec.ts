@@ -244,3 +244,28 @@ test('เลือกแผนรายวัน: ใช้การ์ดกั
   await expect(page.locator('#toast')).toContainText('เพิ่ม');
   await expect(page.locator('.tpl-day', { hasText: 'วันมาถึง' }).locator('.tpl-near [data-act="tpl-add-place"]').first()).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('แปลงเงิน: พิมพ์วอนเห็นบาททันที ใช้ปุ่มลัด สลับทิศ และตั้งอัตราเองได้ (ออฟไลน์ใช้อัตราที่จำไว้)', async ({ page }) => {
+  await page.route('https://api.frankfurter.dev/**', (r) => r.fulfill({ json: { amount: 1, base: 'THB', date: '2026-11-13', rates: { KRW: 40 } } }));
+  await page.goto('/');
+  await page.locator('[data-act="tab"][data-tab="fx"]').filter({ visible: true }).first().click();
+  await expect(page.locator('.fx-rate')).toContainText('1 บาท = 40.00 วอน');
+  await page.locator('#fx-in').pressSequentially('12500');
+  await expect(page.locator('#fx-in')).toHaveValue('12,500');
+  await expect(page.locator('#fx-out')).toHaveText('313');
+  await expect(page.locator('#fx-in')).toBeFocused(); // พิมพ์ต่อได้ แป้นไม่หุบ
+  await page.locator('[data-act="fx-set"][data-v="50000"]').click();
+  await expect(page.locator('#fx-out')).toHaveText('1,250');
+  await page.locator('[data-act="fx-swap"]').click();
+  await expect(page.locator('#fx-in')).toHaveValue('1,250');
+  await expect(page.locator('#fx-out')).toHaveText('50,000');
+  await page.locator('[data-act="fx-swap"]').click();
+  await page.locator('[data-act="fx-edit"]').click();
+  await page.locator('[name="rate"]').fill('38');
+  await page.locator('.fx-rate-form button.primary').click();
+  await page.locator('[data-act="fx-set"][data-v="10000"]').click();
+  await expect(page.locator('#fx-out')).toHaveText('263');
+  await expect(page.locator('.fx-rate')).toContainText('อัตราที่ตั้งเอง');
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  expect(overflow).toBe(false);
+});

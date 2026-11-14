@@ -9,7 +9,7 @@ import { ensureWeather, getWeather } from '../services/weather';
 import { fmtHM } from '../core/time';
 import type { SearchResult } from '../services/placeSearch';
 
-export type Tab = 'today' | 'map' | 'places' | 'plan';
+export type Tab = 'today' | 'map' | 'places' | 'plan' | 'fx';
 
 export type Modal =
   | { type: 'compare'; title: string; dayId: string; oldDay: Day; newDay: Day; note?: string; afterConfirm?: string }
