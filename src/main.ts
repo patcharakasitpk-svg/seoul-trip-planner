@@ -11,12 +11,12 @@ import { startOsm, switchToGoogle, onMapMarkerClick, mapViewReady, syncMapView, 
 import { buildMapSpecs } from './ui/mapSpecs';
 import { onRoutesChange } from './services/routes';
 import { onWeatherChange, ensureWeather } from './services/weather';
-import { insertStop, moveStop, newDay, newStop, dinnerSlot, removeStop, updateStop, reorderStops, newPlan, clone, defaultInsertIndex, applyTripDates } from './core/planOps';
+import { moveStopToDay, insertStop, moveStop, newDay, newStop, dinnerSlot, removeStop, updateStop, reorderStops, newPlan, clone, defaultInsertIndex, applyTripDates } from './core/planOps';
 import type { Day, Place, Plan, Stop, TravelMode } from './core/types';
 import { suggestOrder } from './core/compare';
 import { decodeFragment, parseJsonPlan, buildShareUrl, exportablePlan } from './storage/share';
 import { saveSettings, loadPlans } from './storage/storage';
-import { TEMPLATES, templateDayStops } from './data/templates';
+import { TEMPLATES, templateDayStops, applyDatedTemplate } from './data/templates';
 import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
 import { stopLocationId } from './core/schedule';
 import { searchPlaces, placeFromResult, findExisting } from './services/placeSearch';
@@ -519,6 +519,15 @@ document.addEventListener('click', (ev) => {
       break;
     case 'tpl-apply-all': {
       const tpl = TEMPLATES.find((t) => t.id === d.tpl)!;
+      if (tpl.dated) {
+        confirmThen(`แทนที่รายการทุกวันด้วย “${tpl.name}”? (ตั้งวันที่ จุดเริ่ม/จบ และนัดหมายตามแม่แบบ · กดเลิกทำได้ทันทีหลังใช้)`, 'ใช้แม่แบบ', () => {
+          const before = clone(app.plan);
+          app.commit((p) => applyDatedTemplate(p, tpl));
+          app.activeDayId = app.plan.days[0].id;
+          app.showToast('ใช้แม่แบบแล้ว', () => app.commit((p) => Object.assign(p, { days: before.days }), 'เลิกทำแล้ว'));
+        });
+        return;
+      }
       confirmThen(`แทนที่รายการในวัน 1–${tpl.days.length} ด้วยแม่แบบ “${tpl.name}”? (วันที่ เวลา และจุดเริ่ม/จบที่ตั้งไว้จะคงเดิม)`, 'ใช้แม่แบบ', () =>
         app.commit((p) => {
           tpl.days.forEach((td, i) => {
@@ -700,6 +709,18 @@ document.addEventListener('change', (ev) => {
     case 'day-pref':
       app.updateDay(dayId, (x) => ({ ...x, prefs: { ...x.prefs, [d.field!]: el.checked } }));
       return;
+    case 'stop-move-day': {
+      const to = el.value;
+      if (!to) return;
+      const before = clone(app.plan);
+      const name = (() => {
+        const st = app.findDay(dayId)?.stops.find((x) => x.uid === d.stop);
+        return st ? (app.getPlace(st.placeId)?.nameTh ?? st.title ?? 'รายการ') : 'รายการ';
+      })();
+      app.commit((p) => Object.assign(p, moveStopToDay(p, dayId, d.stop!, to)));
+      app.showToast(`ย้าย ${name} ไปวัน ${app.dayIndex(to) + 1} แล้ว`, () => app.commit((p) => Object.assign(p, { days: before.days }), 'เลิกทำแล้ว'));
+      return;
+    }
     case 'stop-field': {
       const f = d.field!;
       let v: unknown = el.value;

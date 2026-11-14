@@ -29,6 +29,8 @@ async function gotoPlaces(page: Page) {
 }
 async function setDay(page: Page, date: string, time: string, endTime = '22:00') {
   await gotoPlan(page);
+  // วันที่ตั้งค่าครบแล้ว (เช่นวันแรกที่ตั้งเวลาออกจากสนามบินไว้) จะพับกล่องตั้งค่า → เปิดก่อน
+  if (!(await page.locator('[data-field="date"]').isVisible())) await page.locator('.day-summary[data-act="toggle-settings"]').click();
   await page.locator('[data-field="date"]').fill(date);
   await page.locator('[data-field="date"]').dispatchEvent('change');
   await page.locator('[data-field="startTime"]').fill(time);
@@ -79,7 +81,8 @@ test('อากาศจับคู่วันที่เกาหลี เ�
   await gotoPlan(page);
   // แผนใหม่มีวันที่ทริป (30 พ.ย.) ซึ่งเกินช่วงพยากรณ์ของข้อมูลจำลอง → ไม่แสดงตัวเลข
   await expect(page.locator('.wx')).toContainText('ยังไม่มีพยากรณ์สำหรับวันนี้');
-  // ลบวันที่ → ขอให้เลือกวันที่
+  // ลบวันที่ → ขอให้เลือกวันที่ (วันแรกตั้งค่าครบแล้วจึงพับไว้ → เปิดกล่องตั้งค่าก่อน)
+  if (!(await page.locator('[data-field="date"]').isVisible())) await page.locator('.day-summary[data-act="toggle-settings"]').click();
   await page.locator('[data-field="date"]').fill('');
   await page.locator('[data-field="date"]').dispatchEvent('change');
   await expect(page.locator('.wx')).toContainText('เลือกวันที่เพื่อดูพยากรณ์อากาศ');
@@ -170,6 +173,7 @@ test('แม่แบบ: ดูไม่ล้างแผน และต้�
   await page.locator('[data-act="modal-close"]').first().click();
   await expect(page.locator('.timeline')).toContainText('เวลาสำรอง');
   await page.locator('[data-act="open-templates"]').click();
+  await page.locator('[data-act="tpl-tab"][data-v="A"]').click();
   await page.locator('[data-act="tpl-apply-all"]').click();
   await expect(page.locator('.modal')).toContainText('แทนที่รายการในวัน');
   await page.locator('[data-act="confirm-ok"]').click();
@@ -181,10 +185,10 @@ test('แม่แบบ: ดูไม่ล้างแผน และต้�
 test('ลบและย้ายจุดได้โดยไม่ต้องลากวาง', async ({ page }) => {
   await page.goto('/');
   await page.locator('[data-act="open-templates"]').click();
-  await page.locator('[data-act="tpl-apply-all"]').click();
+  await page.locator('[data-act="tpl-apply-all"]').click(); // แม่แบบแรก = แผนแนะนำแบบลงวันที่
   await page.locator('[data-act="confirm-ok"]').click();
   await gotoPlan(page);
-  await expect(page.locator('.timeline')).toContainText('ตลาดนัมแดมุน');
+  await expect(page.locator('.timeline')).toContainText('มยองดงเกียวจา');
   const first = page.locator('.stop .stop-title .t').first();
   const firstText = await first.textContent();
   await page.locator('[data-act="toggle-expand"]').first().click();
@@ -194,4 +198,21 @@ test('ลบและย้ายจุดได้โดยไม่ต้อ�
   // รายการที่ย้ายยังเปิดค้างอยู่ → กดลบได้เลย
   await page.locator('[data-act="stop-remove"]').first().click();
   await expect(page.locator('.stop')).toHaveCount(count - 1);
+});
+
+test('ย้ายจุดแวะไปวันอื่น และเลิกทำได้', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-act="open-templates"]').click();
+  await page.locator('[data-act="tpl-apply-all"]').click();
+  await page.locator('[data-act="confirm-ok"]').click();
+  await gotoPlan(page);
+  await expect(page.locator('.timeline')).toContainText('มยองดงเกียวจา');
+  const card = page.locator('.stop', { hasText: 'มยองดงเกียวจา' });
+  await card.locator('[data-act="toggle-expand"]').click();
+  const target = await page.locator('[data-act-change="stop-move-day"] option').nth(2).getAttribute('value'); // วัน 3
+  await card.locator('[data-act-change="stop-move-day"]').selectOption(target!);
+  await expect(page.locator('#toast')).toContainText('ไปวัน 3');
+  await expect(page.locator('.timeline')).not.toContainText('มยองดงเกียวจา');
+  await page.locator('[data-act="toast-undo"]').click();
+  await expect(page.locator('.timeline')).toContainText('มยองดงเกียวจา');
 });

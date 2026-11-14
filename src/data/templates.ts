@@ -1,5 +1,6 @@
 import type { Stop } from '../core/types';
-import { dinnerSlot, newStop } from '../core/planOps';
+import type { Plan } from '../core/types';
+import { applyTripDates, dinnerSlot, newStop } from '../core/planOps';
 
 /**
  * แม่แบบ 3 แนว — จัดกลุ่มสถานที่ตามย่านเพื่อลดการย้อนเส้นทาง
@@ -10,20 +11,143 @@ export interface TemplateStop {
   stayMin: number;
   dinner?: boolean;
   breakTitle?: string;
+  /** นัดหมายที่ล็อกเวลา เช่น ออกบูธ COEX */
+  lockedTime?: string;
+  /** วิธีเดินทาง/ข้อควรรู้ (แสดงในหมายเหตุของจุดแวะ) */
+  note?: string;
 }
 export interface TemplateDay {
   title: string;
   note: string;
   stops: TemplateStop[];
+  /** แม่แบบแบบลงวันที่: ใช้กับวันในแผนที่วันที่ตรงกัน */
+  date?: string;
+  startPlaceId?: string;
+  startTime?: string;
+  endPlaceId?: string;
+  endTime?: string;
+  /** ไม่เพิ่มช่องมื้อเย็นว่าง (เช่นวันบินกลับ) */
+  noDinner?: boolean;
 }
 export interface Template {
   id: string;
   name: string;
   desc: string;
   days: TemplateDay[];
+  /** true = ทุกวันมีวันที่ ใช้ทั้งแม่แบบแล้วตั้งจุดเริ่ม/จบ/เวลาให้ด้วย */
+  dated?: boolean;
 }
 
 export const TEMPLATES: Template[] = [
+  {
+    id: 'T',
+    name: 'แผนแนะนำ 30 พ.ย.–6 ธ.ค.',
+    dated: true,
+    desc: 'จัดตามเที่ยวบิน TG656/TG653 และนัด COEX (1 ธ.ค. เตรียมบูธบ่าย · 3 ธ.ค. ออกบูธถึง 17:00 · 4 ธ.ค. งานประกาศรางวัลถึง 18:00) · พักเมียงดง 30 พ.ย.–4 ธ.ค. · คืน 5 ธ.ค. นอนซูวอน · จัดกลุ่มตามย่านให้เดินทางน้อย — ใช้แล้วแก้/ย้ายวัน/ลบได้ทุกจุด',
+    days: [
+      {
+        date: '2026-11-30',
+        title: 'ถึงโซล · เมียงดง · ลักซาน',
+        note: 'ลงเครื่อง 06:55 อาคาร 1 → AREX เข้าเมือง (Express ถึงสถานีโซล ~45 นาที / รถธรรมดา ~1 ชม.) · ฝากกระเป๋าที่โรงแรมแล้วเที่ยวเมียงดงแบบเดินได้ · บ่ายพักงีบ',
+        startPlaceId: 'icn',
+        startTime: '08:00',
+        endPlaceId: 'hotel',
+        stops: [
+          { placeId: 'hotel', stayMin: 30, note: 'AREX ไปสถานีโซล แล้วแท็กซี่/เดินไปโรงแรม · ฝากกระเป๋า (เช็กอินบ่าย)' },
+          { placeId: 'myeongdong-kyoja', stayMin: 45, note: 'มื้อกลางวัน คัลกุกซุ · เดินจากโรงแรม · ตรวจใน Naver ว่าสาขาหลักเปิดอาคารไหน' },
+          { placeId: 'myeongdong-cathedral', stayMin: 40, note: 'เดินจากร้าน ~5 นาที' },
+          { placeId: 'shinsegae-main-store', stayMin: 60, note: 'สถานีฮเวฮยอน ทางออก 7 (เดินจากเมียงดงได้) · ห้างปิดเดือนละครั้งมักเป็นวันจันทร์ — เช็กก่อน' },
+          { placeId: null, stayMin: 90, breakTitle: 'เช็กอิน · พักที่โรงแรม' },
+          { placeId: 'naksan-park', stayMin: 60, note: 'สาย 4 เมียงดง → ฮเยฮวา ทางออก 2 แล้วเดินขึ้นเนิน ~15 นาที · ไปช่วงพระอาทิตย์ตก (~17:15) กำแพงเมืองเปิดไฟสวย · ลมแรง ใส่เสื้อหนา' },
+          { placeId: 'hanam-pig-myeongdong', stayMin: 75, dinner: true, note: 'กลับสาย 4 ลงเมียงดง · หมูย่าง' },
+        ],
+      },
+      {
+        date: '2026-12-01',
+        title: 'ตลาดกวางจัง · อิกซอนดง · COEX (เตรียมบูธ)',
+        note: 'เช้ากินในตลาด แล้วเข้า COEX เตรียมบูธช่วงบ่าย',
+        startPlaceId: 'hotel',
+        startTime: '08:30',
+        endPlaceId: 'hotel',
+        stops: [
+          { placeId: 'gwangjang', stayMin: 75, note: 'สาย 1 ซิตี้ฮอลล์ → จงโน 5-กา ทางออก 8 · บินแดต็อก ยุกฮเว กิมบับ' },
+          { placeId: 'soha-salt-pond-ikseon', stayMin: 30, note: 'ขนมปังเกลือ · สถานีจงโน 3-กา ทางออก 4 (นั่ง 1 สถานี หรือเดิน ~15 นาที) · รสยอดนิยมหมดเร็ว ไปช่วงเช้า' },
+          { placeId: 'coex', stayMin: 240, lockedTime: '13:00', note: 'เตรียมบูธ · จงโน 3-กา สาย 3 → อึลจีโร 3-กา ต่อสาย 2 → ซัมซอง ทางออก 5/6 (~45 นาที)' },
+          { placeId: 'library', stayMin: 30, note: 'ห้องสมุดสตาร์ฟิลด์ อยู่ในห้างติด COEX' },
+          { placeId: 'misari-chogyeguksu-coex', stayMin: 45, dinner: true, note: 'กินในห้าง COEX แล้วกลับสาย 2 ซัมซอง → อึลจีโร 1-กา' },
+        ],
+      },
+      {
+        date: '2026-12-02',
+        title: 'มังวอน · ยอนนัม · ฮงแด',
+        note: 'วันว่างเต็มวันฝั่งตะวันตก · ตลาด ริมแม่น้ำ ช็อป แล้วปิ้งย่างฮงแด',
+        startPlaceId: 'hotel',
+        startTime: '09:30',
+        endPlaceId: 'hotel',
+        stops: [
+          { placeId: 'mangwon', stayMin: 60, note: 'สาย 2 → ฮับจอง ต่อสาย 6 → มังวอน ทางออก 2 · ของกินในตลาด' },
+          { placeId: 'mangwon-hangang-park', stayMin: 40, note: 'เดิน ~20 นาที (มังวอน ทางออก 1) · ลมริมแม่น้ำหนาวมาก' },
+          { placeId: 'mibbedong-yeonnam', stayMin: 60, note: 'ดงบุริ · แท็กซี่ ~10 นาที หรือสถานีฮงอิกแด ทางออก 3 · คิวยาว' },
+          { placeId: 'musinsa-standard-hongdae', stayMin: 45, note: 'ฮงอิกแด ทางออก 9' },
+          { placeId: 'hongdae', stayMin: 90, note: 'เดินเล่นย่านฮงแด · Olive Young ฮงแดอยู่ในย่าน' },
+          { placeId: 'yeonnam-mulgalbi-hongdae', stayMin: 75, dinner: true, note: 'มุลกาลบี (สั่ง 2 ที่ขึ้นไป) · ทางเลือก: จังอินดักกาลบี หรือ โชซอนฮวาโรกุย (ปิดวันอาทิตย์) — แตะ "เปลี่ยนร้าน" · กลับสาย 2 ตรงถึงอึลจีโร 1-กา' },
+        ],
+      },
+      {
+        date: '2026-12-03',
+        title: 'ออกบูธ COEX · ห้างฮุนได อัปกูจอง',
+        note: 'ออกบูธถึง 17:00 แล้วช็อปห้างต่อ (ปิด 20:00) กลับกินปูดองที่เมียงดง',
+        startPlaceId: 'hotel',
+        startTime: '08:00',
+        endPlaceId: 'hotel',
+        stops: [
+          { placeId: 'coex', stayMin: 480, lockedTime: '09:00', note: 'ออกบูธ 09:00–17:00 (แก้เวลาเริ่มได้) · สาย 2 อึลจีโร 1-กา → ซัมซอง' },
+          { placeId: 'hyundai-department-store-apgujeong', stayMin: 90, note: 'แท็กซี่ ~15–20 นาที หรือรถไฟฟ้าถึงอัปกูจอง (สาย 3) ทางออก 6 เชื่อมห้าง · ห้างปิด 20:00 วันพฤหัสฯ · วันหยุดห้างเดือน ธ.ค. ยังไม่ประกาศ' },
+          { placeId: 'odarijip-myeongdong', stayMin: 60, dinner: true, note: 'ปูดองซีอิ๊ว · สาย 3 อัปกูจอง → ชุงมูโร ต่อสาย 4 → เมียงดง ทางออก 6 · ร้านเปิดถึง 23:00' },
+        ],
+      },
+      {
+        date: '2026-12-04',
+        title: 'งานประกาศรางวัล COEX · ยองดึงโพ · ยออีโด',
+        note: 'งานถึง 18:00 แล้วไปกินกระดูกหมูย่างฟางข้าว และเดินชมไฟริมแม่น้ำฮัน',
+        startPlaceId: 'hotel',
+        startTime: '08:00',
+        endPlaceId: 'hotel',
+        stops: [
+          { placeId: 'coex', stayMin: 540, lockedTime: '09:00', note: 'งานประกาศรางวัล 09:00–18:00 (แก้เวลาเริ่มได้)' },
+          { placeId: 'jeonwon-jipbul-ppyeogui', stayMin: 75, dinner: true, note: 'สาย 2 ซัมซอง → ทังซาน (~40 นาที) · ยังไม่ยืนยันเวลาเปิด — เช็ก Naver Map ก่อน · ร้านคิวยาว' },
+          { placeId: 'yeouido-hangang-park', stayMin: 45, note: 'แท็กซี่ ~10 นาที หรือสถานียออีนารู (สาย 5) ทางออก 2/3 · กลับสาย 5 → ชุงมูโร/แท็กซี่' },
+        ],
+      },
+      {
+        date: '2026-12-05',
+        title: 'ซองซู · ฮันนัม · แฮบังชน → ซูวอน',
+        note: 'เช็กเอาต์แล้วฝากกระเป๋าที่โรงแรม เที่ยวฝั่งตะวันออก เย็นกลับมารับกระเป๋าแล้วไปซูวอน',
+        startPlaceId: 'hotel',
+        startTime: '09:30',
+        endPlaceId: 'novotel-suwon',
+        stops: [
+          { placeId: 'im-donut-seongsu', stayMin: 30, note: 'สาย 2 อึลจีโร 1-กา → ซองซู ทางออก 4 · ซื้อกลับบ้าน (ไม่มีที่นั่ง) ขายหมดก่อนปิด' },
+          { placeId: null, stayMin: 45, breakTitle: 'เดินเล่นถนนยอนมูจัง / คาเฟ่ซองซู' },
+          { placeId: 'point-of-view-seongsu', stayMin: 45, note: 'เปิด 12:00 · เดินจาก I\'m Donut ได้' },
+          { placeId: 'hannam-dong', stayMin: 90, note: 'แท็กซี่ ~15 นาที · ร้านแฟชั่นตามถนนอิแทวอนโร · กินกลางวันในย่าน' },
+          { placeId: 'haebangchon', stayMin: 75, note: 'แท็กซี่ ~10 นาที (ทางขึ้นชัน) · วิวเมือง/คาเฟ่' },
+          { placeId: 'hotel', stayMin: 20, note: 'รับกระเป๋า → แท็กซี่ไปสถานีโซล → รถไฟไปซูวอน (ITX/มูกุงฮวา ~30–40 นาที หรือรถไฟฟ้าสาย 1 ~1 ชม.) · Novotel ติดสถานีซูวอน ทางออก 4' },
+        ],
+      },
+      {
+        date: '2026-12-06',
+        title: 'ซูวอน → สนามบิน (TG653 17:00)',
+        note: 'ถึงสนามบิน T1 ภายใน 14:00 · จากสถานีซูวอนมีรถบัสลีมูซีนไปสนามบิน (ตรวจตารางรถก่อน) หรือรถไฟไปสถานีโซลต่อ AREX',
+        startPlaceId: 'novotel-suwon',
+        startTime: '10:00',
+        endPlaceId: 'icn',
+        endTime: '14:00',
+        noDinner: true,
+        stops: [{ placeId: null, stayMin: 60, breakTitle: 'บรันช์ / ช็อปใกล้สถานีซูวอน (AK Plaza)' }],
+      },
+    ],
+  },
   {
     id: 'A',
     name: 'ช็อปให้คุ้ม',
@@ -164,9 +288,24 @@ export const TEMPLATES: Template[] = [
 /** แปลงกลุ่มในแม่แบบเป็นรายการจุดแวะ (เพิ่มช่องมื้อเย็นว่างถ้าไม่มี) */
 export function templateDayStops(td: TemplateDay, _stayFor: (id: string) => number): Stop[] {
   const stops: Stop[] = td.stops.map((s) => {
-    if (!s.placeId) return newStop('break', null, s.stayMin, { title: s.breakTitle ?? 'พัก' });
-    return newStop(s.dinner ? 'dinner' : 'place', s.placeId, s.stayMin, s.dinner ? { title: 'มื้อเย็น' } : {});
+    const extra = { lockedTime: s.lockedTime ?? null, note: s.note ?? '' };
+    if (!s.placeId) return newStop('break', null, s.stayMin, { title: s.breakTitle ?? 'พัก', ...extra });
+    return newStop(s.dinner ? 'dinner' : 'place', s.placeId, s.stayMin, s.dinner ? { title: 'มื้อเย็น', ...extra } : extra);
   });
-  if (!stops.some((s) => s.kind === 'dinner')) stops.push(dinnerSlot());
+  if (!td.noDinner && !stops.some((s) => s.kind === 'dinner')) stops.push(dinnerSlot());
   return stops;
+}
+
+/** ใช้แม่แบบแบบลงวันที่กับทั้งแผน: ตั้งวันเที่ยวให้ครบ แล้วแทนรายการ/จุดเริ่ม/จบ/เวลาของวันที่ตรงกัน */
+export function applyDatedTemplate(plan: Plan, tpl: Template): void {
+  applyTripDates(plan);
+  for (const td of tpl.days) {
+    const day = plan.days.find((d) => d.date === td.date);
+    if (!day) continue;
+    day.stops = templateDayStops(td, () => 60);
+    if (td.startPlaceId) day.startPlaceId = td.startPlaceId;
+    if (td.endPlaceId) day.endPlaceId = td.endPlaceId;
+    if (td.startTime) day.startTime = td.startTime;
+    if (td.endTime !== undefined) day.endTime = td.endTime || null;
+  }
 }

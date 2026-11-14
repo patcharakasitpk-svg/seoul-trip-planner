@@ -28,7 +28,7 @@ export function placeOptions(selected: string | null, allowNone = true): string 
     ${group('สถานที่อื่น', ps.filter((p) => !(p.kind === 'hotel' || p.kind === 'venue')))}`;
 }
 
-const shortName = (p: Place | undefined) => (p ? (p.id === 'hotel' ? 'โรงแรม' : p.id === 'coex' ? 'COEX' : p.id === 'novotel-suwon' ? 'Novotel ซูวอน' : p.nameTh) : '?');
+const shortName = (p: Place | undefined) => (p ? (p.id === 'hotel' ? 'โรงแรม' : p.id === 'coex' ? 'COEX' : p.id === 'novotel-suwon' ? 'Novotel ซูวอน' : p.id === 'icn' ? 'สนามบินอินชอน T1' : p.nameTh) : '?');
 
 function timeCell(t: number | null, lower: boolean) {
   return t == null ? '--:--' : `${lower ? '<span class="lb" title="อย่างเร็ว — มีช่วงที่ยังไม่มีข้อมูล">≥</span>' : ''}${fmtHM(t)}`;
@@ -147,6 +147,7 @@ function stopRow(day: Day, t: StopTiming, i: number, total: number, dayIdx: numb
         ${isFood && p ? `<button class="btn sm" data-act="nearby" data-want="shop" data-day="${day.id}" data-stop="${s.uid}">ช็อปใกล้ร้านนี้</button>` : ''}
         ${isShop ? `<button class="btn sm" data-act="nearby" data-want="eat" data-day="${day.id}" data-stop="${s.uid}">กินใกล้จุดนี้</button>` : ''}
         ${p ? `<button class="btn sm" data-act="focus-place" data-place="${esc(p.id)}">แผนที่</button><a class="btn sm" target="_blank" rel="noopener" href="${esc(gmapsPlaceUrl(p))}">Google Maps ↗</a>` : ''}
+        <select class="inp sm" data-act-change="stop-move-day" data-day="${day.id}" data-stop="${s.uid}" aria-label="ย้ายไปวันอื่น"><option value="">ย้ายไปวัน…</option>${app.plan.days.map((dd, k) => (dd.id === day.id ? '' : `<option value="${dd.id}">วัน ${k + 1}${dd.date ? ` · ${esc(fmtDateTh(dd.date))}` : ''}</option>`)).join('')}</select>
         <button class="btn sm danger" data-act="stop-remove" data-day="${day.id}" data-stop="${s.uid}">ลบ</button>
       </div>
     </div>`
@@ -173,7 +174,7 @@ export function renderDayPanel(day: Day): string {
   const trip = tripDates();
   const noDates = tripSetupNeeded(app.plan);
   return `
-  ${noDates ? `<div class="notice trip">ทริป ${esc(fmtDateTh(trip[0]))} – ${esc(fmtDateTh(trip[trip.length - 1]))} (${trip.length} วัน) · คืนเสาร์ 5 ธ.ค. นอน Novotel ซูวอน <button class="btn sm primary" data-act="apply-trip-dates">ตั้งวันเที่ยวให้ครบ</button></div>` : ''}
+  ${noDates ? `<div class="notice trip">ทริป ${esc(fmtDateTh(trip[0]))} – ${esc(fmtDateTh(trip[trip.length - 1]))} (${trip.length} วัน) · ถึงอินชอน T1 30 พ.ย. 06:55 · คืน 5 ธ.ค. นอน Novotel ซูวอน · บินกลับ 6 ธ.ค. 17:00 <button class="btn sm primary" data-act="apply-trip-dates">ตั้งวันเที่ยวให้ครบ</button></div>` : ''}
   <div class="day-head">
     <h2 style="--c:${dayColor(idx)}">วัน ${idx + 1}</h2>
   </div>

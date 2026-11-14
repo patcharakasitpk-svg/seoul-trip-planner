@@ -5,4 +5,13 @@
 export const TRIP_DATES = { start: '2026-11-30', end: '2026-12-06' };
 
 /** คืนที่ไม่ได้นอนโรงแรมหลัก: วันนั้นจบที่ hotelId และวันถัดไปเริ่มจาก hotelId */
+/**
+ * เที่ยวบิน TG656 ถึงอินชอน T1 จ. 30 พ.ย. 06:55 · TG653 ออกจาก T1 อา. 6 ธ.ค. 17:00
+ * วันแรกออกจากสนามบินหลังผ่าน ตม./รับกระเป๋า (~08:00) · วันสุดท้ายถึงสนามบินก่อนเครื่องออก 3 ชม.
+ */
+export const TRIP_FLIGHTS = {
+  arrive: { date: '2026-11-30', placeId: 'icn', time: '08:00', flight: 'TG656 06:55' },
+  depart: { date: '2026-12-06', placeId: 'icn', arriveBy: '14:00', flight: 'TG653 17:00' },
+};
+
 export const TRIP_STAYS: { date: string; hotelId: string }[] = [{ date: '2026-12-05', hotelId: 'novotel-suwon' }];

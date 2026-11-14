@@ -266,17 +266,20 @@ function routeBody(m: Extract<Modal, { type: 'route' }>): string {
 function templatesBody(m: Extract<Modal, { type: 'templates' }>): string {
   const tpl = TEMPLATES.find((t) => t.id === m.tplId) ?? TEMPLATES[0];
   return `
-    <p class="muted small">การดูแม่แบบไม่เปลี่ยนแผนที่กำลังแก้ไข — ก่อนแทนที่จะถามยืนยันเสมอ · แม่แบบไม่กำหนดวันที่หรือเวลา คุณกำหนดเองในแต่ละวัน</p>
+    <p class="muted small">การดูแม่แบบไม่เปลี่ยนแผนที่กำลังแก้ไข — ก่อนแทนที่จะถามยืนยันเสมอ · ${tpl.dated ? 'แม่แบบนี้ลงวันที่และนัดหมายไว้แล้ว ใช้แล้วยังแก้/ย้าย/ลบได้ทุกจุด' : 'แม่แบบไม่กำหนดวันที่หรือเวลา คุณกำหนดเองในแต่ละวัน'}</p>
     <div class="chips">${TEMPLATES.map((t) => `<button class="chip ${t.id === tpl.id ? 'on' : ''}" data-act="tpl-tab" data-v="${t.id}">${esc(t.id)}. ${esc(t.name)}</button>`).join('')}</div>
     <p>${esc(tpl.desc)}</p>
     <div class="tpl-days">
       ${tpl.days
         .map(
-          (d, i) => `<div class="card tpl-day"><h4>กลุ่ม ${i + 1}: ${esc(d.title)}</h4><p class="muted small">${esc(d.note)}</p>
+          (d, i) => `<div class="card tpl-day"><h4>${d.date ? `${esc(fmtDateTh(d.date))}${d.startTime ? ` · ออก ${esc(d.startTime)}` : ''}` : `กลุ่ม ${i + 1}`}: ${esc(d.title)}</h4><p class="muted small">${esc(d.note)}</p>
         <ol>${d.stops
           .map((s) => {
             const p = app.getPlace(s.placeId);
-            return p ? `<li>${CATEGORY_ICON[p.category] ?? ''} ${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <button class="btn ghost xs" data-act="quick-toggle" data-place="${esc(p.id)}" aria-label="เพิ่มเข้าวันที่เลือก">＋</button></li>` : '';
+            const lock = s.lockedTime ? `🔒 ${esc(s.lockedTime)} ` : '';
+            const tip = s.note ? `<br><span class="muted small">${esc(s.note)}</span>` : '';
+            if (!p) return s.breakTitle ? `<li>☕ ${lock}${esc(s.breakTitle)} <span class="muted small">~${s.stayMin} นาที</span>${tip}</li>` : '';
+            return `<li>${CATEGORY_ICON[p.category] ?? ''} ${lock}${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <button class="btn ghost xs" data-act="quick-toggle" data-place="${esc(p.id)}" aria-label="เพิ่มเข้าวันที่เลือก">＋</button>${tip}</li>`;
           })
           .join('')}</ol>
         <div class="row-btns"><select class="inp xs" data-tpl-target="${i}" aria-label="วันปลายทาง">${app.plan.days.map((dd, k) => `<option value="${dd.id}" ${k === i ? 'selected' : ''}>วัน ${k + 1}</option>`).join('')}</select>
