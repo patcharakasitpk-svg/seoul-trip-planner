@@ -1,69 +1,208 @@
 import { app } from '../app';
-import { esc, gmapsDirUrl, kakaoToUrl, MODE_ICON, MODE_LABEL, photosUrl, naverBtn, naverRouteUrl } from '../util';
-import { fmtDateTh, fmtDur, fmtHM, seoulNow } from '../../core/time';
+import { esc, gmapsDirUrl, MODE_ICON, photosUrl, naverBtn, naverRouteUrl, dayColor } from '../util';
+import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from '../../core/time';
 import { renderWeather } from './weather';
-import { routeSummary, stepsText } from './leg';
+import { livePhase, type DaySchedule, type LegInfo, type StopTiming } from '../../core/schedule';
+import { legTransitHint } from './transit';
+import type { Day, Place } from '../../core/types';
+
+/**
+ * หน้า "วันนี้" สำหรับระหว่างเดินทาง: ตอนนี้อยู่ไหน → ไปไหนต่อ ไปยังไง ใช้เวลาเท่าไร อยู่ได้อีกนานแค่ไหน
+ * เช็กอิน "ถึงแล้ว/ออกแล้ว" → คำนวณเวลาที่เหลือทั้งวันใหม่จากเวลาจริง
+ */
+
+const travelText = (leg: LegInfo) =>
+  leg.travelMin != null ? `${leg.source === 'auto' || leg.source === 'estimate' ? '≈ ' : ''}${fmtDur(leg.travelMin)}` : 'ไม่ทราบเวลาเดินทาง';
+
+const stopName = (t: StopTiming) => {
+  const p = app.getPlace(t.stop.placeId);
+  return p?.nameTh ?? t.stop.title ?? (t.stop.kind === 'dinner' ? 'มื้อเย็น (ยังไม่เลือกร้าน)' : 'รายการ');
+};
+
+const shortName = (p: Place | undefined) => (p ? (p.id === 'hotel' ? 'โรงแรม' : p.nameTh) : '?');
+
+/** ปุ่มนำทาง: Naver (รถเมล์/รถไฟ) เด่นสุด · Google · รูป */
+function navRow(from: Place | undefined, to: Place | undefined, mode: LegInfo['mode']): string {
+  if (!to) return '';
+  return `<div class="nav-row">
+    ${naverBtn(naverRouteUrl(null, to), '🟢 Naver Map', 'btn')}
+    <a class="btn" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(null, to, mode))}">🧭 Google</a>
+    ${to.category !== 'base' ? `<a class="btn" target="_blank" rel="noopener" href="${esc(photosUrl(to))}" aria-label="ดูรูป ${esc(to.nameTh)}">📷</a>` : ''}
+  </div>${from && mode === 'TRANSIT' ? legTransitHint(from, to) : ''}`;
+}
+
+function locOf(day: Day, s: DaySchedule, idx: number): Place | undefined {
+  // ตำแหน่งก่อนจุดที่ idx (จุดที่มีสถานที่ล่าสุด ไม่นับพัก/ร้านที่ยังไม่เลือก)
+  for (let i = idx - 1; i >= 0; i--) {
+    const t = s.stops[i];
+    if (t.stop.skipped) continue;
+    if ((t.stop.kind === 'place' || t.stop.kind === 'dinner') && t.stop.placeId) return app.getPlace(t.stop.placeId);
+  }
+  return app.getPlace(day.startPlaceId);
+}
+
+function heroMoving(day: Day, s: DaySchedule, t: StopTiming, live: boolean, eyebrow = 'กำลังไป'): string {
+  const i = s.stops.indexOf(t);
+  const to = app.getPlace(t.stop.placeId);
+  const from = locOf(day, s, i);
+  const isMove = t.stop.kind === 'place' || t.stop.kind === 'dinner';
+  return `<section class="hero">
+    <p class="eyebrow">${eyebrow}</p>
+    <h2>${esc(stopName(t))}</h2>
+    <p class="hero-big">${t.arrive != null ? `ถึงประมาณ <b>${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive)}</b>` : 'ยังไม่มีเวลา'}</p>
+    <p class="hero-facts">${isMove ? `<span>${MODE_ICON[t.leg.mode]} เดินทาง <b>${travelText(t.leg)}</b></span>` : ''}<span>⏱ อยู่ <b>${fmtDur(t.stop.stayMin)}</b></span>${t.stop.lockedTime ? `<span>🔒 นัด <b>${esc(t.stop.lockedTime)}</b></span>` : ''}</p>
+    ${t.stop.note ? `<p class="hero-note">${esc(t.stop.note)}</p>` : ''}
+    ${isMove ? navRow(from, to, t.leg.mode) : ''}
+    ${live ? `<button class="btn primary huge" data-act="live-arrive" data-stop="${t.uid}">✓ ถึงแล้ว</button>` : ''}
+  </section>`;
+}
+
+function heroAt(day: Day, s: DaySchedule, t: StopTiming, now: number | null): string {
+  const real = day.actual?.[t.uid];
+  const arrived = parseHM(real?.a);
+  const plannedOut = (t.start ?? arrived ?? 0) + t.stop.stayMin;
+  const left = now != null ? plannedOut - now : null;
+  const pct = arrived != null && now != null && t.stop.stayMin > 0 ? Math.min(100, Math.max(0, ((now - (t.start ?? arrived)) / t.stop.stayMin) * 100)) : 0;
+  const i = s.stops.indexOf(t);
+  const next = s.stops.slice(i + 1).find((x) => !x.stop.skipped);
+  const nextTo = next ? app.getPlace(next.stop.placeId) : app.getPlace(day.endPlaceId);
+  const here = app.getPlace(t.stop.placeId) ?? locOf(day, s, i);
+  const nextLeg = next ? next.leg : s.end?.leg;
+  return `<section class="hero">
+    <p class="eyebrow">ตอนนี้อยู่ที่${arrived != null ? ` · ถึง ${fmtHM(arrived)}` : ''}</p>
+    <h2>${esc(stopName(t))}</h2>
+    <p class="hero-big ${left != null && left < 0 ? 'bad' : ''}">${left == null ? `อยู่ ${fmtDur(t.stop.stayMin)}` : left >= 0 ? `อยู่ได้อีก <b>${fmtDur(left)}</b>` : `เกินเวลา <b>${fmtDur(-left)}</b>`}</p>
+    <div class="bar" role="progressbar" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+    <p class="hero-facts"><span>ควรออก <b>${fmtHM(plannedOut)}</b></span>${t.stop.lockedTime ? `<span>🔒 ${esc(t.stop.lockedTime)}</span>` : ''}</p>
+    <button class="btn primary huge" data-act="live-depart" data-stop="${t.uid}">✓ ออกจากที่นี่</button>
+    ${
+      nextTo && nextLeg
+        ? `<div class="hero-next"><p class="eyebrow">ถัดไป</p>
+      <p class="next-line"><b>${esc(next ? stopName(next) : `กลับ${shortName(nextTo)}`)}</b> · ${MODE_ICON[nextLeg.mode]} ${travelText(nextLeg)}${next?.arrive != null ? ` · ถึง ~${fmtHM(next.arrive)}` : ''}</p>
+      ${navRow(here, nextTo, nextLeg.mode)}</div>`
+        : ''
+    }
+  </section>`;
+}
+
+function heroReturn(day: Day, s: DaySchedule, live: boolean): string {
+  const end = app.getPlace(day.endPlaceId);
+  const e = s.end;
+  if (!end || !e) return '';
+  const last = [...s.stops].reverse().find((x) => !x.stop.skipped && (x.stop.kind === 'place' || x.stop.kind === 'dinner') && x.stop.placeId);
+  const from = last ? app.getPlace(last.stop.placeId) : app.getPlace(day.startPlaceId);
+  return `<section class="hero">
+    <p class="eyebrow">ขากลับ</p>
+    <h2>กลับ${esc(shortName(end))}</h2>
+    <p class="hero-big">${e.arrive != null ? `ถึงประมาณ <b>${e.lowerBound ? '≥' : ''}${fmtHM(e.arrive)}</b>` : 'ยังไม่มีเวลา'}</p>
+    <p class="hero-facts"><span>${MODE_ICON[e.leg.mode]} เดินทาง <b>${travelText(e.leg)}</b></span>${slackText(day, s)}</p>
+    ${navRow(from, end, e.leg.mode)}
+    ${live ? '<button class="btn primary huge" data-act="live-end">✓ ถึงที่พักแล้ว</button>' : ''}
+  </section>`;
+}
+
+function slackText(day: Day, s: DaySchedule): string {
+  const e = s.end;
+  if (!e || !day.endTime) return '';
+  if (e.slackMin == null) return `<span>ต้องถึง ${esc(day.endTime)}</span>`;
+  return e.slackMin >= 0 ? `<span class="ok-text">ทันเวลา ${esc(day.endTime)} ✓</span>` : `<span class="bad-text">เกิน ${esc(day.endTime)} ${fmtDur(-e.slackMin)}</span>`;
+}
+
+/** รายการทั้งวันแบบย่อ: เวลา · สถานะ · ชื่อ · อยู่นานเท่าไร · เวลาเดินทางก่อนถึง */
+function timeline(day: Day, s: DaySchedule, current: string | null): string {
+  const act = day.actual ?? {};
+  const rows: string[] = [];
+  const start = app.getPlace(day.startPlaceId);
+  const startReal = parseHM(act.__start?.d);
+  rows.push(`<li class="tl ${startReal != null ? 'done' : ''}"><span class="tl-t">${startReal != null ? fmtHM(startReal) : esc(day.startTime ?? '--:--')}</span><span class="tl-dot">${startReal != null ? '✓' : ''}</span><span class="tl-n">ออกจาก ${esc(shortName(start))}</span></li>`);
+  for (const t of s.stops) {
+    if (t.stop.skipped) continue;
+    const real = act[t.uid];
+    const done = !!real?.d;
+    const now = current === t.uid;
+    const isMove = t.stop.kind === 'place' || t.stop.kind === 'dinner';
+    if (isMove) rows.push(`<li class="tl-leg">${MODE_ICON[t.leg.mode]} ${travelText(t.leg)}</li>`);
+    const warn = t.lateMin ? `<span class="bad-text">สาย ${fmtDur(t.lateMin)}</span>` : t.warnings.find((w) => w.startsWith('ปิด')) ? `<span class="bad-text">${esc(t.warnings.find((w) => w.startsWith('ปิด'))!)}</span>` : '';
+    rows.push(`<li class="tl ${done ? 'done' : ''} ${now ? 'now' : ''}">
+      <span class="tl-t">${t.arrive != null ? `${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive)}` : '--:--'}</span>
+      <span class="tl-dot">${done ? '✓' : now ? '●' : ''}</span>
+      <span class="tl-n">${t.stop.lockedTime ? '🔒 ' : ''}${esc(stopName(t))}<small>อยู่ ${fmtDur(t.stop.stayMin)}${t.stop.lockedTime ? ` · นัด ${esc(t.stop.lockedTime)}` : ''} ${warn}</small></span>
+    </li>`);
+  }
+  if (s.end && day.endPlaceId) {
+    const endReal = parseHM(act.__end?.a);
+    rows.push(`<li class="tl-leg">${MODE_ICON[s.end.leg.mode]} ${travelText(s.end.leg)}</li>`);
+    rows.push(`<li class="tl ${endReal != null ? 'done' : ''} ${current === '__end' ? 'now' : ''}"><span class="tl-t">${s.end.arrive != null ? `${s.end.lowerBound ? '≥' : ''}${fmtHM(s.end.arrive)}` : '--:--'}</span><span class="tl-dot">${endReal != null ? '✓' : ''}</span><span class="tl-n">กลับ${esc(shortName(app.getPlace(day.endPlaceId)))}<small>${slackText(day, s)}</small></span></li>`);
+  }
+  return `<ol class="tl-list">${rows.join('')}</ol>`;
+}
+
+export function todayDay(): { day: Day; isToday: boolean } {
+  const now = seoulNow();
+  const real = app.plan.days.find((d) => d.date === now.date);
+  const chosen = app.todayDayId ? app.findDay(app.todayDayId) : undefined;
+  const day = chosen ?? real ?? app.day;
+  return { day, isToday: day.date === now.date };
+}
 
 export function renderToday(): string {
   const now = seoulNow();
-  const todayDay = app.plan.days.find((d) => d.date === now.date);
-  const day = todayDay ?? app.day;
+  const { day, isToday } = todayDay();
   const idx = app.dayIndex(day.id);
-  const s = app.schedule(day);
-  const isToday = !!todayDay;
-  // จุดถัดไป: รายการแรกที่ยังไม่ออก (ถ้าเป็นวันนี้) หรือรายการแรก
+  const s = app.liveSchedule(day, isToday ? now.mins : null);
+  const phase = livePhase(day);
   const active = s.stops.filter((t) => !t.stop.skipped);
-  let nextIdx = 0;
-  if (isToday) {
-    nextIdx = active.findIndex((t) => t.depart == null || t.depart > now.mins);
-    if (nextIdx < 0) nextIdx = active.length; // เหลือช่วงกลับ
-  }
-  const next = active[nextIdx];
-  const prevLocId = nextIdx > 0 ? active[nextIdx - 1].stop.placeId ?? day.startPlaceId : day.startPlaceId;
-  const prevPlace = app.getPlace(prevLocId);
-  let nextHtml = '';
-  if (next) {
-    const p = app.getPlace(next.stop.placeId);
-    const r = next.leg.route && next.leg.route.status === 'ok' ? next.leg.route : null;
-    nextHtml = `<section class="card next">
-      <p class="eyebrow">จุดถัดไป</p>
-      <h2>${esc(p?.nameTh ?? next.stop.title ?? (next.stop.kind === 'dinner' ? 'มื้อเย็น — ยังไม่ได้เลือกร้าน' : 'รายการ'))}</h2>
-      <p class="big-time">${next.arrive != null ? `ถึง ${next.lowerBound ? '≥' : ''}${fmtHM(next.arrive)}` : 'ยังไม่มีเวลา'}${next.stop.lockedTime ? ` · 🔒 นัด ${esc(next.stop.lockedTime)}` : ''}</p>
-      <p>${MODE_ICON[next.leg.mode]} ${MODE_LABEL[next.leg.mode]} · ${next.leg.travelMin != null ? fmtDur(next.leg.travelMin) : 'ไม่ทราบเวลาเดินทาง'}${next.leg.source === 'none' ? ' <span class="pill src none">ยังไม่มีข้อมูล</span>' : ''}</p>
-      ${r ? `<p class="small">${routeSummary(r)}</p>${stepsText(r.steps)}` : ''}
-      ${next.warnings.length ? `<ul class="warns">${next.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}
-      ${p ? `<div class="nav-btns">
-        <a class="btn primary big" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(null, p, next.leg.mode))}">🧭 นำทางจากตำแหน่งปัจจุบัน</a>
-        ${prevPlace ? `<a class="btn" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(prevPlace, p, next.leg.mode))}">เส้นทางจาก ${esc(prevPlace.nameTh)}</a>` : ''}
-        ${naverBtn(naverRouteUrl(null, p), '🟢 Naver Map (รถเมล์/รถไฟ จากตรงนี้)', 'btn')}
-        ${kakaoToUrl(p) ? `<a class="btn" target="_blank" rel="noopener" href="${esc(kakaoToUrl(p)!)}">KakaoMap</a>` : ''}
-        <a class="btn" target="_blank" rel="noopener" href="${esc(photosUrl(p))}">📷 ดูรูปหน้าร้าน</a>
-      </div>` : ''}
+  const byUid = (u: string) => s.stops.find((t) => t.uid === u)!;
+
+  let hero = '';
+  let current: string | null = null;
+  if (!isToday) {
+    // ดูล่วงหน้า: แสดงจุดแรกแบบตัวอย่าง (เช็กอินได้เฉพาะวันเดินทางจริง)
+    hero = active[0] ? heroMoving(day, s, active[0], false, 'จุดแรกของวัน') : '<p class="empty">วันนี้ยังไม่มีจุดแวะ</p>';
+  } else if (phase.kind === 'ready') {
+    const first = active[0];
+    const start = app.getPlace(day.startPlaceId);
+    const plan = parseHM(day.startTime);
+    const lateBy = plan != null ? now.mins - plan : null;
+    hero = `<section class="hero">
+      <p class="eyebrow">เริ่มวัน</p>
+      <h2>ออกจาก${esc(shortName(start))}</h2>
+      <p class="hero-big">ตามแผน <b>${esc(day.startTime ?? '--:--')}</b>${lateBy != null && lateBy > 5 ? ` <span class="bad-text small">ช้ากว่าแผน ${fmtDur(lateBy)}</span>` : ''}</p>
+      ${first ? `<p class="hero-facts"><span>จุดแรก <b>${esc(stopName(first))}</b></span><span>${MODE_ICON[first.leg.mode]} ${travelText(first.leg)}</span></p>` : ''}
+      <button class="btn primary huge" data-act="live-start">▶ ออกเดินทางตอนนี้</button>
     </section>`;
+  } else if (phase.kind === 'moving') {
+    current = phase.uid;
+    hero = heroMoving(day, s, byUid(phase.uid), true);
+  } else if (phase.kind === 'at') {
+    current = phase.uid;
+    hero = heroAt(day, s, byUid(phase.uid), now.mins);
+  } else if (phase.kind === 'returning') {
+    current = '__end';
+    hero = heroReturn(day, s, true);
+  } else {
+    hero = `<section class="hero done"><p class="eyebrow">จบวันนี้ 🎉</p><h2>ถึง${esc(shortName(app.getPlace(day.endPlaceId)))}แล้ว</h2><p class="hero-facts"><span>ถึง ${esc(day.actual?.__end?.a ?? '')}</span></p></section>`;
   }
-  const end = app.getPlace(day.endPlaceId);
-  const lastLoc = active.length ? (active[active.length - 1].stop.placeId ?? prevLocId) : day.startPlaceId;
-  const lastPlace = app.getPlace(lastLoc);
-  const returnHtml = end
-    ? `<section class="card">
-      <p class="eyebrow">ช่วงกลับ</p>
-      <h3>กลับ ${esc(end.nameTh)}</h3>
-      <p>${s.end?.arrive != null ? `ถึง ${s.end.lowerBound ? '≥' : ''}${fmtHM(s.end.arrive)}` : 'ยังไม่มีเวลา'}${s.end?.slackMin != null ? (s.end.slackMin >= 0 ? ` · <span class="ok-text">เหลือ ${fmtDur(s.end.slackMin)}</span>` : ` · <span class="bad-text">เกิน ${fmtDur(-s.end.slackMin)}</span>`) : s.end?.lowerBound ? ' · <span class="warn-text">ยังสรุปไม่ได้ว่าทัน</span>' : ''}</p>
-      <div class="nav-btns"><a class="btn primary" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(null, end, day.endLeg.mode))}">🧭 นำทางกลับจากตำแหน่งปัจจุบัน</a>${naverBtn(naverRouteUrl(null, end), '🟢 Naver Map', 'btn')}
-      ${lastPlace && lastPlace.id !== end.id ? `<a class="btn" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(lastPlace, end, day.endLeg.mode))}">จาก ${esc(lastPlace.nameTh)}</a>` : ''}</div>
-    </section>`
-    : '';
-  const upcoming = active.slice(nextIdx + 1);
+
+  // นัดที่ล็อกไว้ข้างหน้าที่จะไม่ทัน
+  const late = active.find((t) => t.lateMin && !day.actual?.[t.uid]?.a);
+  const alert = late ? `<div class="alert-late">⚠ จะไม่ทัน <b>${esc(stopName(late))}</b> นัด ${esc(late.stop.lockedTime ?? '')} (สาย ${fmtDur(late.lateMin!)}) — ลดเวลาที่จุดก่อนหน้า หรือข้ามบางจุด</div>` : '';
+  const hasActual = !!day.actual && Object.keys(day.actual).length > 0;
+
   return `
     <div class="today-head">
-      <h2>วันนี้ · ${esc(fmtDateTh(now.date))}</h2>
-      <p class="muted small">เวลาในโซลตอนนี้ ${fmtHM(now.mins)} (Asia/Seoul)</p>
-      ${isToday ? `<p>ตามแผน <b>วัน ${idx + 1}</b></p>` : `<p class="notice">วันนี้ไม่มีในแผน — แสดง <b>วัน ${idx + 1}</b> (${esc(fmtDateTh(day.date))}) แทน</p>`}
-      ${!app.online ? '<p class="notice warn">ออฟไลน์ — แสดงแผนที่บันทึกไว้ แผนที่ออนไลน์ เส้นทาง และอากาศยังอัปเดตไม่ได้</p>' : ''}
+      <div>
+        <h2>${esc(fmtDateTh(day.date ?? now.date))}</h2>
+        <p class="muted small">${isToday ? `ตอนนี้ ${fmtHM(now.mins)} (เวลาโซล)` : 'ดูล่วงหน้า — ปุ่มเช็กอินใช้ได้ในวันเดินทางจริง'}</p>
+      </div>
+      <select class="inp sm day-pick" data-act-change="today-day" aria-label="เลือกวัน" style="--c:${dayColor(idx)}">
+        ${app.plan.days.map((d, k) => `<option value="${d.id}" ${d.id === day.id ? 'selected' : ''}>วัน ${k + 1}${d.date ? ` · ${esc(fmtDateTh(d.date).replace(/ \d{4}$/, ''))}` : ''}${d.date === now.date ? ' (วันนี้)' : ''}</option>`).join('')}
+      </select>
     </div>
-    ${nextHtml || (active.length ? '' : '<p class="empty">วันนี้ยังไม่มีจุดแวะ</p>')}
-    ${upcoming.length ? `<section class="card"><p class="eyebrow">ต่อจากนั้น</p><ol class="mini-tl">${upcoming.map((t) => `<li>${t.arrive != null ? (t.lowerBound ? '≥' : '') + fmtHM(t.arrive) : '--:--'} ${esc(app.getPlace(t.stop.placeId)?.nameTh ?? t.stop.title ?? (t.stop.kind === 'dinner' ? 'มื้อเย็น (ยังไม่เลือกร้าน)' : t.stop.kind))}</li>`).join('')}</ol></section>` : ''}
-    ${returnHtml}
-    ${renderWeather(day, s, { full: false })}
-    <button class="btn block-btn" data-act="tab" data-tab="plan">แก้แผนวันนี้</button>`;
+    ${!app.online ? '<p class="notice warn">ออฟไลน์ — แสดงแผนที่บันทึกไว้ ปุ่มเช็กอินยังใช้ได้</p>' : ''}
+    ${alert}
+    ${hero}
+    <section class="card tl-card"><p class="eyebrow">ทั้งวัน${s.stops.some((t) => t.leg.source === 'auto') ? ' · ≈ = เวลาประมาณจากระยะทาง' : ''}</p>${timeline(day, s, current)}</section>
+    ${renderWeather(day, app.schedule(day), { full: false })}
+    <div class="row-btns today-foot"><button class="btn" data-act="tab" data-tab="plan">แก้แผนวันนี้</button>${isToday && hasActual ? `<button class="btn ghost sm" data-act="live-reset" data-day="${day.id}">ล้างเวลาจริงวันนี้</button>` : ''}</div>`;
 }

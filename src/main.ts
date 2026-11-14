@@ -3,7 +3,7 @@ import QRCode from 'qrcode';
 import { app, type Tab } from './ui/app';
 import { renderLibraryControls, renderLibraryList } from './ui/views/library';
 import { renderDayPanel, renderDayTabs } from './ui/views/day';
-import { renderToday } from './ui/views/today';
+import { renderToday, todayDay } from './ui/views/today';
 import { renderModal } from './ui/views/modals';
 import { esc, MODE_LABEL } from './ui/util';
 import { loadGoogle, googleStatus, onGoogleStatus } from './services/google';
@@ -254,6 +254,24 @@ function keepFormState() {
     },
   };
 }
+
+/* ---------------- เช็กอินระหว่างเดินทาง ---------------- */
+/** บันทึกเวลาจริง (เวลาโซลตอนนี้) แล้วคำนวณเวลาที่เหลือทั้งวันใหม่ · มีปุ่มเลิกทำ */
+function checkIn(dayId: string, key: string, field: 'a' | 'd', label: string) {
+  const target = app.findDay(dayId);
+  if (!target) return;
+  const before = clone(target);
+  const hm = fmtHM(seoulNow().mins);
+  const actual = { ...(target.actual ?? {}) };
+  actual[key] = { ...(actual[key] ?? {}), [field]: hm };
+  app.setDay(dayId, { ...target, actual });
+  app.showToast(`${label} ${hm}`, () => app.setDay(dayId, before, 'เลิกทำแล้ว'));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+// นับเวลาถอยหลัง "อยู่ได้อีก…" ให้เดินเอง
+setInterval(() => {
+  if (app.tab === 'today' && !app.modal) app.requestRender();
+}, 30000);
 
 /* ---------------- Naver Map (แอป) ---------------- */
 /** เปิดแอป Naver Map — ถ้า ~2.5 วิแล้วยังอยู่หน้าเดิม (ไม่มีแอป / เบราว์เซอร์ในแอป LINE บล็อก) ให้คำแนะนำ */
@@ -898,6 +916,27 @@ document.addEventListener('click', (ev) => {
     case 'open-share':
       app.modal = { type: 'share' };
       break;
+    case 'live-start':
+    case 'live-arrive':
+    case 'live-depart':
+    case 'live-end': {
+      const { day: td } = todayDay();
+      const key = act === 'live-start' ? '__start' : act === 'live-end' ? '__end' : d.stop!;
+      const field = act === 'live-arrive' || act === 'live-end' ? 'a' : 'd';
+      const label = { 'live-start': 'ออกเดินทาง', 'live-arrive': 'ถึงแล้ว', 'live-depart': 'ออกแล้ว', 'live-end': 'ถึงที่พักแล้ว' }[act];
+      checkIn(td.id, key, field, label);
+      return;
+    }
+    case 'live-reset': {
+      const target = app.findDay(d.day!);
+      if (!target) return;
+      confirmThen('ล้างเวลาจริงที่เช็กอินของวันนี้ทั้งหมด? (แผนยังอยู่ครบ)', 'ล้าง', () => {
+        const before = clone(target);
+        app.setDay(target.id, { ...target, actual: undefined });
+        app.showToast('ล้างเวลาจริงแล้ว', () => app.setDay(target.id, before, 'เลิกทำแล้ว'));
+      });
+      return;
+    }
     case 'naver':
       openNaver(d.href!);
       return;
@@ -1154,6 +1193,12 @@ document.addEventListener('change', (ev) => {
     case 'day-pref':
       app.updateDay(dayId, (x) => ({ ...x, prefs: { ...x.prefs, [d.field!]: el.checked } }));
       return;
+    case 'today-day': {
+      const real = app.plan.days.find((x) => x.date === seoulNow().date);
+      app.todayDayId = real && real.id === el.value ? null : el.value;
+      app.requestRender();
+      return;
+    }
     case 'tpl-target': {
       const m = app.modal;
       if (m?.type !== 'templates') return;

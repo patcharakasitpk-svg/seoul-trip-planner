@@ -7,6 +7,7 @@ import { peekRoute, requestRoute, routeKey, setWanted, type RouteReq } from '../
 import { matchDayWeather, type DayWeather } from '../core/weather';
 import { ensureWeather, getWeather } from '../services/weather';
 import { fmtHM } from '../core/time';
+import { liveEstimateMin, straightLineM } from '../core/geo';
 import type { SearchResult } from '../services/placeSearch';
 
 export type Tab = 'today' | 'map' | 'places' | 'plan' | 'fx';
@@ -67,6 +68,8 @@ class AppState {
   focusPlaceId: string | null = null;
   fitNext = true;
   search: WebSearch | null = null;
+  /** วันที่เลือกดูในหน้า "วันนี้" (null = วันตามปฏิทินจริง) */
+  todayDayId: string | null = null;
   /** ครั้งถัดไปให้แผนที่ซูมพอดีผลค้นหา */
   fitSearch = false;
 
@@ -151,6 +154,22 @@ class AppState {
 
   schedule(day: Day): DaySchedule {
     return computeSchedule(day, this.ctxFor(day));
+  }
+
+  /** ตารางแบบเดินทางจริง: ใช้เวลาที่เช็กอิน + เวลาประมาณจากระยะเมื่อไม่มีข้อมูล · now = null เมื่อดูวันอื่น */
+  liveSchedule(day: Day, now: number | null): DaySchedule {
+    return computeSchedule(day, {
+      ...this.ctxFor(day),
+      live: {
+        now,
+        estimate: (fromId, toId, mode) => {
+          const a = this.getPlace(fromId);
+          const b = this.getPlace(toId);
+          if (a?.lat == null || a.lng == null || b?.lat == null || b.lng == null) return null;
+          return liveEstimateMin(straightLineM({ lat: a.lat, lng: a.lng }, { lat: b.lat, lng: b.lng }), mode);
+        },
+      },
+    });
   }
 
   /** ขอข้อมูลเส้นทางสำหรับช่วงที่ยังไม่มี (เรียกหลัง render, หน่วงเวลาเพื่อลดคำขอเมื่อแก้เร็ว ๆ) */

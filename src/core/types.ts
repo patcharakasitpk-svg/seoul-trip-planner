@@ -95,6 +95,8 @@ export interface Day {
   stops: Stop[];
   endLeg: Leg;
   weatherRef: string; // 'seoul' | placeId
+  /** เวลาจริงระหว่างเดินทาง: key = uid ของจุดแวะ, '__start' (ออกจากจุดเริ่ม), '__end' (ถึงจุดสิ้นสุด) · a = ถึง, d = ออก (HH:MM) */
+  actual?: Record<string, { a?: string; d?: string }>;
 }
 
 export type ColdLevel = 'low' | 'normal' | 'high';

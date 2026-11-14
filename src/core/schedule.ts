@@ -2,7 +2,7 @@ import type { Day, Leg, Place, RouteResult, Stop } from './types';
 import { parseHM } from './time';
 import { closedOn } from './hours';
 
-export type LegSource = 'user' | 'service' | 'estimate' | 'same' | 'none';
+export type LegSource = 'user' | 'service' | 'estimate' | 'auto' | 'same' | 'none';
 
 export interface LegInfo {
   fromId: string | null;
@@ -50,6 +50,35 @@ export type RouteLookup = (fromId: string, toId: string, mode: Leg['mode'], date
 export interface ScheduleCtx {
   getPlace: (id: string) => Place | undefined;
   getRoute: RouteLookup;
+  /**
+   * โหมดเดินทางจริง (หน้า "วันนี้"): ใช้เวลาจริงที่เช็กอิน (day.actual) แทนแผน
+   * now = เวลาตอนนี้ (นาที) ถ้าเป็นวันนี้ · null = ซ้อมดูวันอื่น (ไม่ใช้นาฬิกา)
+   * estimate = เวลาเดินทางโดยประมาณจากระยะ เมื่อไม่มีข้อมูล (แสดงเป็น "≈")
+   */
+  live?: { now: number | null; estimate: (fromId: string, toId: string, mode: Leg['mode']) => number | null };
+}
+
+/** ตอนนี้อยู่ขั้นไหนของวัน (จากเวลาจริงที่เช็กอิน) */
+export type LivePhase = { kind: 'ready' } | { kind: 'moving'; uid: string } | { kind: 'at'; uid: string } | { kind: 'returning' } | { kind: 'done' };
+
+export function livePhase(day: Day): LivePhase {
+  const act = day.actual ?? {};
+  if (act.__end?.a) return { kind: 'done' };
+  if (!act.__start?.d) return { kind: 'ready' };
+  for (const s of day.stops) {
+    if (s.skipped) continue;
+    const a = act[s.uid];
+    if (!a?.a) return { kind: 'moving', uid: s.uid };
+    if (!a.d) return { kind: 'at', uid: s.uid };
+  }
+  return day.endPlaceId ? { kind: 'returning' } : { kind: 'done' };
+}
+
+/** เติมเวลาเดินทางโดยประมาณ (เฉพาะโหมดเดินทางจริง) เมื่อไม่มีข้อมูล */
+function withEstimate(leg: LegInfo, ctx: ScheduleCtx): LegInfo {
+  if (leg.source !== 'none' || !ctx.live || !leg.fromId || !leg.toId || leg.reason?.startsWith('ยังไม่ได้เลือกร้าน')) return leg;
+  const est = ctx.live.estimate(leg.fromId, leg.toId, leg.mode);
+  return est == null ? leg : { ...leg, travelMin: est, source: 'auto', reason: 'ประมาณจากระยะทาง' };
 }
 
 const STATUS_REASON: Record<string, string> = {
@@ -104,7 +133,10 @@ export function computeSchedule(day: Day, ctx: ScheduleCtx): DaySchedule {
   if (!day.startPlaceId) messages.push('ยังไม่เลือกจุดเริ่ม');
   if (!day.endPlaceId) messages.push('ยังไม่เลือกจุดสิ้นสุด');
 
-  let cur: number | null = startMins;
+  const act = ctx.live ? day.actual ?? {} : {};
+  const started = !!act.__start?.d;
+  const now = ctx.live?.now ?? null;
+  let cur: number | null = parseHM(act.__start?.d) ?? startMins;
   let lowerBound = false;
   let loc: string | null = day.startPlaceId;
   let locUnknown = false;
@@ -127,8 +159,11 @@ export function computeSchedule(day: Day, ctx: ScheduleCtx): DaySchedule {
     if (!isMove) {
       leg = { fromId: loc, toId: loc, mode: stop.legIn.mode, travelMin: 0, bufferMin: 0, source: 'same', reason: null, route: null, departMins: cur };
     } else {
-      leg = resolveLeg(stop.legIn, loc, target, day, cur, ctx, unselected || locUnknown);
+      leg = withEstimate(resolveLeg(stop.legIn, loc, target, day, cur, ctx, unselected || locUnknown), ctx);
     }
+    const real = act[stop.uid];
+    const realArrive = parseHM(real?.a);
+    const realDepart = parseHM(real?.d);
     const warnings: string[] = [];
     if (leg.source === 'none') {
       missing++;
@@ -137,7 +172,13 @@ export function computeSchedule(day: Day, ctx: ScheduleCtx): DaySchedule {
       totalTravel += leg.travelMin ?? 0;
       totalBuffer += leg.bufferMin;
     }
-    const arrive: number | null = cur == null ? null : cur + (leg.travelMin ?? 0) + leg.bufferMin;
+    let arrive: number | null = cur == null ? null : cur + (leg.travelMin ?? 0) + leg.bufferMin;
+    if (realArrive != null) {
+      arrive = realArrive;
+      lowerBound = false; // รู้เวลาจริงแล้ว
+    } else if (started && now != null && arrive != null && arrive < now) {
+      arrive = now; // ยังไม่ถึงทั้งที่ควรถึงแล้ว → ถึงอย่างเร็วตอนนี้
+    }
     let wait = 0;
     let start = arrive;
     let lateMin: number | null = null;
@@ -161,7 +202,9 @@ export function computeSchedule(day: Day, ctx: ScheduleCtx): DaySchedule {
       }
     }
     const place = stop.placeId ? ctx.getPlace(stop.placeId) : undefined;
-    const depart = start == null ? null : start + Math.max(0, stop.stayMin);
+    let depart = start == null ? null : start + Math.max(0, stop.stayMin);
+    if (realDepart != null) depart = realDepart;
+    else if (realArrive != null && now != null && depart != null && depart < now) depart = now; // ยังอยู่เกินแผน
     if (place && start != null && !lowerBound) {
       const open = parseHM(place.openTime);
       const close = parseHM(place.closeTime);
@@ -187,7 +230,7 @@ export function computeSchedule(day: Day, ctx: ScheduleCtx): DaySchedule {
 
   let end: DaySchedule['end'] = null;
   if (day.endPlaceId) {
-    const leg = resolveLeg(day.endLeg, loc, day.endPlaceId, day, cur, ctx, locUnknown);
+    const leg = withEstimate(resolveLeg(day.endLeg, loc, day.endPlaceId, day, cur, ctx, locUnknown), ctx);
     if (leg.source === 'none') {
       missing++;
       lowerBound = true;
@@ -195,7 +238,12 @@ export function computeSchedule(day: Day, ctx: ScheduleCtx): DaySchedule {
       totalTravel += leg.travelMin ?? 0;
       totalBuffer += leg.bufferMin;
     }
-    const arrive = cur == null ? null : cur + (leg.travelMin ?? 0) + leg.bufferMin;
+    let arrive = cur == null ? null : cur + (leg.travelMin ?? 0) + leg.bufferMin;
+    const realEnd = parseHM(act.__end?.a);
+    if (realEnd != null) {
+      arrive = realEnd;
+      lowerBound = false;
+    } else if (started && now != null && arrive != null && arrive < now) arrive = now;
     const target = parseHM(day.endTime);
     let slack: number | null = null;
     if (arrive != null && target != null) {

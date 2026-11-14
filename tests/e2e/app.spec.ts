@@ -428,3 +428,42 @@ test('ของที่จะซื้อ: เลือกรูปแล้ว
   await page.locator('form[data-form="shop-item"] button.primary').click();
   await expect(page.locator('[data-shop-item]', { hasText: 'มาสก์หน้า' }).locator('.shop-thumb.add')).toBeVisible();
 });
+
+test('วันนี้ระหว่างเดินทาง: เริ่มวัน → ถึงแล้ว → อยู่ได้อีก → ออกแล้ว → เวลาที่เหลือคำนวณใหม่ · เลิกทำได้', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-12-01T01:00:00Z')); // 10:00 เวลาโซล วันที่ 1 ธ.ค.
+  await page.goto('/');
+  await page.locator('[data-act="open-templates"]').click();
+  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
+  await page.locator('[data-act="tpl-apply-all"]').click();
+  await page.locator('[data-act="confirm-ok"]').click();
+  await page.locator('[data-act="tab"][data-tab="today"]').filter({ visible: true }).first().click();
+  const hero = page.locator('.hero');
+  await expect(page.locator('.today-head')).toContainText('ตอนนี้ 10:00');
+  await expect(hero).toContainText('เริ่มวัน');
+  await expect(hero).toContainText('ช้ากว่าแผน'); // แผนออก 08:30
+  await page.locator('[data-act="live-start"]').click();
+  await expect(page.locator('#toast')).toContainText('ออกเดินทาง 10:00');
+  await expect(hero).toContainText('กำลังไป');
+  await expect(hero).toContainText('ตลาดกวางจัง');
+  await expect(hero).toContainText('เดินทาง'); // มีเวลาเดินทาง (≈ ประมาณ)
+  await expect(hero.locator('[data-act="naver"]')).toBeVisible();
+  await page.locator('[data-act="live-arrive"]').click();
+  await expect(hero).toContainText('ตอนนี้อยู่ที่');
+  await expect(hero).toContainText('อยู่ได้อีก');
+  await expect(hero.locator('.hero-next')).toContainText('โซฮา'); // ถัดไป
+  // timeline: ออกจากโรงแรม ✓ และจุดปัจจุบัน
+  await expect(page.locator('.tl.done').first()).toContainText('ออกจาก');
+  await expect(page.locator('.tl.now')).toContainText('ตลาดกวางจัง');
+  // เลิกทำการเช็กอินล่าสุด
+  await page.locator('[data-act="toast-undo"]').click();
+  await expect(hero).toContainText('กำลังไป');
+  await page.locator('[data-act="live-arrive"]').click();
+  await page.locator('[data-act="live-depart"]').click();
+  await expect(hero).toContainText('กำลังไป');
+  await expect(hero).toContainText('โซฮา');
+  // วันอื่น = ดูล่วงหน้า ไม่มีปุ่มเช็กอิน
+  await page.locator('[data-act-change="today-day"]').selectOption({ index: 2 });
+  await expect(page.locator('.today-head')).toContainText('ดูล่วงหน้า');
+  await expect(page.locator('[data-act^="live-"]')).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+});

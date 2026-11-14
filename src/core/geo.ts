@@ -30,3 +30,10 @@ export function roughEstimateMin(distM: number, mode: 'WALKING' | 'TRANSIT' | 'D
   if (mode === 'TRANSIT') return Math.round(15 + ((km * 1.4) / 25) * 60);
   return Math.round(5 + ((km * 1.4) / 20) * 60);
 }
+
+/** เวลาประมาณสำหรับหน้า "วันนี้": ระยะใกล้ (เดินไม่เกิน ~20 นาที ≈ 1.2 กม.) เดินเร็วกว่ารอรถ → ใช้เวลาเดิน */
+export function liveEstimateMin(distM: number, mode: 'WALKING' | 'TRANSIT' | 'DRIVING'): number {
+  const walk = roughEstimateMin(distM, 'WALKING');
+  if (mode === 'TRANSIT' && walk <= 20) return walk;
+  return roughEstimateMin(distM, mode);
+}

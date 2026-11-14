@@ -46,6 +46,7 @@ export function validatePlan(input: unknown): { ok: true; plan: Plan; warnings: 
         fastest: isObj(d.prefs) ? d.prefs.fastest !== false : true,
       },
       afterBooth: d.afterBooth === true,
+      actual: actualTimes(d.actual),
       stops,
       endLeg: leg(d.endLeg),
       weatherRef: str(d.weatherRef, 80) || 'seoul',
@@ -127,4 +128,17 @@ const str = (x: unknown, max: number) => (typeof x === 'string' ? x.slice(0, max
 const hm = (x: unknown) => (typeof x === 'string' && parseHM(x) != null && parseHM(x)! < 1440 ? x : null);
 function clampNum(x: unknown, lo: number, hi: number, def: number) {
   return typeof x === 'number' && Number.isFinite(x) ? Math.min(hi, Math.max(lo, Math.round(x))) : def;
+}
+
+/** เวลาจริงที่เช็กอิน: เก็บเฉพาะ key สั้น ๆ และเวลา HH:MM */
+function actualTimes(x: unknown): Day['actual'] {
+  if (!isObj(x)) return undefined;
+  const out: NonNullable<Day['actual']> = {};
+  for (const [k, v] of Object.entries(x).slice(0, 80)) {
+    if (!isObj(v) || k.length > 40) continue;
+    const a = hm(v.a);
+    const d = hm(v.d);
+    if (a || d) out[k] = { ...(a ? { a } : {}), ...(d ? { d } : {}) };
+  }
+  return Object.keys(out).length ? out : undefined;
 }
