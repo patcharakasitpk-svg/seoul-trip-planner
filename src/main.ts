@@ -16,7 +16,8 @@ import type { Day, Place, Plan, Stop, TravelMode } from './core/types';
 import { suggestOrder } from './core/compare';
 import { decodeFragment, parseJsonPlan, buildShareUrl, exportablePlan } from './storage/share';
 import { saveSettings, loadPlans } from './storage/storage';
-import { TEMPLATES, templateDayStops, applyDatedTemplate } from './data/templates';
+import { TEMPLATES, templateDayStops, applyDatedTemplate, mergeDayStops } from './data/templates';
+import { tplTargetDay } from './ui/views/modals';
 import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
 import { stopLocationId } from './core/schedule';
 import { searchPlaces, placeFromResult, findExisting } from './services/placeSearch';
@@ -80,7 +81,12 @@ function render() {
   }
   $('#lib-list').innerHTML = renderLibraryList();
   $('#right').innerHTML = app.tab === 'today' ? renderToday() : renderDayPanel(app.day);
+  // คงตำแหน่งเลื่อนในหน้าต่าง (เช่นกด ＋ ในแม่แบบหลายครั้ง) ไม่ให้เด้งกลับบนสุด
+  const prevModal = document.querySelector('#modal-root .modal-body') as HTMLElement | null;
+  const keepScroll = prevModal && app.modal ? { type: app.modal.type, top: prevModal.scrollTop } : null;
   $('#modal-root').innerHTML = renderModal();
+  const nextModal = document.querySelector('#modal-root .modal-body') as HTMLElement | null;
+  if (keepScroll && nextModal && app.modal?.type === keepScroll.type) nextModal.scrollTop = keepScroll.top;
   document.body.classList.toggle('modal-open', !!app.modal);
   $('#toast').innerHTML = app.toast ? `${esc(app.toast.msg)}${app.toast.undo ? ' <button class="toast-undo" data-act="toast-undo">เลิกทำ</button>' : ''}` : '';
   $('#toast').classList.toggle('has-action', !!app.toast?.undo);
@@ -515,7 +521,7 @@ document.addEventListener('click', (ev) => {
       app.modal = { type: 'templates', tplId: TEMPLATES[0].id };
       break;
     case 'tpl-tab':
-      app.modal = { type: 'templates', tplId: d.v! };
+      app.modal = { type: 'templates', tplId: d.v! }; // เปลี่ยนแท็บ = ล้างวันปลายทางที่เลือกไว้
       break;
     case 'tpl-apply-all': {
       const tpl = TEMPLATES.find((t) => t.id === d.tpl)!;
@@ -539,28 +545,32 @@ document.addEventListener('click', (ev) => {
       return;
     }
     case 'tpl-copy-day': {
+      const m = app.modal;
+      if (m?.type !== 'templates') return;
       const tpl = TEMPLATES.find((t) => t.id === d.tpl)!;
-      const td = tpl.days[Number(d.i)];
-      const sel = document.querySelector(`[data-tpl-target="${d.i}"]`) as HTMLSelectElement;
-      const targetId = sel?.value ?? app.activeDayId;
-      const targetIdx = app.dayIndex(targetId);
-      const doIt = () =>
-        app.commit((p) => {
-          const t = p.days.find((x) => x.id === targetId)!;
-          const stops = templateDayStops(td, (id) => app.stayFor(id));
-          if (d.mode === 'replace') t.stops = stops;
-          else {
-            const extra = stops.filter((s) => s.kind !== 'dinner' || !t.stops.some((x) => x.kind === 'dinner'));
-            const di = t.stops.findIndex((x) => x.kind === 'dinner');
-            t.stops.splice(di >= 0 ? di : t.stops.length, 0, ...extra);
-          }
-          app.activeDayId = targetId;
-        }, `คัดลอกกลุ่มสถานที่ไปวัน ${targetIdx + 1} แล้ว`);
-      if (d.mode === 'replace') confirmThen(`แทนที่รายการทั้งหมดในวัน ${targetIdx + 1}?`, 'แทนที่', doIt);
-      else {
-        app.modal = null;
-        doIt();
-      }
+      const i = Number(d.i);
+      const targetId = tplTargetDay(m, tpl, i);
+      const n = app.dayIndex(targetId) + 1;
+      const target = app.findDay(targetId)!;
+      const mode = d.mode === 'replace' ? 'replace' : 'append';
+      const nd = { ...target, stops: mergeDayStops(target.stops, templateDayStops(tpl.days[i], (id) => app.stayFor(id)), mode) };
+      app.activeDayId = targetId;
+      applyWithUndo(targetId, nd, mode === 'replace' ? `ใช้ “${tpl.days[i].title}” เป็นวัน ${n} แล้ว` : `เพิ่ม “${tpl.days[i].title}” ต่อท้ายวัน ${n} แล้ว`);
+      return;
+    }
+    case 'tpl-add-place': {
+      const m = app.modal;
+      if (m?.type !== 'templates') return;
+      const tpl = TEMPLATES.find((t) => t.id === d.tpl)!;
+      const targetId = tplTargetDay(m, tpl, Number(d.i));
+      const target = app.findDay(targetId)!;
+      const p = app.getPlace(d.place);
+      if (!p) return;
+      const n = app.dayIndex(targetId) + 1;
+      const existing = target.stops.find((s) => s.placeId === p.id);
+      const before = clone(target);
+      app.setDay(targetId, existing ? removeStop(target, existing.uid) : insertStop(target, defaultInsertIndex(target), stopForPlace(p.id)));
+      app.showToast(existing ? `เอา ${p.nameTh} ออกจากวัน ${n}` : `เพิ่ม ${p.nameTh} เข้าวัน ${n}`, () => app.setDay(targetId, before, 'เลิกทำแล้ว'));
       return;
     }
     case 'tpl-blank':
@@ -709,6 +719,13 @@ document.addEventListener('change', (ev) => {
     case 'day-pref':
       app.updateDay(dayId, (x) => ({ ...x, prefs: { ...x.prefs, [d.field!]: el.checked } }));
       return;
+    case 'tpl-target': {
+      const m = app.modal;
+      if (m?.type !== 'templates') return;
+      app.modal = { ...m, targets: { ...(m.targets ?? {}), [Number(d.i)]: el.value } };
+      app.requestRender();
+      return;
+    }
     case 'stop-move-day': {
       const to = el.value;
       if (!to) return;

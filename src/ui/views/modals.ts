@@ -8,7 +8,7 @@ import { fmtDist } from '../../core/geo';
 import { nearby } from '../../core/compare';
 import { stopLocationId, type LegInfo } from '../../core/schedule';
 import { DINING_ZONE_LABEL, FOOD_TYPE_LABEL, CATEGORY_ICON } from '../../data/places';
-import { TEMPLATES } from '../../data/templates';
+import { TEMPLATES, nearbyForTemplateDay, type Template } from '../../data/templates';
 import { placeCard } from './library';
 import { buildShareUrl, MAX_FRAGMENT } from '../../storage/share';
 import { googleStatus } from '../../services/google';
@@ -263,32 +263,56 @@ function routeBody(m: Extract<Modal, { type: 'route' }>): string {
 }
 
 /* ---------- แม่แบบ ---------- */
+/** วันปลายทางของการ์ดแม่แบบ: ที่ผู้ใช้เลือกไว้ › แม่แบบลงวันที่ = วันที่ตรงกัน › เมนูรายวัน = วันที่กำลังดู › ลำดับเดียวกัน */
+export function tplTargetDay(m: Extract<Modal, { type: 'templates' }>, tpl: Template, i: number): string {
+  const chosen = m.targets?.[i];
+  if (chosen && app.findDay(chosen)) return chosen;
+  const td = tpl.days[i];
+  const byDate = td.date ? app.plan.days.find((d) => d.date === td.date) : undefined;
+  if (byDate) return byDate.id;
+  if (tpl.pick) return app.activeDayId;
+  return (app.plan.days[i] ?? app.day).id;
+}
+
 function templatesBody(m: Extract<Modal, { type: 'templates' }>): string {
   const tpl = TEMPLATES.find((t) => t.id === m.tplId) ?? TEMPLATES[0];
+  const addBtn = (i: number, p: Place, inDay: boolean, label = '') =>
+    `<button class="btn ghost xs ${inDay ? 'on' : ''}" data-act="tpl-add-place" data-tpl="${tpl.id}" data-i="${i}" data-place="${esc(p.id)}" aria-pressed="${inDay}" aria-label="${inDay ? 'เอาออกจากวันนั้น' : 'เพิ่มเข้าวันนั้น'} ${esc(p.nameTh)}">${inDay ? '✓' : '＋'}${label}</button>`;
+  const hint = tpl.pick
+    ? 'เลือกวันที่ช่องล่างการ์ด แล้วกด “ใช้เป็นวันนั้น” หรือกด ＋ ทีละจุด · แทนที่แล้วนัดที่ล็อกเวลา (COEX/สนามบิน) ยังอยู่ · กดเลิกทำได้'
+    : tpl.dated
+      ? 'แม่แบบนี้ลงวันที่และนัดหมายไว้แล้ว ใช้แล้วยังแก้/ย้าย/ลบได้ทุกจุด'
+      : 'แม่แบบไม่กำหนดวันที่หรือเวลา คุณกำหนดเองในแต่ละวัน';
   return `
-    <p class="muted small">การดูแม่แบบไม่เปลี่ยนแผนที่กำลังแก้ไข — ก่อนแทนที่จะถามยืนยันเสมอ · ${tpl.dated ? 'แม่แบบนี้ลงวันที่และนัดหมายไว้แล้ว ใช้แล้วยังแก้/ย้าย/ลบได้ทุกจุด' : 'แม่แบบไม่กำหนดวันที่หรือเวลา คุณกำหนดเองในแต่ละวัน'}</p>
+    <p class="muted small">การดูแม่แบบไม่เปลี่ยนแผนที่กำลังแก้ไข · ${hint}</p>
     <div class="chips">${TEMPLATES.map((t) => `<button class="chip ${t.id === tpl.id ? 'on' : ''}" data-act="tpl-tab" data-v="${t.id}">${esc(t.id)}. ${esc(t.name)}</button>`).join('')}</div>
     <p>${esc(tpl.desc)}</p>
     <div class="tpl-days">
       ${tpl.days
-        .map(
-          (d, i) => `<div class="card tpl-day"><h4>${d.date ? `${esc(fmtDateTh(d.date))}${d.startTime ? ` · ออก ${esc(d.startTime)}` : ''}` : `กลุ่ม ${i + 1}`}: ${esc(d.title)}</h4><p class="muted small">${esc(d.note)}</p>
+        .map((d, i) => {
+          const targetId = tplTargetDay(m, tpl, i);
+          const target = app.findDay(targetId)!;
+          const inTarget = (pid: string) => target.stops.some((s) => s.placeId === pid);
+          const near = nearbyForTemplateDay(d, app.places());
+          const head = d.date ? `${esc(fmtDateTh(d.date))}${d.startTime ? ` · ออก ${esc(d.startTime)}` : ''}: ` : tpl.pick ? '' : `กลุ่ม ${i + 1}: `;
+          return `<div class="card tpl-day" data-tpl-card="${i}"><h4>${head}${esc(d.title)}</h4><p class="muted small">${esc(d.note)}</p>
         <ol>${d.stops
           .map((s) => {
             const p = app.getPlace(s.placeId);
             const lock = s.lockedTime ? `🔒 ${esc(s.lockedTime)} ` : '';
             const tip = s.note ? `<br><span class="muted small">${esc(s.note)}</span>` : '';
             if (!p) return s.breakTitle ? `<li>☕ ${lock}${esc(s.breakTitle)} <span class="muted small">~${s.stayMin} นาที</span>${tip}</li>` : '';
-            return `<li>${CATEGORY_ICON[p.category] ?? ''} ${lock}${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <a class="btn ghost xs" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(p.nameTh)}">📷</a> <button class="btn ghost xs" data-act="quick-toggle" data-place="${esc(p.id)}" aria-label="เพิ่มเข้าวันที่เลือก">＋</button>${tip}</li>`;
+            return `<li>${CATEGORY_ICON[p.category] ?? ''} ${lock}${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <a class="btn ghost xs" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(p.nameTh)}">📷</a> ${p.category === 'base' ? '' : addBtn(i, p, inTarget(p.id))}${tip}</li>`;
           })
           .join('')}</ol>
-        <div class="row-btns"><select class="inp xs" data-tpl-target="${i}" aria-label="วันปลายทาง">${app.plan.days.map((dd, k) => `<option value="${dd.id}" ${k === i ? 'selected' : ''}>วัน ${k + 1}</option>`).join('')}</select>
-        <button class="btn sm" data-act="tpl-copy-day" data-tpl="${tpl.id}" data-i="${i}" data-mode="append">ต่อท้ายวันนั้น</button>
-        <button class="btn sm" data-act="tpl-copy-day" data-tpl="${tpl.id}" data-i="${i}" data-mode="replace">แทนที่วันนั้น</button></div></div>`,
-        )
+        ${near.length ? `<div class="tpl-near"><span class="muted small">ที่ใกล้เคียง (เติมเองได้):</span> ${near.map((n) => `<span class="near-chip">${addBtn(i, n.place, inTarget(n.place.id), ` ${CATEGORY_ICON[n.place.category] ?? ''} ${esc(n.place.nameTh)} <span class="muted">· ${esc(fmtDist(n.distM))}</span>`)}<a class="btn ghost xs" href="${esc(photosUrl(n.place))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(n.place.nameTh)}">📷</a></span>`).join('')}</div>` : ''}
+        <div class="row-btns tpl-actions"><label class="small">ใช้กับ <select class="inp xs" data-act-change="tpl-target" data-i="${i}" aria-label="วันปลายทาง">${app.plan.days.map((dd, k) => `<option value="${dd.id}" ${dd.id === targetId ? 'selected' : ''}>วัน ${k + 1}${dd.date ? ` · ${esc(fmtDateTh(dd.date).replace(/ \d{4}$/, ''))}` : ''}</option>`).join('')}</select></label>
+        <button class="btn sm primary" data-act="tpl-copy-day" data-tpl="${tpl.id}" data-i="${i}" data-mode="replace">ใช้เป็นวันนั้น</button>
+        <button class="btn sm" data-act="tpl-copy-day" data-tpl="${tpl.id}" data-i="${i}" data-mode="append">เพิ่มต่อท้าย</button></div></div>`;
+        })
         .join('')}
     </div>
-    <div class="modal-actions sticky"><button class="btn" data-act="tpl-blank">เริ่มจากแผนว่าง (สร้างแผนใหม่)</button><button class="btn primary" data-act="tpl-apply-all" data-tpl="${tpl.id}">ใช้ทั้งแม่แบบนี้</button></div>`;
+    <div class="modal-actions sticky"><button class="btn" data-act="tpl-blank">เริ่มจากแผนว่าง (สร้างแผนใหม่)</button>${tpl.pick ? '' : `<button class="btn primary" data-act="tpl-apply-all" data-tpl="${tpl.id}">ใช้ทั้งแม่แบบนี้</button>`}</div>`;
 }
 
 /* ---------- แชร์ ---------- */

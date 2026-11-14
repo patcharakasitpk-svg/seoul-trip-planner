@@ -185,7 +185,8 @@ test('แม่แบบ: ดูไม่ล้างแผน และต้�
 test('ลบและย้ายจุดได้โดยไม่ต้องลากวาง', async ({ page }) => {
   await page.goto('/');
   await page.locator('[data-act="open-templates"]').click();
-  await page.locator('[data-act="tpl-apply-all"]').click(); // แม่แบบแรก = แผนแนะนำแบบลงวันที่
+  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
+  await page.locator('[data-act="tpl-apply-all"]').click(); // แผนแนะนำแบบลงวันที่
   await page.locator('[data-act="confirm-ok"]').click();
   await gotoPlan(page);
   await expect(page.locator('.timeline')).toContainText('มยองดงเกียวจา');
@@ -203,6 +204,7 @@ test('ลบและย้ายจุดได้โดยไม่ต้อ�
 test('ย้ายจุดแวะไปวันอื่น และเลิกทำได้', async ({ page }) => {
   await page.goto('/');
   await page.locator('[data-act="open-templates"]').click();
+  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
   await page.locator('[data-act="tpl-apply-all"]').click();
   await page.locator('[data-act="confirm-ok"]').click();
   await gotoPlan(page);
@@ -215,4 +217,30 @@ test('ย้ายจุดแวะไปวันอื่น และเล�
   await expect(page.locator('.timeline')).not.toContainText('มยองดงเกียวจา');
   await page.locator('[data-act="toast-undo"]').click();
   await expect(page.locator('.timeline')).toContainText('มยองดงเกียวจา');
+});
+
+test('เลือกแผนรายวัน: ใช้การ์ดกับวันที่เลือก นัดที่ล็อกยังอยู่ และเติมที่ใกล้เคียงเองได้', async ({ page }) => {
+  await page.goto('/');
+  // วัน 4 (3 ธ.ค.) มีนัด COEX ที่ล็อกไว้จากแผนแนะนำ
+  await page.locator('[data-act="open-templates"]').click();
+  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
+  await page.locator('[data-act="tpl-apply-all"]').click();
+  await page.locator('[data-act="confirm-ok"]').click();
+  await page.locator('[data-act="open-templates"]').click();
+  await expect(page.locator('.modal')).toContainText('เลือกแผนรายวัน');
+  const card = page.locator('.tpl-day', { hasText: 'ฮงแด ช็อปตอนเย็น' });
+  const day4 = await card.locator('[data-act-change="tpl-target"] option').nth(3).getAttribute('value');
+  await card.locator('[data-act-change="tpl-target"]').selectOption(day4!);
+  await page.locator('.tpl-day', { hasText: 'ฮงแด ช็อปตอนเย็น' }).locator('[data-act="tpl-copy-day"][data-mode="replace"]').click();
+  await expect(page.locator('#toast')).toContainText('เป็นวัน 4');
+  await gotoPlan(page);
+  await expect(page.locator('.timeline')).toContainText('โคเอ็กซ์'); // นัดที่ล็อกยังอยู่
+  await expect(page.locator('.timeline')).toContainText('จังอิน');
+  // เติมที่ใกล้เคียงเองจากการ์ด
+  await page.locator('[data-act="open-templates"]').click();
+  const c2 = page.locator('.tpl-day', { hasText: 'วันมาถึง' });
+  const nearBtn = c2.locator('.tpl-near [data-act="tpl-add-place"]').first();
+  await nearBtn.click();
+  await expect(page.locator('#toast')).toContainText('เพิ่ม');
+  await expect(page.locator('.tpl-day', { hasText: 'วันมาถึง' }).locator('.tpl-near [data-act="tpl-add-place"]').first()).toHaveAttribute('aria-pressed', 'true');
 });

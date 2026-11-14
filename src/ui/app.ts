@@ -14,7 +14,7 @@ export type Tab = 'today' | 'map' | 'places' | 'plan';
 export type Modal =
   | { type: 'compare'; title: string; dayId: string; oldDay: Day; newDay: Day; note?: string; afterConfirm?: string }
   | { type: 'add'; placeId: string; dayId: string; index: number | null }
-  | { type: 'templates'; tplId: string }
+  | { type: 'templates'; tplId: string; /** การ์ดที่ i → วันปลายทางที่เลือกไว้ */ targets?: Record<number, string> }
   | { type: 'share' }
   | { type: 'import'; plan: Plan; warnings: string[]; source: 'link' | 'json' }
   | { type: 'confirm'; message: string; okLabel: string; action: () => void }

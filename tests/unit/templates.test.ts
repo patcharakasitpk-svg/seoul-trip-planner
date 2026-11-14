@@ -40,3 +40,39 @@ describe('แม่แบบ', () => {
     expect(by('2026-12-02').stops.find((s) => s.kind === 'dinner')?.placeId).toBe('yeonnam-mulgalbi-hongdae');
   });
 });
+
+import { mergeDayStops, nearbyForTemplateDay } from '../../src/data/templates';
+import { newStop, dinnerSlot } from '../../src/core/planOps';
+
+describe('เลือกแผนรายวัน', () => {
+  const coexAM = { ...newStop('place', 'coex', 480), lockedTime: '09:00' };
+  const coexPM = { ...newStop('place', 'coex', 240), lockedTime: '13:00' };
+  const a = newStop('place', 'gwangjang', 60);
+  const b = newStop('place', 'soha-salt-pond-ikseon', 30);
+  const din = newStop('dinner', 'odarijip-myeongdong', 60);
+
+  it('แทนที่วันแล้วนัดที่ล็อกยังอยู่: นัดเช้าไว้หน้าสุด', () => {
+    const out = mergeDayStops([coexAM, newStop('place', 'library', 30)], [a, b, din], 'replace');
+    expect(out.map((s) => s.placeId)).toEqual(['coex', 'gwangjang', 'soha-salt-pond-ikseon', 'odarijip-myeongdong']);
+  });
+  it('นัดบ่ายแทรกกลางวัน ก่อนมื้อเย็น', () => {
+    const out = mergeDayStops([coexPM], [a, b, din], 'replace');
+    expect(out.map((s) => s.placeId)).toEqual(['gwangjang', 'coex', 'soha-salt-pond-ikseon', 'odarijip-myeongdong']);
+  });
+  it('เพิ่มต่อท้ายก่อนมื้อเย็นเดิม และไม่เพิ่มมื้อเย็นซ้ำ', () => {
+    const out = mergeDayStops([coexAM, dinnerSlot()], [a, din], 'append');
+    expect(out.map((s) => s.kind)).toEqual(['place', 'place', 'dinner']);
+    expect(out[0].placeId).toBe('coex');
+  });
+  it('การ์ดเมนูมีที่ใกล้เคียงให้เติม (ไม่ซ้ำกับในการ์ด และไม่เกินระยะ)', () => {
+    const menu = TEMPLATES.find((t) => t.pick)!;
+    const card = menu.days.find((d) => d.stops.some((s) => s.placeId === 'myeongdong-kyoja'))!;
+    const near = nearbyForTemplateDay(card, PUBLIC_PLACES);
+    expect(near.length).toBeGreaterThan(0);
+    for (const n of near) {
+      expect(card.stops.some((s) => s.placeId === n.place.id)).toBe(false);
+      expect(n.distM).toBeLessThanOrEqual(1500);
+      expect(n.place.category).not.toBe('base');
+    }
+  });
+});

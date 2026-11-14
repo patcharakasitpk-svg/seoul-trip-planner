@@ -1,5 +1,6 @@
 import type { Stop } from '../core/types';
-import type { Plan } from '../core/types';
+import type { Place, Plan } from '../core/types';
+import { straightLineM } from '../core/geo';
 import { applyTripDates, dinnerSlot, newStop } from '../core/planOps';
 
 /**
@@ -36,9 +37,126 @@ export interface Template {
   days: TemplateDay[];
   /** true = ทุกวันมีวันที่ ใช้ทั้งแม่แบบแล้วตั้งจุดเริ่ม/จบ/เวลาให้ด้วย */
   dated?: boolean;
+  /** true = เมนูแผนรายวัน เลือกทีละการ์ดไปใส่วันที่ต้องการ (ไม่มีปุ่มใช้ทั้งแม่แบบ) */
+  pick?: boolean;
 }
 
 export const TEMPLATES: Template[] = [
+  {
+    id: 'D',
+    name: 'เลือกแผนรายวัน (ผสมเอง)',
+    pick: true,
+    desc: 'เมนูแผนรายวันแยกตามย่าน — ถูกใจการ์ดไหนเลือก "ใช้เป็นวัน…" แล้วเติม/ตัดเองจาก "ที่ใกล้เคียง" · แทนที่วันไหน นัดที่ล็อกเวลาไว้ (COEX/สนามบิน) ยังอยู่ · ทุกอย่างกดเลิกทำได้',
+    days: [
+      {
+        title: 'วันมาถึง · เมียงดงเบา ๆ',
+        note: 'เหมาะวันลงเครื่องเช้า · เดินจากโรงแรมได้ทั้งหมด มีช่วงพัก',
+        stops: [
+          { placeId: 'hotel', stayMin: 30, note: 'AREX จากสนามบินไปสถานีโซล แล้วแท็กซี่/เดิน · ฝากกระเป๋า' },
+          { placeId: 'myeongdong-kyoja', stayMin: 45, note: 'คัลกุกซุ · เดินจากโรงแรม' },
+          { placeId: 'myeongdong-cathedral', stayMin: 40 },
+          { placeId: 'shinsegae-main-store', stayMin: 60, note: 'ฮเวฮยอน ทางออก 7' },
+          { placeId: null, stayMin: 90, breakTitle: 'เช็กอิน · พักที่โรงแรม' },
+          { placeId: 'myeongdong', stayMin: 90, note: 'สตรีทฟู้ดเปิด ~16:00' },
+          { placeId: 'hanam-pig-myeongdong', stayMin: 75, dinner: true },
+        ],
+      },
+      {
+        title: 'เมียงดง · นัมแดมุน · นัมซาน',
+        note: 'ช็อปเครื่องสำอาง/ของฝากใกล้โรงแรม แล้วขึ้นหอคอยตอนเย็น · นัมแดมุนปิดวันอาทิตย์',
+        stops: [
+          { placeId: 'namdaemun', stayMin: 60, note: 'เดินจากโรงแรม ~5 นาที' },
+          { placeId: 'oliveyoung-myeongdong-global', stayMin: 40 },
+          { placeId: 'daiso-myeongdong-main', stayMin: 30 },
+          { placeId: 'n-seoul-tower', stayMin: 90, note: 'เดินไปสถานีกระเช้านัมซาน ~10 นาทีจากเมียงดง' },
+          { placeId: 'odarijip-myeongdong', stayMin: 60, dinner: true, note: 'ปูดองซีอิ๊ว · เมียงดง ทางออก 6' },
+        ],
+      },
+      {
+        title: 'จงโน · ตลาดกวางจัง · ลักซาน',
+        note: 'วังเก่า ตลาด ขนมปังเกลือ แล้วชมกำแพงเมืองยามเย็น · คย็องบกกุงปิดวันอังคาร',
+        stops: [
+          { placeId: 'gyeongbokgung', stayMin: 120, note: 'สาย 3 คย็องบกกุง ทางออก 5' },
+          { placeId: 'gwangjang', stayMin: 75, note: 'จงโน 5-กา ทางออก 8 · บินแดต็อก ยุกฮเว' },
+          { placeId: 'soha-salt-pond-ikseon', stayMin: 30, note: 'จงโน 3-กา ทางออก 4 · รสยอดนิยมหมดเร็ว' },
+          { placeId: 'naksan-park', stayMin: 60, note: 'สาย 4 ฮเยฮวา ทางออก 2 เดินขึ้นเนิน ~15 นาที · ไปช่วงพระอาทิตย์ตก' },
+          { placeId: 'jinokhwa-dakhanmari', stayMin: 60, dinner: true, note: 'ไก่ต้มทั้งตัว ย่านทงแดมุน' },
+        ],
+      },
+      {
+        title: 'มังวอน · ยอนนัม · ฮงแด (เต็มวัน)',
+        note: 'ตลาด ริมแม่น้ำ ช็อป แล้วปิ้งย่างฮงแด · กลับสาย 2 ตรงถึงอึลจีโร 1-กา',
+        stops: [
+          { placeId: 'mangwon', stayMin: 60, note: 'สาย 2 → ฮับจอง ต่อสาย 6 → มังวอน ทางออก 2' },
+          { placeId: 'mangwon-hangang-park', stayMin: 40, note: 'เดิน ~20 นาที · ลมริมแม่น้ำหนาว' },
+          { placeId: 'mibbedong-yeonnam', stayMin: 60, note: 'ดงบุริ · คิวยาว' },
+          { placeId: 'musinsa-standard-hongdae', stayMin: 45 },
+          { placeId: 'hongdae', stayMin: 90 },
+          { placeId: 'yeonnam-mulgalbi-hongdae', stayMin: 75, dinner: true, note: 'มุลกาลบี (2 ที่ขึ้นไป)' },
+        ],
+      },
+      {
+        title: 'ฮงแด ช็อปตอนเย็น (หลังเลิกงาน)',
+        note: 'ร้านเปิดดึก เหมาะวันที่ว่างหลัง 17:00 · สาย 2 ตรงจากซัมซอง/อึลจีโร',
+        stops: [
+          { placeId: 'musinsa-standard-hongdae', stayMin: 45, note: 'ฮงอิกแด ทางออก 9 · เปิดถึง 23:00' },
+          { placeId: 'oliveyoung-hongdae-town', stayMin: 30 },
+          { placeId: 'hongdae', stayMin: 60 },
+          { placeId: 'jangin-dakgalbi-hongdae', stayMin: 60, dinner: true, note: 'ทัคกาลบี · เปิดถึงเที่ยงคืน · ทางเลือก: โชซอนฮวาโรกุย (ปิดวันอาทิตย์)' },
+        ],
+      },
+      {
+        title: 'ซองซู · อัปกูจอง',
+        note: 'โดนัท ร้านเครื่องเขียน/ของดีไซน์ แล้วต่อห้างหรู · Point of View เปิด 12:00',
+        stops: [
+          { placeId: 'im-donut-seongsu', stayMin: 30, note: 'สาย 2 ซองซู ทางออก 4 · ซื้อกลับ ไม่มีที่นั่ง' },
+          { placeId: null, stayMin: 45, breakTitle: 'เดินเล่นถนนยอนมูจัง / คาเฟ่' },
+          { placeId: 'point-of-view-seongsu', stayMin: 45 },
+          { placeId: 'hyundai-department-store-apgujeong', stayMin: 90, note: 'แท็กซี่ ~15 นาที หรือสาย 3 อัปกูจอง ทางออก 6 · ศูนย์อาหารชั้นใต้ดิน' },
+        ],
+      },
+      {
+        title: 'ยงซาน · ฮันนัม · แฮบังชน',
+        note: 'พิพิธภัณฑ์ในร่ม (เหมาะวันอากาศไม่ดี) แล้วย่านแฟชั่น/คาเฟ่บนเนิน',
+        stops: [
+          { placeId: 'museum', stayMin: 120, note: 'สาย 4 อีชน ทางออก 2' },
+          { placeId: 'hannam-dong', stayMin: 90, note: 'แท็กซี่ ~10 นาที · ฮันกังจิน ทางออก 3' },
+          { placeId: 'haebangchon', stayMin: 75, note: 'แท็กซี่ ~10 นาที (ทางชัน)' },
+        ],
+      },
+      {
+        title: 'COEX หลังเลิกบูธ',
+        note: 'ใช้ "เพิ่มต่อท้าย" กับวันออกบูธ — ทุกจุดอยู่ในอาคารเดียวกัน',
+        stops: [
+          { placeId: 'library', stayMin: 30 },
+          { placeId: 'starfield-coex-mall', stayMin: 90 },
+          { placeId: 'oliveyoung-coex', stayMin: 30 },
+          { placeId: 'gwanghwamun-seokgalbi-coex', stayMin: 60, dinner: true },
+        ],
+      },
+      {
+        title: 'ยองดึงโพ · ยออีโด (มื้อเย็น + ไฟกลางคืน)',
+        note: 'ใช้ "เพิ่มต่อท้าย" กับวันที่เลิกงานเย็น · สาย 2 ถึงทังซาน',
+        stops: [
+          { placeId: 'jeonwon-jipbul-ppyeogui', stayMin: 75, dinner: true, note: 'เช็กเวลาเปิดใน Naver ก่อน · คิวยาว' },
+          { placeId: 'yeouido-hangang-park', stayMin: 45, note: 'แท็กซี่ ~10 นาที หรือยออีนารู (สาย 5) ทางออก 2/3' },
+        ],
+      },
+      {
+        title: 'เสื้อผ้าราคาถูก · โกโตมอลล์',
+        note: 'ช็อปใต้ดินยาวในสถานีขนส่งด่วน · เดินในร่มทั้งหมด',
+        stops: [
+          { placeId: 'gotomall', stayMin: 120, note: 'สาย 3/7/9 สถานีขนส่งด่วน (Express Bus Terminal)' },
+        ],
+      },
+      {
+        title: 'วันกลับ · ซูวอน → สนามบิน',
+        note: 'ถึงสนามบินก่อนเครื่องออก 3 ชม. · รถบัสลีมูซีนจากสถานีซูวอน หรือรถไฟไปสถานีโซลต่อ AREX',
+        noDinner: true,
+        stops: [{ placeId: null, stayMin: 60, breakTitle: 'บรันช์ / ช็อปใกล้สถานีซูวอน (AK Plaza)' }],
+      },
+    ],
+  },
   {
     id: 'T',
     name: 'แผนแนะนำ 30 พ.ย.–6 ธ.ค.',
@@ -308,4 +426,43 @@ export function applyDatedTemplate(plan: Plan, tpl: Template): void {
     if (td.startTime) day.startTime = td.startTime;
     if (td.endTime !== undefined) day.endTime = td.endTime || null;
   }
+}
+
+/**
+ * รวมรายการจากแม่แบบเข้าวัน
+ * - replace: แทนรายการเดิม แต่คงนัดที่ล็อกเวลาไว้ (เช่น COEX) โดยวางนัดตามเวลาที่ล็อก (ก่อน/หลังรายการใหม่)
+ * - append: ต่อท้ายก่อนมื้อเย็น และไม่เพิ่มมื้อเย็นซ้ำถ้าวันนั้นมีแล้ว
+ */
+export function mergeDayStops(existing: Stop[], incoming: Stop[], mode: 'replace' | 'append'): Stop[] {
+  if (mode === 'append') {
+    const hasDinner = existing.some((x) => x.kind === 'dinner');
+    const extra = incoming.filter((s) => s.kind !== 'dinner' || !hasDinner);
+    const out = [...existing];
+    const di = out.findIndex((x) => x.kind === 'dinner');
+    out.splice(di >= 0 ? di : out.length, 0, ...extra);
+    return out;
+  }
+  const locked = existing.filter((x) => x.lockedTime);
+  const morning = locked.filter((x) => x.lockedTime! < '12:00');
+  const later = locked.filter((x) => x.lockedTime! >= '12:00');
+  const dinnerIdx = incoming.findIndex((s) => s.kind === 'dinner');
+  const body = dinnerIdx >= 0 ? incoming.slice(0, dinnerIdx) : incoming;
+  const tail = dinnerIdx >= 0 ? incoming.slice(dinnerIdx) : [];
+  // นัดเช้า (เช่นออกบูธ 09:00) ไว้หน้าสุด · นัดบ่าย (เช่นเตรียมบูธ 13:00) ไว้หลังรายการช่วงเช้าครึ่งแรก
+  const half = later.length ? Math.ceil(body.length / 2) : body.length;
+  return [...morning, ...body.slice(0, half), ...later, ...body.slice(half), ...tail];
+}
+
+/** สถานที่ใกล้เคียงที่แนะนำเพิ่มสำหรับการ์ดแผนรายวัน (เดินถึง ~1.5 กม. จากจุดใดจุดหนึ่งในการ์ด) */
+export function nearbyForTemplateDay(td: TemplateDay, places: Place[], max = 6, radiusM = 1500): { place: Place; distM: number }[] {
+  const inCard = new Set(td.stops.map((s) => s.placeId).filter(Boolean) as string[]);
+  const anchors = places.filter((p) => inCard.has(p.id) && p.lat != null && p.lng != null && p.category !== 'base');
+  if (!anchors.length) return [];
+  const out: { place: Place; distM: number }[] = [];
+  for (const p of places) {
+    if (inCard.has(p.id) || p.category === 'base' || p.lat == null || p.lng == null || p.custom) continue;
+    const d = Math.min(...anchors.map((a) => straightLineM({ lat: a.lat!, lng: a.lng! }, { lat: p.lat!, lng: p.lng! })));
+    if (d <= radiusM) out.push({ place: p, distM: d });
+  }
+  return out.sort((a, b) => a.distM - b.distM).slice(0, max);
 }

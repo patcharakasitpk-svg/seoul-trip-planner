@@ -356,3 +356,11 @@ label.block { display: block; margin: .4rem 0; }
 .web-search-head .muted { order: 3; flex-basis: 100%; }
 .search-result .icon-btn { text-decoration: none; }
 .mk-search { border-color: #e8453c; }
+
+/* แม่แบบ: ที่ใกล้เคียง */
+.tpl-near { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; margin: .3rem 0 .5rem; }
+.near-chip { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 0 .1rem 0 .1rem; }
+.near-chip .btn { border: 0; }
+.tpl-day .btn.ghost.xs.on { color: #fff; background: var(--accent, #1f6feb); }
+.tpl-actions { align-items: center; }
+.near-chip .btn { white-space: normal; text-align: left; justify-content: flex-start; }
