@@ -367,40 +367,64 @@ test('Naver Map: ปุ่มเส้นทางรถเมล์/รถไ�
   await expect(page.locator('.modal')).toContainText('Naver Map', { timeout: 6000 });
 });
 
-test('ของที่จะซื้อ: ใส่รูป ดูรูปใหญ่ เก็บไว้หลังรีโหลด และลบรูปได้', async ({ page }) => {
+test('ของที่จะซื้อ: เลือกรูปแล้วเห็นตัวอย่างก่อนบันทึก · ยกเลิกไม่ใช้รูป · ดูรูปใหญ่ · เก็บหลังรีโหลด · ลบรูปต้องกดบันทึก', async ({ page }) => {
   await page.goto('/');
   await page.locator('[data-act="tab"][data-tab="fx"]').filter({ visible: true }).first().click();
   await page.locator('[data-act="money-view"][data-v="shop"]').click();
+  const makePng = (color: string) =>
+    page.evaluate(async (col) => {
+      const c = document.createElement('canvas');
+      c.width = 1200; c.height = 800;
+      const x = c.getContext('2d')!; x.fillStyle = col; x.fillRect(0, 0, 1200, 800);
+      const b: Blob = await new Promise((r) => c.toBlob((bb) => r(bb!), 'image/png'));
+      return Array.from(new Uint8Array(await b.arrayBuffer()));
+    }, color);
+  const file = async (color: string) => ({ name: 'p.png', mimeType: 'image/png', buffer: Buffer.from(await makePng(color)) });
+
+  // เพิ่มของใหม่พร้อมรูป: เห็นตัวอย่างในฟอร์มก่อนกดเพิ่ม
   await page.locator('[data-act="shop-add"]').click();
-  await page.locator('form[data-form="shop-item"] [name="name"]').fill('มาสก์หน้า');
-  await page.locator('form[data-form="shop-item"] [name="name"]').press('Enter');
-  // รูป PNG ขนาด 1200×800 สร้างในหน้าเว็บ
-  const png = await page.evaluate(async () => {
-    const c = document.createElement('canvas');
-    c.width = 1200; c.height = 800;
-    const x = c.getContext('2d')!; x.fillStyle = '#e8453c'; x.fillRect(0, 0, 1200, 800);
-    const b: Blob = await new Promise((r) => c.toBlob((bb) => r(bb!), 'image/png'));
-    return Array.from(new Uint8Array(await b.arrayBuffer()));
-  });
+  const f = page.locator('form[data-form="shop-item"]');
+  await f.locator('[name="name"]').fill('มาสก์หน้า');
+  await f.locator('input[type="file"][data-shop-photo]').setInputFiles(await file('#e8453c'));
+  const preview = page.locator('form[data-form="shop-item"] .photo-preview img');
+  await expect(preview).toHaveAttribute('src', /^blob:/);
+  expect(await preview.evaluate((i: HTMLImageElement) => i.naturalWidth)).toBe(640); // ย่อแล้ว
+  await expect(page.locator('form[data-form="shop-item"] [name="name"]')).toHaveValue('มาสก์หน้า'); // ที่พิมพ์ไว้ไม่หาย
+  await page.locator('form[data-form="shop-item"] button.primary').click();
   const card = page.locator('[data-shop-item]', { hasText: 'มาสก์หน้า' });
-  await card.locator('input[type="file"][data-shop-photo]').setInputFiles({ name: 'mask.png', mimeType: 'image/png', buffer: Buffer.from(png) });
-  const img = card.locator('.shop-thumb img');
-  await expect(img).toHaveAttribute('src', /^blob:/);
-  expect(await img.evaluate((i: HTMLImageElement) => i.naturalWidth)).toBe(640); // ย่อแล้ว
+  await expect(card.locator('.shop-thumb img')).toHaveAttribute('src', /^blob:/);
+
+  // กรอบ 📷 ของการ์ดที่ยังไม่มีรูป → เปิดฟอร์มพร้อมตัวอย่าง · กดยกเลิก = ไม่ใช้รูป
+  await page.locator('[data-act="shop-add"]').click();
+  await page.locator('form[data-form="shop-item"] [name="name"]').fill('กันแดด');
+  await page.locator('form[data-form="shop-item"] [name="name"]').press('Enter');
+  const c2 = page.locator('[data-shop-item]', { hasText: 'กันแดด' });
+  await c2.locator('.shop-thumb.add input[data-shop-photo]').setInputFiles(await file('#4aa3df'));
+  await expect(page.locator('form[data-form="shop-item"] .photo-preview img')).toHaveAttribute('src', /^blob:/);
+  await page.locator('form[data-form="shop-item"] [data-act="shop-form-cancel"]').click();
+  await expect(page.locator('[data-shop-item]', { hasText: 'กันแดด' }).locator('.shop-thumb.add')).toBeVisible();
+
+  // ดูรูปใหญ่
   await card.locator('[data-act="shop-photo-view"]').click();
   await expect(page.locator('.photo-view img')).toHaveAttribute('src', /^blob:/);
   await page.locator('.photo-view').click();
   await expect(page.locator('.photo-view')).toHaveCount(0);
+
+  // เก็บหลังรีโหลด
   await page.reload();
   await page.locator('[data-act="tab"][data-tab="fx"]').filter({ visible: true }).first().click();
   await page.locator('[data-act="money-view"][data-v="shop"]').click();
   await expect(page.locator('[data-shop-item]', { hasText: 'มาสก์หน้า' }).locator('.shop-thumb img')).toHaveAttribute('src', /^blob:/);
-  // ลบรูป (จากหน้าแก้รายการ) แล้วเลิกทำ
+
+  // ลบรูป: เห็นว่าจะหายก่อน · ยกเลิก = รูปยังอยู่ · บันทึก = หาย
   await page.locator('[data-shop-item]', { hasText: 'มาสก์หน้า' }).locator('[data-act="shop-edit"]').first().click();
-  await page.locator('[data-act="shop-photo-del"]').click();
-  await expect(page.locator('form[data-form="shop-item"]')).toContainText('เพิ่มรูป'); // ฟอร์มยังเปิด ปุ่มเปลี่ยนเป็นเพิ่มรูป
-  await page.locator('[data-act="shop-form-cancel"]').click();
-  await expect(page.locator('[data-shop-item]').first().locator('.shop-thumb.add')).toBeVisible();
-  await page.locator('[data-act="toast-undo"]').click();
-  await expect(page.locator('[data-shop-item]').first().locator('.shop-thumb img')).toHaveAttribute('src', /^blob:/);
+  await expect(page.locator('form[data-form="shop-item"] .photo-preview img')).toHaveAttribute('src', /^blob:/); // รูปปัจจุบัน
+  await page.locator('[data-act="shop-draft-clear"]').click();
+  await expect(page.locator('form[data-form="shop-item"] .photo-preview')).toContainText('ไม่มีรูป');
+  await page.locator('form[data-form="shop-item"] [data-act="shop-form-cancel"]').click();
+  await expect(page.locator('[data-shop-item]', { hasText: 'มาสก์หน้า' }).locator('.shop-thumb img')).toHaveAttribute('src', /^blob:/);
+  await page.locator('[data-shop-item]', { hasText: 'มาสก์หน้า' }).locator('[data-act="shop-edit"]').first().click();
+  await page.locator('[data-act="shop-draft-clear"]').click();
+  await page.locator('form[data-form="shop-item"] button.primary').click();
+  await expect(page.locator('[data-shop-item]', { hasText: 'มาสก์หน้า' }).locator('.shop-thumb.add')).toBeVisible();
 });

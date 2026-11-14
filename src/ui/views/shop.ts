@@ -13,15 +13,32 @@ export interface ShopUi {
   editPrice: string | null;
   /** รูปที่กำลังดูขนาดใหญ่ */
   viewPhoto: string | null;
-  /** กำลังย่อ/บันทึกรูปของรายการนี้ */
+  /** กำลังย่อรูปของฟอร์มนี้ (id รายการ หรือ 'new') */
   photoBusy: string | null;
+  /** รูปที่เลือกไว้ในฟอร์ม ยังไม่บันทึก: for = id รายการ หรือ 'new' · id = null คือจะลบรูปเมื่อบันทึก */
+  draftPhoto: { for: string; id: string | null } | null;
 }
 
 const photoInput = (itemId: string) => `<input type="file" accept="image/*" data-shop-photo="${esc(itemId)}" hidden>`;
 
 const thb = (krw: number, rate: number | null) => (rate ? ` <span class="muted">≈ ฿${fmtThb(krw / rate)}</span>` : '');
 
-function itemForm(it: ShopItem | null): string {
+/** ส่วนรูปในฟอร์ม: แสดงตัวอย่างรูปที่จะใช้ก่อนกดบันทึก */
+function photoField(key: string, current: string | null | undefined, ui: ShopUi): string {
+  const draft = ui.draftPhoto?.for === key ? ui.draftPhoto : null;
+  const shown = draft ? draft.id : current ?? null;
+  if (ui.photoBusy === key) return '<div class="photo-preview busy"><span class="muted small">กำลังย่อรูป…</span></div>';
+  const tag = draft ? (draft.id ? '<span class="pill new">รูปใหม่ — ยังไม่บันทึก</span>' : current ? '<span class="pill del">จะลบรูปเมื่อกดบันทึก</span>' : '') : '';
+  return `<div class="photo-preview ${shown ? '' : 'empty'}">
+    ${shown ? `<img data-photo="${esc(shown)}" alt="ตัวอย่างรูป">` : '<span class="muted small">ไม่มีรูป</span>'}
+    <div class="photo-preview-side">${tag}
+      <label class="btn sm">📷 ${shown ? 'เปลี่ยนรูป' : 'เพิ่มรูป'}${photoInput(key)}</label>
+      ${shown ? `<button type="button" class="btn sm" data-act="shop-draft-clear" data-for="${esc(key)}">เอารูปออก</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function itemForm(it: ShopItem | null, ui: ShopUi): string {
   return `<form data-form="shop-item" class="shop-form" ${it ? `data-item="${esc(it.id)}"` : ''}>
     <input class="inp" name="name" placeholder="ชื่อของ เช่น กันแดด Round Lab" maxlength="80" required value="${esc(it?.name ?? '')}" data-autofocus aria-label="ชื่อของ" enterkeyhint="done">
     <div class="shop-form-row">
@@ -29,8 +46,8 @@ function itemForm(it: ShopItem | null): string {
       <label>จาก<input class="inp" name="thbLabel" placeholder="Shopee" maxlength="30" value="${esc(it?.thbLabel ?? '')}" aria-label="ที่มาของราคาไทย" enterkeyhint="done"></label>
       <label>จำนวน<input class="inp qty" name="qty" type="number" min="1" max="99" value="${it?.qty ?? 1}" aria-label="จำนวนชิ้น" enterkeyhint="done"></label>
     </div>
-    <div class="row-btns"><button class="btn sm primary">${it ? 'บันทึก' : 'เพิ่ม'}</button><button type="button" class="btn sm" data-act="shop-form-cancel">ยกเลิก</button>
-      ${it ? `<label class="btn sm">📷 ${it.photo ? 'เปลี่ยนรูป' : 'เพิ่มรูป'}${photoInput(it.id)}</label>${it.photo ? `<button type="button" class="btn sm danger" data-act="shop-photo-del" data-item="${esc(it.id)}">ลบรูป</button>` : ''}` : ''}</div>
+    ${photoField(it ? it.id : 'new', it?.photo, ui)}
+    <div class="row-btns"><button class="btn sm primary">${it ? 'บันทึก' : 'เพิ่ม'}</button><button type="button" class="btn sm" data-act="shop-form-cancel">ยกเลิก</button></div>
   </form>`;
 }
 
@@ -54,7 +71,7 @@ function verdictLine(it: ShopItem, rate: number | null): string {
 }
 
 function card(it: ShopItem, store: ShopStore, rate: number | null, ui: ShopUi): string {
-  if (ui.editItem === it.id) return `<article class="shop-item editing" data-shop-item="${esc(it.id)}">${itemForm(it)}</article>`;
+  if (ui.editItem === it.id) return `<article class="shop-item editing" data-shop-item="${esc(it.id)}">${itemForm(it, ui)}</article>`;
   const best = cheapest(it);
   const multi = it.prices.length > 1;
   return `<article class="shop-item ${it.bought ? 'bought' : ''}" data-shop-item="${esc(it.id)}">
@@ -104,7 +121,7 @@ export function renderShop(store: ShopStore, rate: number | null, ui: ShopUi, su
   return `
   <div class="shop-wrap">
     ${sumLine}
-    ${ui.adding ? itemForm(null) : '<button class="btn primary shop-add" data-act="shop-add">＋ เพิ่มของที่จะซื้อ</button>'}
+    ${ui.adding ? itemForm(null, ui) : '<button class="btn primary shop-add" data-act="shop-add">＋ เพิ่มของที่จะซื้อ</button>'}
     ${items.length ? items.map((it) => card(it, store, rate, ui)).join('') : ui.adding ? '' : '<p class="empty">ยังไม่มีรายการ — กด “＋ เพิ่มของที่จะซื้อ” แล้วใส่ราคาไทย/ราคาร้านในเกาหลีเพื่อเทียบ</p>'}
     ${s.bought ? '<button class="btn ghost sm" data-act="shop-clear-bought">ลบรายการที่ซื้อแล้ว</button>' : ''}
     ${rate ? '' : '<p class="muted small">ยังไม่มีอัตราแลกเปลี่ยน — แสดงราคาวอนอย่างเดียว (ตั้งได้ในหน้าแปลงเงิน)</p>'}

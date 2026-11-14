@@ -284,8 +284,17 @@ function openNaver(href: string) {
 /* ---------------- ของที่จะซื้อ (เก็บเฉพาะเครื่องนี้) ---------------- */
 let moneyView: 'fx' | 'shop' = 'fx';
 let shop: ShopStore = loadShop();
-const shopUi: ShopUi = { adding: false, editItem: null, priceFor: null, editPrice: null, viewPhoto: null, photoBusy: null };
-const closeShopForms = () => Object.assign(shopUi, { adding: false, editItem: null, priceFor: null, editPrice: null, viewPhoto: null });
+const shopUi: ShopUi = { adding: false, editItem: null, priceFor: null, editPrice: null, viewPhoto: null, photoBusy: null, draftPhoto: null };
+/** ทิ้งรูปที่เลือกไว้แต่ยังไม่บันทึก */
+function discardDraftPhoto() {
+  const d = shopUi.draftPhoto;
+  shopUi.draftPhoto = null;
+  if (d?.id) void deletePhotos([d.id]);
+}
+const closeShopForms = () => {
+  discardDraftPhoto();
+  Object.assign(shopUi, { adding: false, editItem: null, priceFor: null, editPrice: null, viewPhoto: null });
+};
 
 /** ใส่รูปจริงให้ <img data-photo> หลังเรนเดอร์ (อ่านจาก IndexedDB แบบ async) */
 function hydratePhotos() {
@@ -297,29 +306,39 @@ function hydratePhotos() {
   });
 }
 
-async function addShopPhoto(itemId: string, file: File) {
+/** เลือกรูปในฟอร์ม (หรือกรอบ 📷 ของการ์ด) → ย่อ เก็บไว้ชั่วคราว แล้วแสดงตัวอย่างในฟอร์ม — ใช้จริงเมื่อกดบันทึก */
+async function pickShopPhoto(key: string, file: File) {
   if (!file.type.startsWith('image/')) {
     app.showToast('เลือกไฟล์รูปภาพ');
     app.requestRender();
     return;
   }
-  shopUi.photoBusy = itemId;
+  // กรอบ 📷 บนการ์ด → เปิดฟอร์มแก้รายการนั้น
+  if (key !== 'new' && shopUi.editItem !== key) {
+    closeShopForms();
+    shopUi.editItem = key;
+  }
+  shopUi.photoBusy = key;
   app.requestRender();
   try {
     const blob = await resizeImage(file);
     const id = uid('ph-');
     await putPhoto(id, blob);
     shopUi.photoBusy = null;
-    shopCommit((s) => {
-      const it = s.items.find((x) => x.id === itemId);
-      if (it) it.photo = id;
-    }, 'เพิ่มรูปแล้ว');
+    // ฟอร์มถูกปิดระหว่างย่อรูป → ไม่ใช้รูปนี้
+    const stillOpen = key === 'new' ? shopUi.adding : shopUi.editItem === key;
+    if (!stillOpen) {
+      void deletePhotos([id]);
+      return;
+    }
+    if (shopUi.draftPhoto?.id) void deletePhotos([shopUi.draftPhoto.id]);
+    shopUi.draftPhoto = { for: key, id };
   } catch (e) {
     console.warn('photo failed', e);
     shopUi.photoBusy = null;
     app.showToast('บันทึกรูปไม่ได้ (เบราว์เซอร์นี้อาจไม่อนุญาตให้เก็บรูป เช่นโหมดส่วนตัว)');
-    app.requestRender();
   }
+  app.requestRender();
 }
 
 /** ล้างรูปที่ไม่มีรายการไหนใช้แล้ว (หลังลบรายการ/เปลี่ยนรูป) — ทำตอนเปิดแอป เพื่อให้ปุ่มเลิกทำยังคืนรูปได้ */
@@ -904,15 +923,11 @@ document.addEventListener('click', (ev) => {
     case 'shop-photo-close':
       shopUi.viewPhoto = null;
       break;
-    case 'shop-photo-del': {
-      const it = shop.items.find((x) => x.id === d.item);
-      const old = it?.photo;
-      if (!it || !old) return;
-      shopCommit((s) => {
-        const x = s.items.find((y) => y.id === d.item);
-        if (x) x.photo = null;
-      }, 'ลบรูปแล้ว', (cur) => ({ ...cur, items: cur.items.map((x) => (x.id === it.id && !x.photo ? { ...x, photo: old } : x)) }));
-      return;
+    case 'shop-draft-clear': {
+      const key = d.for!;
+      if (shopUi.draftPhoto?.id) void deletePhotos([shopUi.draftPhoto.id]);
+      shopUi.draftPhoto = { for: key, id: null };
+      break;
     }
     case 'shop-form-cancel':
       closeShopForms();
@@ -1111,7 +1126,7 @@ document.addEventListener('change', (ev) => {
   const el = ev.target as HTMLInputElement;
   if (el.dataset.shopPhoto) {
     const f = el.files?.[0];
-    if (f) void addShopPhoto(el.dataset.shopPhoto, f);
+    if (f) void pickShopPhoto(el.dataset.shopPhoto, f);
     el.value = '';
     return;
   }
@@ -1281,17 +1296,20 @@ document.addEventListener('submit', (ev) => {
       return;
     }
     const editId = form.dataset.item;
+    const draft = shopUi.draftPhoto?.for === (editId ?? 'new') ? shopUi.draftPhoto : null;
     if (!editId && shop.items.length >= SHOP_LIMITS.items) {
       app.showToast(`รายการเต็มแล้ว (${SHOP_LIMITS.items}) — ลบรายการที่ซื้อแล้วก่อน`);
       app.requestRender();
       return;
     }
+    shopUi.draftPhoto = null; // ใช้รูปนี้แล้ว — ไม่ต้องทิ้งตอนปิดฟอร์ม
     closeShopForms();
     const { ok: _ok, ...fields } = r;
+    const photo = draft ? { photo: draft.id } : {};
     shopCommit((s) => {
       const it = editId ? s.items.find((x) => x.id === editId) : undefined;
-      if (it) Object.assign(it, fields);
-      else s.items.push({ id: uid('si'), prices: [], bought: false, ...fields });
+      if (it) Object.assign(it, fields, photo);
+      else s.items.push({ id: uid('si'), prices: [], bought: false, ...fields, ...photo });
     }, editId ? undefined : `เพิ่ม ${r.name} แล้ว — กด “＋ ราคาร้านในเกาหลี” เพื่อเทียบราคา`);
   } else if (kind === 'shop-price') {
     const r = parsePriceInput(String(fd.get('store') ?? ''), String(fd.get('krw') ?? ''));
