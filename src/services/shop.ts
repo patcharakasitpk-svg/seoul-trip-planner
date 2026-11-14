@@ -21,6 +21,8 @@ export interface ShopItem {
   thbLabel: string;
   prices: ShopPrice[];
   bought: boolean;
+  /** รหัสรูปใน IndexedDB (ดู shopPhotos.ts) */
+  photo?: string | null;
 }
 export interface ShopStore {
   items: ShopItem[];
@@ -64,6 +66,7 @@ export function sanitizeShop(raw: unknown): ShopStore {
       thbLabel: str(o.thbLabel, SHOP_LIMITS.label),
       prices,
       bought: o.bought === true,
+      photo: typeof o.photo === 'string' && /^ph-[A-Za-z0-9_-]{1,40}$/.test(o.photo) ? o.photo : null,
     });
   }
   return { items, lastStore: str(r.lastStore, SHOP_LIMITS.store) };
@@ -183,4 +186,10 @@ export function restorePrice(s: ShopStore, itemId: string, price: ShopPrice, ind
       return { ...it, prices };
     }),
   };
+}
+
+/** รูปที่เก็บไว้แต่ไม่มีรายการไหนใช้แล้ว (ลบทิ้งได้) */
+export function unusedPhotoIds(s: ShopStore, stored: string[]): string[] {
+  const used = new Set(s.items.map((i) => i.photo).filter(Boolean));
+  return stored.filter((id) => !used.has(id));
 }

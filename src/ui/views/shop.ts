@@ -11,7 +11,13 @@ export interface ShopUi {
   priceFor: string | null;
   /** id ราคาที่กำลังแก้ (null = เพิ่มใหม่) */
   editPrice: string | null;
+  /** รูปที่กำลังดูขนาดใหญ่ */
+  viewPhoto: string | null;
+  /** กำลังย่อ/บันทึกรูปของรายการนี้ */
+  photoBusy: string | null;
 }
+
+const photoInput = (itemId: string) => `<input type="file" accept="image/*" data-shop-photo="${esc(itemId)}" hidden>`;
 
 const thb = (krw: number, rate: number | null) => (rate ? ` <span class="muted">≈ ฿${fmtThb(krw / rate)}</span>` : '');
 
@@ -23,7 +29,8 @@ function itemForm(it: ShopItem | null): string {
       <label>จาก<input class="inp" name="thbLabel" placeholder="Shopee" maxlength="30" value="${esc(it?.thbLabel ?? '')}" aria-label="ที่มาของราคาไทย" enterkeyhint="done"></label>
       <label>จำนวน<input class="inp qty" name="qty" type="number" min="1" max="99" value="${it?.qty ?? 1}" aria-label="จำนวนชิ้น" enterkeyhint="done"></label>
     </div>
-    <div class="row-btns"><button class="btn sm primary">${it ? 'บันทึก' : 'เพิ่ม'}</button><button type="button" class="btn sm" data-act="shop-form-cancel">ยกเลิก</button></div>
+    <div class="row-btns"><button class="btn sm primary">${it ? 'บันทึก' : 'เพิ่ม'}</button><button type="button" class="btn sm" data-act="shop-form-cancel">ยกเลิก</button>
+      ${it ? `<label class="btn sm">📷 ${it.photo ? 'เปลี่ยนรูป' : 'เพิ่มรูป'}${photoInput(it.id)}</label>${it.photo ? `<button type="button" class="btn sm danger" data-act="shop-photo-del" data-item="${esc(it.id)}">ลบรูป</button>` : ''}` : ''}</div>
   </form>`;
 }
 
@@ -52,6 +59,13 @@ function card(it: ShopItem, store: ShopStore, rate: number | null, ui: ShopUi): 
   const multi = it.prices.length > 1;
   return `<article class="shop-item ${it.bought ? 'bought' : ''}" data-shop-item="${esc(it.id)}">
     <div class="shop-head">
+      ${
+        ui.photoBusy === it.id
+          ? '<span class="shop-thumb busy" aria-label="กำลังบันทึกรูป">…</span>'
+          : it.photo
+            ? `<button class="shop-thumb" data-act="shop-photo-view" data-item="${esc(it.id)}" aria-label="ดูรูป ${esc(it.name)}"><img data-photo="${esc(it.photo)}" alt=""></button>`
+            : `<label class="shop-thumb add" aria-label="เพิ่มรูป ${esc(it.name)}" title="ถ่ายรูป/เลือกรูป">📷${photoInput(it.id)}</label>`
+      }
       <button class="shop-check ${it.bought ? 'on' : ''}" data-act="shop-bought" data-item="${esc(it.id)}" aria-pressed="${it.bought}" aria-label="${it.bought ? 'ยังไม่ได้ซื้อ' : 'ซื้อแล้ว'}">${it.bought ? '✓' : ''}</button>
       <button class="shop-name" data-act="shop-edit" data-item="${esc(it.id)}" aria-label="แก้ ${esc(it.name)}">${esc(it.name)}${it.qty > 1 ? ` <span class="muted">×${it.qty}</span>` : ''}</button>
       <button class="icon-btn sm" data-act="shop-del" data-item="${esc(it.id)}" aria-label="ลบ ${esc(it.name)}">🗑</button>
@@ -82,7 +96,7 @@ export function renderShop(store: ShopStore, rate: number | null, ui: ShopUi, su
   const items = sortItems(store.items);
   const sumLine = s.total
     ? `<div class="shop-sum">
-        <div><span class="muted small">ยังต้องซื้อ (ร้านที่ถูกสุด)</span><b>₩${fmtKrw(s.toBuyKrw)}${s.toBuyThb != null ? ` <span class="muted">≈ ฿${fmtThb(s.toBuyThb)}</span>` : ''}</b></div>
+        <div><span class="muted small">ยังต้องซื้อ (ร้านที่ถูกสุด)</span>${s.toBuyKrw ? `<b>₩${fmtKrw(s.toBuyKrw)}${s.toBuyThb != null ? ` <span class="muted">≈ ฿${fmtThb(s.toBuyThb)}</span>` : ''}</b>` : '<b class="muted">ยังไม่มีราคาเกาหลี</b>'}</div>
         ${s.savedThb ? `<div><span class="muted small">ประหยัดกว่าไทย</span><b class="good">฿${fmtThb(s.savedThb)}</b></div>` : ''}
         <div><span class="muted small">ซื้อแล้ว</span><b>${s.bought}/${s.total}</b></div>
       </div>`
@@ -95,6 +109,7 @@ export function renderShop(store: ShopStore, rate: number | null, ui: ShopUi, su
     ${s.bought ? '<button class="btn ghost sm" data-act="shop-clear-bought">ลบรายการที่ซื้อแล้ว</button>' : ''}
     ${rate ? '' : '<p class="muted small">ยังไม่มีอัตราแลกเปลี่ยน — แสดงราคาวอนอย่างเดียว (ตั้งได้ในหน้าแปลงเงิน)</p>'}
     <p class="muted small">รายการนี้เก็บเฉพาะในเครื่องนี้ ไม่ปนกับแผนและไม่แชร์</p>
+    ${ui.viewPhoto ? `<div class="photo-view" data-act="shop-photo-close" role="dialog" aria-label="รูปของที่จะซื้อ"><img data-photo="${esc(ui.viewPhoto)}" alt=""><span class="photo-close">✕</span></div>` : ''}
     <datalist id="shop-stores">${suggestions.map((n) => `<option value="${esc(n)}">`).join('')}</datalist>
   </div>`;
 }

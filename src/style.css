@@ -431,3 +431,13 @@ body[data-tab="fx"] .layout, body[data-tab="fx"] #day-tabs-wrap { display: none;
 /* Naver Map */
 button.link { border: 0; background: none; padding: 0; font: inherit; cursor: pointer; color: var(--accent); }
 .leg .naver { color: #03a94d; margin-left: .4rem; }
+
+/* รูปของที่จะซื้อ */
+.shop-thumb { flex: none; width: 52px; height: 52px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--bg, #f5f6f8); padding: 0; display: grid; place-items: center; cursor: pointer; font-size: 1.2rem; color: var(--muted); }
+.shop-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.shop-thumb.add { border-style: dashed; }
+.shop-thumb.busy { cursor: progress; }
+.shop-thumb.missing::after, .photo-view.missing::after { content: 'ไม่มีรูป'; font-size: .65rem; }
+.photo-view { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.88); display: grid; place-items: center; padding: 1rem; cursor: zoom-out; }
+.photo-view img { max-width: 100%; max-height: 85vh; border-radius: 12px; }
+.photo-close { position: absolute; top: max(1rem, env(safe-area-inset-top)); right: 1rem; color: #fff; font-size: 1.5rem; }

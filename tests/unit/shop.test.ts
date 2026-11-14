@@ -121,3 +121,27 @@ describe('ของที่จะซื้อ: ตรวจสิ่งที�
     expect(back2.items[0].prices.map((x) => x.id)).toEqual(['p1', 'p2']);
   });
 });
+
+describe('ของที่จะซื้อ: รูป', () => {
+  it('เก็บรหัสรูปที่ถูกรูปแบบ ทิ้งค่าที่แปลก', () => {
+    const s = sanitizeShop({ items: [{ name: 'A', photo: 'ph-abc123' }, { name: 'B', photo: '../../x' }, { name: 'C' }] });
+    expect(s.items.map((i) => i.photo)).toEqual(['ph-abc123', null, null]);
+  });
+});
+
+import { unusedPhotoIds } from '../../src/services/shop';
+describe('ของที่จะซื้อ: ล้างรูปที่ไม่ใช้', () => {
+  it('รูปที่ไม่มีรายการไหนอ้างถึง = ลบได้', () => {
+    const s = sanitizeShop({ items: [{ name: 'A', photo: 'ph-1' }] });
+    expect(unusedPhotoIds(s, ['ph-1', 'ph-2', 'ph-3'])).toEqual(['ph-2', 'ph-3']);
+  });
+});
+
+import { fitSize } from '../../src/services/shopPhotos';
+describe('ย่อรูป', () => {
+  it('ด้านยาวไม่เกิน 640 คงสัดส่วน และไม่ขยายรูปเล็ก', () => {
+    expect(fitSize(4032, 3024)).toEqual({ w: 640, h: 480 });
+    expect(fitSize(3024, 4032)).toEqual({ w: 480, h: 640 });
+    expect(fitSize(300, 200)).toEqual({ w: 300, h: 200 });
+  });
+});

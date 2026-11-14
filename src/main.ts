@@ -26,7 +26,8 @@ import { RoomSync, inviteUrl, newRoomId, roomFromHash, toRoomDoc, fromRoomDoc, s
 import { SYNC_DB_URL } from './config';
 import { loadFx, saveFx, needsRefresh, fetchRate, activeRate, parseAmount } from './services/fx';
 import { renderFx, fxResult, formatTyping, type FxUi } from './ui/views/fx';
-import { loadShop, saveShop, parseItemInput, parsePriceInput, restoreItem, restorePrice, SHOP_LIMITS, type ShopStore } from './services/shop';
+import { loadShop, saveShop, parseItemInput, parsePriceInput, restoreItem, restorePrice, unusedPhotoIds, SHOP_LIMITS, type ShopStore } from './services/shop';
+import { putPhoto, photoUrl, photoIds, deletePhotos, resizeImage } from './services/shopPhotos';
 import { renderShop, storeSuggestions, type ShopUi } from './ui/views/shop';
 import { safeGet, safeSet } from './storage/storage';
 
@@ -216,6 +217,7 @@ function renderFxPage() {
   const kept = keepFormState();
   $('#fx').innerHTML = sw + (moneyView === 'fx' ? renderFx(fxUi, fxStore, app.online) : renderShop(shop, activeRate(fxStore), shopUi, storeSuggestions(shop, placeNames)));
   if (!kept.restore()) (document.querySelector('#fx [data-autofocus]') as HTMLInputElement | null)?.focus();
+  hydratePhotos();
 }
 
 /** เก็บค่าที่กำลังพิมพ์ในฟอร์มที่เปิดอยู่ แล้วใส่คืนหลังเรนเดอร์ใหม่ (เน็ตหลุด/อัตราอัปเดตระหว่างพิมพ์ ไม่ให้หาย) */
@@ -282,8 +284,46 @@ function openNaver(href: string) {
 /* ---------------- ของที่จะซื้อ (เก็บเฉพาะเครื่องนี้) ---------------- */
 let moneyView: 'fx' | 'shop' = 'fx';
 let shop: ShopStore = loadShop();
-const shopUi: ShopUi = { adding: false, editItem: null, priceFor: null, editPrice: null };
-const closeShopForms = () => Object.assign(shopUi, { adding: false, editItem: null, priceFor: null, editPrice: null });
+const shopUi: ShopUi = { adding: false, editItem: null, priceFor: null, editPrice: null, viewPhoto: null, photoBusy: null };
+const closeShopForms = () => Object.assign(shopUi, { adding: false, editItem: null, priceFor: null, editPrice: null, viewPhoto: null });
+
+/** ใส่รูปจริงให้ <img data-photo> หลังเรนเดอร์ (อ่านจาก IndexedDB แบบ async) */
+function hydratePhotos() {
+  document.querySelectorAll<HTMLImageElement>('#fx img[data-photo]').forEach((img) => {
+    void photoUrl(img.dataset.photo!).then((u) => {
+      if (u) img.src = u;
+      else img.closest('.shop-thumb, .photo-view')?.classList.add('missing');
+    });
+  });
+}
+
+async function addShopPhoto(itemId: string, file: File) {
+  if (!file.type.startsWith('image/')) {
+    app.showToast('เลือกไฟล์รูปภาพ');
+    app.requestRender();
+    return;
+  }
+  shopUi.photoBusy = itemId;
+  app.requestRender();
+  try {
+    const blob = await resizeImage(file);
+    const id = uid('ph-');
+    await putPhoto(id, blob);
+    shopUi.photoBusy = null;
+    shopCommit((s) => {
+      const it = s.items.find((x) => x.id === itemId);
+      if (it) it.photo = id;
+    }, 'เพิ่มรูปแล้ว');
+  } catch (e) {
+    console.warn('photo failed', e);
+    shopUi.photoBusy = null;
+    app.showToast('บันทึกรูปไม่ได้ (เบราว์เซอร์นี้อาจไม่อนุญาตให้เก็บรูป เช่นโหมดส่วนตัว)');
+    app.requestRender();
+  }
+}
+
+/** ล้างรูปที่ไม่มีรายการไหนใช้แล้ว (หลังลบรายการ/เปลี่ยนรูป) — ทำตอนเปิดแอป เพื่อให้ปุ่มเลิกทำยังคืนรูปได้ */
+void photoIds().then((ids) => deletePhotos(unusedPhotoIds(shop, ids)));
 
 /** แก้รายการ: บันทึกลงเครื่อง · undo = คืนเฉพาะสิ่งที่ลบ บนรายการปัจจุบัน (ไม่ทับการแก้อื่นที่เกิดหลังจากนั้น) */
 function shopCommit(mut: (s: ShopStore) => void, msg?: string, undo?: (current: ShopStore) => ShopStore) {
@@ -854,6 +894,26 @@ document.addEventListener('click', (ev) => {
       closeShopForms();
       shopUi.editItem = d.item ?? null;
       break;
+    case 'shop-photo-view': {
+      const it = shop.items.find((x) => x.id === d.item);
+      if (!it?.photo) return;
+      closeShopForms();
+      shopUi.viewPhoto = it.photo;
+      break;
+    }
+    case 'shop-photo-close':
+      shopUi.viewPhoto = null;
+      break;
+    case 'shop-photo-del': {
+      const it = shop.items.find((x) => x.id === d.item);
+      const old = it?.photo;
+      if (!it || !old) return;
+      shopCommit((s) => {
+        const x = s.items.find((y) => y.id === d.item);
+        if (x) x.photo = null;
+      }, 'ลบรูปแล้ว', (cur) => ({ ...cur, items: cur.items.map((x) => (x.id === it.id && !x.photo ? { ...x, photo: old } : x)) }));
+      return;
+    }
     case 'shop-form-cancel':
       closeShopForms();
       break;
@@ -1049,6 +1109,12 @@ function setLeg(dayId: string, target: string, patch: Partial<Stop['legIn']>) {
 
 document.addEventListener('change', (ev) => {
   const el = ev.target as HTMLInputElement;
+  if (el.dataset.shopPhoto) {
+    const f = el.files?.[0];
+    if (f) void addShopPhoto(el.dataset.shopPhoto, f);
+    el.value = '';
+    return;
+  }
   if (el.dataset.filter) {
     if (el.dataset.filter === 'q') return; // จัดการโดย input event แล้ว
     (app.filters as any)[el.dataset.filter] = el.value;
