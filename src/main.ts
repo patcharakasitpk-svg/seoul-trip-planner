@@ -22,6 +22,9 @@ import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
 import { stopLocationId } from './core/schedule';
 import { searchPlaces, placeFromResult, findExisting } from './services/placeSearch';
 import { SEARCH_PREFIX } from './ui/mapSpecs';
+import { RoomSync, inviteUrl, newRoomId, roomFromHash, toRoomDoc, fromRoomDoc, shouldApplyRemote, type RoomDoc, type SyncState } from './services/sync';
+import { SYNC_DB_URL } from './config';
+import { safeGet, safeSet } from './storage/storage';
 
 const hadSavedPlans = loadPlans() != null;
 const $ = (sel: string) => document.querySelector(sel) as HTMLElement;
@@ -69,6 +72,11 @@ function render() {
   if (g.status === 'error') st.push(`<span class="warn">Google Maps ใช้ไม่ได้ (${esc(g.error)}) — ใช้แผนที่ OpenStreetMap แทน</span>`);
   if (!app.storageOk) st.push('<span class="warn">บันทึกในเครื่องไม่ได้ — โปรด Export JSON ก่อนปิดหน้า</span>');
   else if (!app.saveOk) st.push('<span class="warn">บันทึกล่าสุดไม่สำเร็จ — โปรด Export JSON</span>');
+  ensureSync();
+  if (syncState.status === 'live') st.push(`<span class="sync ok">🔗 ซิงก์กับเพื่อน${syncState.lastAt ? ` · ล่าสุด ${esc(new Date(syncState.lastAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' }))}` : ''}</span>`);
+  else if (syncState.status === 'connecting') st.push('<span class="sync">🔗 กำลังเชื่อมต่อแผนร่วม…</span>');
+  else if (syncState.status === 'pending') st.push('<span class="warn">🔗 ยังส่งการแก้ให้เพื่อนไม่ได้ (ออฟไลน์?) — จะส่งเองเมื่อออนไลน์</span>');
+  else if (syncState.status === 'error') st.push(`<span class="warn">🔗 ซิงก์ไม่ได้: ${esc(syncState.message)}</span>`);
   $('#status-bar').innerHTML = st.join('');
   $('#day-tabs-wrap').innerHTML = renderDayTabs();
 
@@ -181,8 +189,124 @@ function addSearchResult(i: number) {
   quickToggle(place.id);
 }
 
+/* ---------------- ซิงก์สดกับเพื่อน ---------------- */
+const clientId = (() => {
+  const k = 'stp.v1.client';
+  const v = safeGet(k);
+  if (v) return v;
+  const n = newRoomId(16);
+  safeSet(k, n);
+  return n;
+})();
+let sync: RoomSync | null = null;
+export let syncState: SyncState = { status: 'off' };
+/** ห้องที่เพิ่งกดลิงก์เข้ามา — แผนในเครื่องเป็นแผนว่างชั่วคราว ต้องรับจากห้องเท่านั้น */
+let joiningRoom: string | null = null;
+let lastRemoteToast = 0;
+
+function ensureSync() {
+  const roomId = SYNC_DB_URL ? app.plan.roomId ?? null : null;
+  if (sync && sync.roomId === roomId) return;
+  sync?.stop();
+  sync = null;
+  syncState = { status: 'off' };
+  if (!roomId) return;
+  sync = new RoomSync(SYNC_DB_URL, roomId, clientId, onRemote, (s) => {
+    syncState = s;
+    app.requestRender();
+  });
+  sync.start();
+  sync.push(toRoomDoc(app.plan, clientId)); // ส่งเมื่อห้องพร้อม (ถ้าห้องมีแผนอยู่แล้ว จะรับของห้องก่อน)
+}
+
+function onRemote(doc: RoomDoc | null) {
+  const s = sync;
+  if (!s) return;
+  const plan = app.plan;
+  if (!doc) {
+    if (joiningRoom === s.roomId) {
+      // ลิงก์เก่า/ห้องว่าง → ไม่สร้างห้องจากแผนว่าง: ยกเลิกการซิงก์ของแผนชั่วคราวนี้
+      joiningRoom = null;
+      s.clearPending();
+      app.commit((p) => {
+        p.roomId = null;
+      }, 'ไม่พบแผนในลิงก์นี้ — ให้เพื่อนกด “เริ่มแชร์แผนนี้กับเพื่อน” แล้วส่งลิงก์ใหม่');
+    }
+    return; // ห้องว่าง: แผนในเครื่องจะถูกส่งขึ้นไป (pending)
+  }
+  const joining = joiningRoom === s.roomId;
+  // ในเครื่องมีการแก้ที่ยังไม่ได้ส่ง → ของเราเป็น "ตัวล่าสุด" จะส่งทับ (ยกเว้นเพิ่งเข้าห้อง)
+  if (!joining && s.hasPending()) return;
+  const localDoc = toRoomDoc(plan, clientId).plan;
+  if (!joining && !shouldApplyRemote(doc, clientId, localDoc)) return;
+  const next = fromRoomDoc(doc, { id: plan.id, roomId: s.roomId });
+  if (!next) {
+    app.showToast('ข้อมูลแผนจากเพื่อนอ่านไม่ได้ — ข้ามไป');
+    return;
+  }
+  if (joining) s.clearPending(); // ทิ้งแผนว่างชั่วคราวที่ค้างส่ง
+  s.lastSent = toRoomDoc(next, clientId).plan;
+  const keepDay = next.days.some((d) => d.id === app.activeDayId) ? app.activeDayId : next.days[0].id;
+  app.store.plans = app.store.plans.map((x) => (x.id === plan.id ? next : x));
+  app.activeDayId = keepDay;
+  app.persist();
+  if (joining) {
+    joiningRoom = null;
+    app.fitNext = true;
+    app.showToast(`เข้าร่วมแผน “${next.name}” แล้ว — แก้ได้ทั้งคู่ อัปเดตสด`);
+  } else if (Date.now() - lastRemoteToast > 4000) {
+    lastRemoteToast = Date.now();
+    app.showToast('เพื่อนแก้แผน — อัปเดตแล้ว');
+  }
+  app.requestRender();
+}
+
+app.onPersist = () => {
+  if (!sync || app.plan.roomId !== sync.roomId) return;
+  if (joiningRoom === sync.roomId) return; // ห้ามส่งแผนว่างชั่วคราว
+  sync.push(toRoomDoc(app.plan, clientId));
+};
+
+function startSharing() {
+  if (!SYNC_DB_URL) return;
+  const roomId = newRoomId();
+  app.commit((p) => {
+    p.roomId = roomId;
+  });
+}
+
+function stopSharing() {
+  app.commit((p) => {
+    p.roomId = null;
+  }, 'หยุดซิงก์ในเครื่องนี้แล้ว (แผนยังอยู่ครบ)');
+}
+
+function joinRoom(roomId: string) {
+  const existing = app.store.plans.find((p) => p.roomId === roomId);
+  if (existing) {
+    app.store.activeId = existing.id;
+    app.activeDayId = existing.days[0].id;
+    app.persist();
+    app.showToast('เปิดแผนร่วมกับเพื่อนแล้ว');
+    return;
+  }
+  if (!SYNC_DB_URL) {
+    app.showToast('เว็บนี้ยังไม่ได้ตั้งค่าซิงก์ — เปิดลิงก์ร่วมแผนไม่ได้');
+    return;
+  }
+  joiningRoom = roomId;
+  const p = newPlan('แผนร่วมกับเพื่อน');
+  p.roomId = roomId;
+  app.addPlan(p);
+  app.showToast('กำลังโหลดแผนของเพื่อน…');
+}
+
+window.addEventListener('online', () => void sync?.flush());
+
 /* ---------------- QR ---------------- */
 function drawQr() {
+  const ci = document.getElementById('qr-invite') as HTMLCanvasElement | null;
+  if (ci && app.plan.roomId) QRCode.toCanvas(ci, inviteUrl(location.href, app.plan.roomId), { width: 200, margin: 1, errorCorrectionLevel: 'M' }).catch(() => {});
   const c = document.getElementById('qr') as HTMLCanvasElement | null;
   if (!c) return;
   const r = buildShareUrl(app.plan, location.href);
@@ -582,6 +706,17 @@ document.addEventListener('click', (ev) => {
     case 'open-share':
       app.modal = { type: 'share' };
       break;
+    case 'sync-start':
+      startSharing();
+      return;
+    case 'sync-stop':
+      confirmThen('หยุดซิงก์แผนนี้ในเครื่องนี้? (แผนในเครื่องยังอยู่ครบ เพื่อนยังใช้แผนในห้องต่อได้)', 'หยุดซิงก์', stopSharing);
+      return;
+    case 'copy-invite': {
+      const v = (document.getElementById('invite-url') as HTMLInputElement | null)?.value;
+      if (v) navigator.clipboard?.writeText(v).then(() => app.showToast('คัดลอกลิงก์ชวนเพื่อนแล้ว'), () => app.showToast('คัดลอกไม่ได้ — กดค้างที่ลิงก์เพื่อคัดลอก'));
+      return;
+    }
     case 'copy-link': {
       const r = buildShareUrl(app.plan, location.href);
       if (r.ok) copy(r.url, 'คัดลอกลิงก์แล้ว (สำเนาแผน ณ ตอนนี้)');
@@ -879,6 +1014,12 @@ onWeatherChange(() => app.requestRender());
 onGoogleStatus(() => app.requestRender());
 
 function handleHash() {
+  const room = roomFromHash(location.hash);
+  if (room) {
+    history.replaceState(null, '', location.pathname + location.search);
+    joinRoom(room);
+    return;
+  }
   const r = decodeFragment(location.hash);
   if (!r) return;
   history.replaceState(null, '', location.pathname + location.search);

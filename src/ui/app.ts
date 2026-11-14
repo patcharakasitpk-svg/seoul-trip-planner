@@ -214,8 +214,12 @@ class AppState {
     }, toast);
   }
 
+  /** เรียกหลังบันทึกทุกครั้ง (ใช้ส่งแผนขึ้นห้องซิงก์) */
+  onPersist: () => void = () => {};
+
   persist() {
     this.saveOk = savePlans(this.store);
+    this.onPersist();
   }
 
   addPlan(plan: Plan, activate = true) {

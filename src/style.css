@@ -364,3 +364,8 @@ label.block { display: block; margin: .4rem 0; }
 .tpl-day .btn.ghost.xs.on { color: #fff; background: var(--accent, #1f6feb); }
 .tpl-actions { align-items: center; }
 .near-chip .btn { white-space: normal; text-align: left; justify-content: flex-start; }
+
+/* ซิงก์กับเพื่อน */
+.sync-card { margin-bottom: .8rem; border-color: var(--accent); }
+.status-bar .sync { color: var(--accent); }
+.status-bar .sync.ok { color: #0e8a5f; }

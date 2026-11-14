@@ -2,6 +2,12 @@
  * ช่วงวันเที่ยวตั้งต้นของแผนใหม่ (แก้ได้ตามทริป)
  * ใช้สร้างวันในแผนใหม่ และปุ่ม "ตั้งวันเที่ยวให้ครบ" สำหรับแผนเดิม
  */
+/**
+ * ซิงก์สดกับเพื่อน: URL ของ Firebase Realtime Database (ไม่ใช่ความลับ — สิทธิ์คุมด้วย Rules: เข้าได้เฉพาะคนที่มีรหัสห้อง)
+ * ว่าง = ปิดฟีเจอร์ซิงก์ · ตั้งตอน build ด้วย VITE_SYNC_DB_URL ได้
+ */
+export const SYNC_DB_URL: string = ((import.meta as any).env?.VITE_SYNC_DB_URL as string | undefined) || '';
+
 export const TRIP_DATES = { start: '2026-11-30', end: '2026-12-06' };
 
 /** คืนที่ไม่ได้นอนโรงแรมหลัก: วันนั้นจบที่ hotelId และวันถัดไปเริ่มจาก hotelId */

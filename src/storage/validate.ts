@@ -69,6 +69,7 @@ export function validatePlan(input: unknown): { ok: true; plan: Plan; warnings: 
     plan: {
       version: 1,
       id: str(input.id, 40) || uid('p'),
+      roomId: typeof input.roomId === 'string' && /^[A-Za-z0-9]{20,40}$/.test(input.roomId) ? input.roomId : null,
       name: str(input.name, 80) || 'แผนเที่ยวโซล',
       days,
       customPlaces,

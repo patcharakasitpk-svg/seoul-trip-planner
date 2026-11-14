@@ -8,7 +8,8 @@ const PREFIX = 'plan=';
 
 /** แผนที่จะส่งออก: ไม่มี API Key / ผลบริการ (แผนเก็บเฉพาะข้อมูลผู้ใช้อยู่แล้ว) */
 export function exportablePlan(plan: Plan): Plan {
-  const { ...p } = plan;
+  // ลิงก์/JSON เป็นสำเนา → ไม่พารหัสห้องซิงก์ติดไป (กันสำเนาไปเขียนทับห้องของเพื่อน)
+  const { roomId: _room, ...p } = plan;
   return JSON.parse(JSON.stringify(p));
 }
 

@@ -102,6 +102,8 @@ export type ColdLevel = 'low' | 'normal' | 'high';
 export interface Plan {
   version: 1;
   id: string;
+  /** รหัสห้องซิงก์สดกับเพื่อน (ไม่มี = แผนเฉพาะเครื่องนี้) */
+  roomId?: string | null;
   name: string;
   days: Day[];
   customPlaces: Place[];
