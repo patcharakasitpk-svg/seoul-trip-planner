@@ -35,3 +35,26 @@ describe('พิกัดจากแหล่งเดียว', () => {
     expect(noPin).not.toContain('hanam-pig-myeongdong');
   });
 });
+
+import { naverRouteUrl, naverPlaceUrl } from '../../src/ui/util';
+
+describe('Naver Map', () => {
+  const hotel = PUBLIC_PLACES.find((x) => x.id === 'hotel')!;
+  const kyoja = PUBLIC_PLACES.find((x) => x.id === 'myeongdong-kyoja')!;
+  it('เส้นทางขนส่งสาธารณะ: ต้นทาง/ปลายทาง พิกัด ชื่อเกาหลี และ appname', () => {
+    const u = naverRouteUrl(hotel, kyoja)!;
+    expect(u.startsWith('nmap://route/public?')).toBe(true);
+    const q = new URLSearchParams(u.split('?')[1]);
+    expect(Number(q.get('slat'))).toBeCloseTo(hotel.lat!);
+    expect(Number(q.get('dlng'))).toBeCloseTo(kyoja.lng!);
+    expect(q.get('dname')).toContain('명동교자');
+    expect(q.get('appname')).toBeTruthy();
+  });
+  it('ไม่มีต้นทาง = ใช้ตำแหน่งปัจจุบันในแอป · ปลายทางไม่มีพิกัด = ไม่มีปุ่ม', () => {
+    const q = new URLSearchParams(naverRouteUrl(null, kyoja)!.split('?')[1]);
+    expect(q.has('slat')).toBe(false);
+    expect(naverRouteUrl(hotel, { ...kyoja, lat: null, lng: null })).toBeNull();
+    expect(naverPlaceUrl({ ...kyoja, lat: null })).toBeNull();
+    expect(naverPlaceUrl(kyoja)!.startsWith('nmap://place?')).toBe(true);
+  });
+});

@@ -1,5 +1,5 @@
 import { app } from '../app';
-import { esc, gmapsDirUrl, kakaoToUrl, MODE_ICON, MODE_LABEL, photosUrl } from '../util';
+import { esc, gmapsDirUrl, kakaoToUrl, MODE_ICON, MODE_LABEL, photosUrl, naverBtn, naverRouteUrl } from '../util';
 import { fmtDateTh, fmtDur, fmtHM, seoulNow } from '../../core/time';
 import { renderWeather } from './weather';
 import { routeSummary, stepsText } from './leg';
@@ -35,6 +35,7 @@ export function renderToday(): string {
       ${p ? `<div class="nav-btns">
         <a class="btn primary big" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(null, p, next.leg.mode))}">🧭 นำทางจากตำแหน่งปัจจุบัน</a>
         ${prevPlace ? `<a class="btn" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(prevPlace, p, next.leg.mode))}">เส้นทางจาก ${esc(prevPlace.nameTh)}</a>` : ''}
+        ${naverBtn(naverRouteUrl(null, p), '🟢 Naver Map (รถเมล์/รถไฟ จากตรงนี้)', 'btn')}
         ${kakaoToUrl(p) ? `<a class="btn" target="_blank" rel="noopener" href="${esc(kakaoToUrl(p)!)}">KakaoMap</a>` : ''}
         <a class="btn" target="_blank" rel="noopener" href="${esc(photosUrl(p))}">📷 ดูรูปหน้าร้าน</a>
       </div>` : ''}
@@ -48,7 +49,7 @@ export function renderToday(): string {
       <p class="eyebrow">ช่วงกลับ</p>
       <h3>กลับ ${esc(end.nameTh)}</h3>
       <p>${s.end?.arrive != null ? `ถึง ${s.end.lowerBound ? '≥' : ''}${fmtHM(s.end.arrive)}` : 'ยังไม่มีเวลา'}${s.end?.slackMin != null ? (s.end.slackMin >= 0 ? ` · <span class="ok-text">เหลือ ${fmtDur(s.end.slackMin)}</span>` : ` · <span class="bad-text">เกิน ${fmtDur(-s.end.slackMin)}</span>`) : s.end?.lowerBound ? ' · <span class="warn-text">ยังสรุปไม่ได้ว่าทัน</span>' : ''}</p>
-      <div class="nav-btns"><a class="btn primary" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(null, end, day.endLeg.mode))}">🧭 นำทางกลับจากตำแหน่งปัจจุบัน</a>
+      <div class="nav-btns"><a class="btn primary" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(null, end, day.endLeg.mode))}">🧭 นำทางกลับจากตำแหน่งปัจจุบัน</a>${naverBtn(naverRouteUrl(null, end), '🟢 Naver Map', 'btn')}
       ${lastPlace && lastPlace.id !== end.id ? `<a class="btn" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(lastPlace, end, day.endLeg.mode))}">จาก ${esc(lastPlace.nameTh)}</a>` : ''}</div>
     </section>`
     : '';

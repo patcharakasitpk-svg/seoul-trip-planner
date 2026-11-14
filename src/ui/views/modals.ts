@@ -1,6 +1,6 @@
 import type { Day, Place, TravelMode } from '../../core/types';
 import { app, type Modal } from '../app';
-import { esc, dayColor, MODE_ICON, MODE_LABEL, gmapsDirUrl, kakaoToUrl, photosUrl } from '../util';
+import { esc, dayColor, MODE_ICON, MODE_LABEL, gmapsDirUrl, kakaoToUrl, photosUrl, naverBtn, naverRouteUrl } from '../util';
 import { diffDays as diffSchedules } from '../../core/compare';
 import { fmtDur, fmtHM, fmtDateTh, parseHM } from '../../core/time';
 import { routeSummary, stepsText, straightDist } from './leg';
@@ -261,6 +261,7 @@ function routeBody(m: Extract<Modal, { type: 'route' }>): string {
     <label class="small">เปลี่ยนเวลาออก <input class="inp xs" type="time" value="${m.departMins != null ? fmtHM(m.departMins).slice(0, 5) : ''}" data-act-change="route-depart"></label>
     ${dist != null ? `<p class="muted small">ระยะเส้นตรง ${fmtDist(dist)} — ไม่ใช่ระยะเดินทางจริง</p>` : ''}
     <div class="mode-grid">${cards}</div>
+    <p class="small">${naverBtn(naverRouteUrl(from, to), '🟢 ดูรถเมล์/รถไฟใน Naver Map')} <span class="muted">แม่นที่สุดในเกาหลี: สายรถเมล์ เวลารถมา ทางออกสถานี</span></p>
     ${kakaoToUrl(to) ? `<p class="small"><a target="_blank" rel="noopener" href="${esc(kakaoToUrl(to)!)}">เปิดใน KakaoMap ↗</a> (มีเส้นทางเดิน/รถในเกาหลี)</p>` : ''}`;
 }
 

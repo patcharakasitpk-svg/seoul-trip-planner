@@ -253,6 +253,32 @@ function keepFormState() {
   };
 }
 
+/* ---------------- Naver Map (แอป) ---------------- */
+/** เปิดแอป Naver Map — ถ้า ~2.5 วิแล้วยังอยู่หน้าเดิม (ไม่มีแอป / เบราว์เซอร์ในแอป LINE บล็อก) ให้คำแนะนำ */
+function openNaver(href: string) {
+  if (!href.startsWith('nmap://')) return;
+  let left = false;
+  const mark = () => (left = true);
+  window.addEventListener('pagehide', mark, { once: true });
+  window.addEventListener('blur', mark, { once: true });
+  document.addEventListener('visibilitychange', () => document.visibilityState === 'hidden' && mark(), { once: true });
+  location.href = href;
+  setTimeout(() => {
+    window.removeEventListener('pagehide', mark);
+    window.removeEventListener('blur', mark);
+    if (left || document.visibilityState === 'hidden') return;
+    const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const inApp = /Line\/|FBAN|FBAV|Instagram/i.test(navigator.userAgent);
+    confirmThen(
+      inApp
+        ? 'เปิด Naver Map จากในแอป LINE ไม่ได้ — กด ⋯ มุมขวาแล้วเลือก “เปิดใน Safari/Chrome” แล้วกดปุ่มอีกครั้ง · ถ้ายังไม่มีแอป Naver Map กด “ติดตั้ง”'
+        : 'ไม่ได้เปิดแอป Naver Map — อาจยังไม่ได้ติดตั้ง ติดตั้งตอนนี้ไหม? (ฟรี · เมนูภาษาอังกฤษได้)',
+      'ติดตั้ง Naver Map',
+      () => window.open(ios ? 'https://apps.apple.com/app/id311867728' : 'https://play.google.com/store/apps/details?id=com.nhn.android.nmap', '_blank', 'noopener'),
+    );
+  }, 2500);
+}
+
 /* ---------------- ของที่จะซื้อ (เก็บเฉพาะเครื่องนี้) ---------------- */
 let moneyView: 'fx' | 'shop' = 'fx';
 let shop: ShopStore = loadShop();
@@ -813,6 +839,9 @@ document.addEventListener('click', (ev) => {
     case 'open-share':
       app.modal = { type: 'share' };
       break;
+    case 'naver':
+      openNaver(d.href!);
+      return;
     case 'money-view':
       moneyView = d.v === 'shop' ? 'shop' : 'fx';
       closeShopForms();

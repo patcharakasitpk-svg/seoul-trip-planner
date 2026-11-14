@@ -1,7 +1,7 @@
 import type { Place } from '../../core/types';
 import { app } from '../app';
 import { CATEGORY_ICON, CATEGORY_LABEL, DINING_ZONE_LABEL } from '../../data/places';
-import { esc, gmapsPlaceUrl, photosUrl } from '../util';
+import { esc, gmapsPlaceUrl, photosUrl, naverBtn, naverPlaceUrl } from '../util';
 import { closedOn, shortHours, weekdayTh } from '../../core/hours';
 import { stationBlock } from './transit';
 import { fmtDateTh } from '../../core/time';
@@ -205,6 +205,7 @@ function placeDetails(p: Place): string {
       <div class="row-btns">
         <a class="btn sm" href="${esc(photosUrl(p))}" target="_blank" rel="noopener">📷 ดูรูป</a>
         <a class="btn sm" href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">Google Maps ↗</a>
+        ${naverBtn(naverPlaceUrl(p))}
         ${p.lat != null ? `<button class="btn sm" data-act="focus-place" data-place="${esc(p.id)}">ดูบนแผนที่</button>` : ''}
       </div>
     </div>`;

@@ -352,3 +352,17 @@ test('ของที่จะซื้อ: สิ่งที่กำลัง
   await expect(page.locator('[data-shop-item]', { hasText: 'A' })).toBeVisible();
   await expect(page.locator('[data-shop-item]', { hasText: 'B' }).locator('[data-act="shop-bought"]')).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('Naver Map: ปุ่มเส้นทางรถเมล์/รถไฟ และคำแนะนำเมื่อเปิดแอปไม่ได้', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-act="open-templates"]').click();
+  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
+  await page.locator('[data-act="tpl-apply-all"]').click();
+  await page.locator('[data-act="confirm-ok"]').click();
+  await gotoPlan(page);
+  const btn = page.locator('.timeline [data-act="naver"]').first();
+  await expect(btn).toBeVisible();
+  expect(await btn.getAttribute('data-href')).toMatch(/^nmap:\/\/route\/public\?.*dlat=/);
+  await btn.click(); // ไม่มีแอป → ยังอยู่หน้าเดิม → แนะนำติดตั้ง
+  await expect(page.locator('.modal')).toContainText('Naver Map', { timeout: 6000 });
+});

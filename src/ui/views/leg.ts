@@ -1,7 +1,7 @@
 import type { LegInfo } from '../../core/schedule';
 import type { RouteResult, TransitStep, TravelMode } from '../../core/types';
 import { app } from '../app';
-import { esc, gmapsDirUrl, kakaoToUrl, MODE_ICON, MODE_LABEL } from '../util';
+import { esc, gmapsDirUrl, kakaoToUrl, MODE_ICON, MODE_LABEL, naverBtn, naverRouteUrl } from '../util';
 import { fmtDur } from '../../core/time';
 import { fmtDist, roughEstimateMin, straightLineM } from '../../core/geo';
 import { legTransitHint } from './transit';
@@ -61,7 +61,8 @@ export function legRow(dayId: string, leg: LegInfo, target: string): string {
   const main = canFill
     ? `<span class="leg-ico">${MODE_ICON[leg.mode]}</span>${distHint}
        <label class="leg-fill"><input class="inp xs" type="number" min="0" inputmode="numeric" placeholder="กี่นาที" data-act-change="leg-manual" data-day="${dayId}" data-stop="${target}" aria-label="เวลาเดินทาง (นาที)"> นาที</label>
-       ${gm ? `<a class="link small" target="_blank" rel="noopener" href="${esc(gm)}">ดูใน Google Maps ↗</a>` : ''}`
+       ${gm ? `<a class="link small" target="_blank" rel="noopener" href="${esc(gm)}">ดูใน Google Maps ↗</a>` : ''}
+       ${from && to && leg.mode === 'TRANSIT' ? naverBtn(naverRouteUrl(from, to), '🟢 รถเมล์/รถไฟใน Naver', 'link small naver') : ''}`
     : missing
       ? `<span class="leg-ico">${MODE_ICON[leg.mode]}</span><span class="muted small">${esc(leg.reason ?? 'ยังไม่มีข้อมูล')}</span>`
       : `<span class="leg-ico">${MODE_ICON[leg.mode]}</span>${distHint}<b>${fmtDur(leg.travelMin)}</b>${leg.bufferMin ? `<span class="muted small">+ เผื่อ ${leg.bufferMin} นาที</span>` : ''}<span class="src ${leg.source}">${SRC_TEXT[leg.source]}</span>`;
@@ -86,6 +87,7 @@ export function legRow(dayId: string, leg: LegInfo, target: string): string {
       ${dist != null ? `<p class="muted small">ระยะเส้นตรง ${fmtDist(dist)} (ไม่ใช่ระยะเดินทางจริง)</p>` : ''}
       <div class="row-btns">
         ${gm ? `<a class="btn xs" target="_blank" rel="noopener" href="${esc(gm)}">Google Maps ↗</a>` : ''}
+        ${from && to ? naverBtn(naverRouteUrl(from, to), '🟢 Naver Map', 'btn xs') : ''}
         ${to && kakaoToUrl(to) ? `<a class="btn xs" target="_blank" rel="noopener" href="${esc(kakaoToUrl(to)!)}">KakaoMap ↗</a>` : ''}
         <button class="btn xs" data-act="leg-detail" data-day="${dayId}" data-stop="${target}">เทียบวิธีเดินทาง</button>
         ${missing && est != null ? `<button class="btn ghost xs" data-act="leg-estimate" data-day="${dayId}" data-stop="${target}" data-v="${est}">ใช้ค่าประมาณ ~${est} นาที</button>` : ''}

@@ -47,6 +47,42 @@ export function gmapsDirUrl(from: Place | null, to: Place, mode: TravelMode): st
   return `https://www.google.com/maps/dir/?${p}`;
 }
 
+/**
+ * Naver Map (แอป) — เส้นทางขนส่งสาธารณะ: รถเมล์/รถไฟฟ้า เวลารถมาจริง ทางออกสถานี
+ * ใช้ URL scheme ทางการ nmap://route/public · ไม่ใส่ต้นทาง = ใช้ตำแหน่งปัจจุบันในแอป
+ * https://guide.ncloud-docs.com/docs/en/maps-url-scheme
+ */
+export function naverRouteUrl(from: Place | null, to: Place, appname = 'seoul-trip-planner'): string | null {
+  if (to.lat == null || to.lng == null) return null;
+  const p = new URLSearchParams();
+  if (from && from.lat != null && from.lng != null) {
+    p.set('slat', String(from.lat));
+    p.set('slng', String(from.lng));
+    p.set('sname', naverName(from));
+  }
+  p.set('dlat', String(to.lat));
+  p.set('dlng', String(to.lng));
+  p.set('dname', naverName(to));
+  p.set('appname', appname);
+  return `nmap://route/public?${p}`;
+}
+
+/** Naver Map (แอป) — เปิดหมุดสถานที่ */
+export function naverPlaceUrl(p: Place, appname = 'seoul-trip-planner'): string | null {
+  if (p.lat == null || p.lng == null) return null;
+  return `nmap://place?${new URLSearchParams({ lat: String(p.lat), lng: String(p.lng), name: naverName(p), appname })}`;
+}
+
+/** ชื่อที่ส่งให้ Naver: เกาหลีก่อน (ค้นตรงกว่า) */
+function naverName(p: Place): string {
+  return (p.nameKo ?? p.nameEn).replace(/\s*\(.*?\)\s*/g, ' ').trim().slice(0, 60);
+}
+
+/** ปุ่มเปิด Naver Map (จัดการกรณีไม่มีแอป/เปิดจากในแอป LINE ใน main.ts: data-act="naver") */
+export function naverBtn(url: string | null, label = '🟢 Naver Map', cls = 'btn sm'): string {
+  return url ? `<button class="${cls}" data-act="naver" data-href="${esc(url)}">${label}</button>` : '';
+}
+
 /** KakaoMap (ใช้งานได้ดีในเกาหลีสำหรับเดิน/รถ) — ต้องมีพิกัด */
 export function kakaoToUrl(to: Place): string | null {
   if (to.lat == null || to.lng == null) return null;
