@@ -1,5 +1,6 @@
 import { safeGet, safeSet } from '../storage/storage';
 import { uid } from '../core/planOps';
+import { parseAmount } from './fx';
 
 /**
  * ของที่จะซื้อ — เก็บเฉพาะเครื่องนี้ (ไม่อยู่ในแผน ไม่แชร์ ไม่ซิงก์)
@@ -130,4 +131,56 @@ export function summary(items: ShopItem[], rate: number | null): { toBuyKrw: num
 /** ที่ยังไม่ซื้อขึ้นก่อน (คงลำดับที่เพิ่ม) */
 export function sortItems(items: ShopItem[]): ShopItem[] {
   return [...items.filter((i) => !i.bought), ...items.filter((i) => i.bought)];
+}
+
+const MAX_THB = 1e7;
+const MAX_KRW = 1e9;
+
+/** ตรวจราคาร้านที่พิมพ์ — ไม่ผ่าน = แจ้งผู้ใช้ (ไม่บันทึกค่าที่โหลดกลับมาแล้วจะหาย) */
+export function parsePriceInput(storeText: string, krwText: string): { ok: true; store: string; krw: number } | { ok: false; error: string } {
+  const store = storeText.trim().slice(0, SHOP_LIMITS.store);
+  const krw = parseAmount(krwText);
+  if (!store) return { ok: false, error: 'ใส่ชื่อร้าน' };
+  if (krw == null || krw <= 0) return { ok: false, error: 'ใส่ราคาวอนเป็นตัวเลข เช่น 18000' };
+  if (krw > MAX_KRW) return { ok: false, error: 'ราคาวอนมากเกินไป — ตรวจจำนวนศูนย์' };
+  return { ok: true, store, krw };
+}
+
+/** ตรวจรายการที่พิมพ์ — ราคาไทยว่างได้ แต่ถ้าพิมพ์แล้วอ่านไม่ได้/เกินช่วงต้องแจ้ง */
+export function parseItemInput(f: { name: string; thb: string; thbLabel: string; qty: string }):
+  | { ok: true; name: string; thb: number | null; thbLabel: string; qty: number }
+  | { ok: false; error: string } {
+  const name = f.name.trim().slice(0, SHOP_LIMITS.name);
+  if (!name) return { ok: false, error: 'ใส่ชื่อของ' };
+  let thb: number | null = null;
+  if (f.thb.trim()) {
+    const v = parseAmount(f.thb);
+    if (v == null || v <= 0) return { ok: false, error: 'ราคาไทยต้องเป็นตัวเลข เช่น 580 (หรือเว้นว่าง)' };
+    if (v > MAX_THB) return { ok: false, error: 'ราคาไทยมากเกินไป — ตรวจจำนวนศูนย์' };
+    thb = v;
+  }
+  const q = Math.round(Number(f.qty));
+  const qty = Number.isFinite(q) ? Math.min(SHOP_LIMITS.qtyMax, Math.max(1, q)) : 1;
+  return { ok: true, name, thb, thbLabel: f.thbLabel.trim().slice(0, SHOP_LIMITS.label), qty };
+}
+
+/** เลิกทำการลบรายการ: ใส่คืนเฉพาะรายการนั้น ณ ตำแหน่งเดิม (ไม่ทับการแก้อื่นที่เกิดหลังลบ) */
+export function restoreItem(s: ShopStore, item: ShopItem, index: number): ShopStore {
+  if (s.items.some((x) => x.id === item.id)) return s;
+  const items = [...s.items];
+  items.splice(Math.min(index, items.length), 0, item);
+  return { ...s, items };
+}
+
+/** เลิกทำการลบราคา: ใส่คืนเฉพาะราคานั้นในรายการเดิม */
+export function restorePrice(s: ShopStore, itemId: string, price: ShopPrice, index: number): ShopStore {
+  return {
+    ...s,
+    items: s.items.map((it) => {
+      if (it.id !== itemId || it.prices.some((x) => x.id === price.id)) return it;
+      const prices = [...it.prices];
+      prices.splice(Math.min(index, prices.length), 0, price);
+      return { ...it, prices };
+    }),
+  };
 }

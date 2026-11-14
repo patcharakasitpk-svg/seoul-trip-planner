@@ -46,7 +46,7 @@ export const needsRefresh = (s: FxStore, now = Date.now()) => !s.ref || !s.fetch
 
 /** แปลงข้อความตัวเลข เช่น "12,500" "1.5k" → number (ไม่ใช่ตัวเลข = null) */
 export function parseAmount(text: string): number | null {
-  const t = text.replace(/[,\s₩฿]/g, '').toLowerCase();
+  const t = text.replace(/[,\s₩฿원]|บาท|วอน/g, '').toLowerCase();
   if (!t) return null;
   const m = /^(\d+(?:\.\d+)?)(k|m)?$/.exec(t);
   if (!m) return null;

@@ -317,3 +317,38 @@ test('ของที่จะซื้อ: เพิ่ม/เทียบร�
   await expect(page.locator('[data-shop-item]', { hasText: 'กันแดด' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
 });
+
+test('ของที่จะซื้อ: สิ่งที่กำลังพิมพ์ไม่หายเมื่อเน็ตหลุด · ราคาผิดมีคำเตือน · เลิกทำไม่ทับการแก้อื่น', async ({ page }) => {
+  await page.route('https://api.frankfurter.dev/**', (r) => r.fulfill({ json: { amount: 1, base: 'THB', date: '2026-11-13', rates: { KRW: 40 } } }));
+  await page.goto('/');
+  await page.locator('[data-act="tab"][data-tab="fx"]').filter({ visible: true }).first().click();
+  await page.locator('[data-act="money-view"][data-v="shop"]').click();
+  for (const name of ['A', 'B']) {
+    await page.locator('[data-act="shop-add"]').click();
+    await page.locator('form[data-form="shop-item"] [name="name"]').fill(name);
+    await page.locator('form[data-form="shop-item"] [name="name"]').press('Enter');
+  }
+  // พิมพ์ค้างอยู่ แล้วเน็ตหลุด/กลับมา (หน้าเรนเดอร์ใหม่)
+  await page.locator('[data-shop-item]', { hasText: 'A' }).locator('[data-act="shop-price-add"]').click();
+  const pf = page.locator('form[data-form="shop-price"]');
+  await pf.locator('[name="store"]').fill('Daiso');
+  await pf.locator('[name="krw"]').fill('18');
+  await page.evaluate(() => window.dispatchEvent(new Event('offline')));
+  await expect(page.locator('#status-bar')).toContainText('ออฟไลน์'); // หน้าเรนเดอร์ใหม่แล้ว
+  await expect(page.locator('form[data-form="shop-price"] [name="store"]')).toHaveValue('Daiso');
+  await expect(page.locator('form[data-form="shop-price"] [name="krw"]')).toHaveValue('18');
+  await expect(page.locator('form[data-form="shop-price"] [name="krw"]')).toBeFocused();
+  await page.evaluate(() => window.dispatchEvent(new Event('online')));
+  // ราคาผิด → มีคำเตือน
+  await page.locator('form[data-form="shop-price"] [name="krw"]').fill('abc');
+  await page.locator('form[data-form="shop-price"] [name="krw"]').press('Enter');
+  await expect(page.locator('#toast')).toContainText('ใส่ราคาวอน');
+  await page.locator('form[data-form="shop-price"] [data-act="shop-form-cancel"]').click();
+  // ลบ A → ติ๊ก B ซื้อแล้ว → เลิกทำ: A กลับมา และ B ยังติ๊กอยู่
+  await page.locator('[data-shop-item]', { hasText: 'A' }).locator('[data-act="shop-del"]').click();
+  await page.locator('[data-shop-item]', { hasText: 'B' }).locator('[data-act="shop-bought"]').click();
+  await page.locator('[data-act="toast-undo"]').click().catch(() => {});
+  // toast ของการติ๊กไม่มีปุ่มเลิกทำ → ปุ่มเลิกทำของการลบต้องยังกดได้
+  await expect(page.locator('[data-shop-item]', { hasText: 'A' })).toBeVisible();
+  await expect(page.locator('[data-shop-item]', { hasText: 'B' }).locator('[data-act="shop-bought"]')).toHaveAttribute('aria-pressed', 'true');
+});

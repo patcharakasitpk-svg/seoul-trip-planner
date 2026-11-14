@@ -85,3 +85,39 @@ describe('ของที่จะซื้อ: ตรวจข้อมูล�
     expect(sanitizeShop(null)).toEqual({ items: [], lastStore: '' });
   });
 });
+
+import { parseItemInput, parsePriceInput, restoreItem, restorePrice } from '../../src/services/shop';
+import { parseAmount } from '../../src/services/fx';
+
+describe('ของที่จะซื้อ: ตรวจสิ่งที่พิมพ์ (ไม่ให้หายเงียบ)', () => {
+  it('อ่านราคาที่มีหน่วยติดมา', () => {
+    expect(parseAmount('18,000원')).toBe(18000);
+    expect(parseAmount('580บาท')).toBe(580);
+    expect(parseAmount('580 บาท')).toBe(580);
+  });
+  it('ราคาร้าน: ต้องมีร้าน และราคาอยู่ในช่วงที่บันทึกได้', () => {
+    expect(parsePriceInput('Daiso', '18,000')).toEqual({ ok: true, store: 'Daiso', krw: 18000 });
+    expect(parsePriceInput('', '18000').ok).toBe(false);
+    expect(parsePriceInput('X', 'abc').ok).toBe(false);
+    expect(parsePriceInput('X', '99999999999').ok).toBe(false);
+  });
+  it('รายการ: ราคาไทยพิมพ์ผิด/เกินช่วง → แจ้ง ไม่บันทึกเป็น "ไม่มีราคา" เงียบ ๆ', () => {
+    expect(parseItemInput({ name: 'กันแดด', thb: '580', thbLabel: 'Shopee', qty: '2' })).toEqual({ ok: true, name: 'กันแดด', thb: 580, thbLabel: 'Shopee', qty: 2 });
+    expect(parseItemInput({ name: 'กันแดด', thb: '', thbLabel: '', qty: '' })).toMatchObject({ ok: true, thb: null, qty: 1 });
+    expect(parseItemInput({ name: 'กันแดด', thb: 'ห้าร้อย', thbLabel: '', qty: '1' }).ok).toBe(false);
+    expect(parseItemInput({ name: 'กันแดด', thb: '99999999', thbLabel: '', qty: '1' }).ok).toBe(false);
+    expect(parseItemInput({ name: '  ', thb: '', thbLabel: '', qty: '1' }).ok).toBe(false);
+  });
+  it('เลิกทำการลบ: คืนเฉพาะที่ลบ ไม่ทับการแก้อื่นที่ทำหลังจากนั้น', () => {
+    const a = item({ id: 'a', name: 'A' });
+    const b = item({ id: 'b', name: 'B' });
+    const now = { items: [{ ...b, bought: true }], lastStore: 'X' }; // ลบ A แล้วไปติ๊ก B
+    const back = restoreItem(now, a, 0);
+    expect(back.items.map((x) => x.id)).toEqual(['a', 'b']);
+    expect(back.items[1].bought).toBe(true);
+    expect(restoreItem(back, a, 0).items).toHaveLength(2); // ไม่ซ้ำ
+    const withPrice = { items: [item({ id: 'a', prices: [p('p2', 'Y', 2)] })], lastStore: '' };
+    const back2 = restorePrice(withPrice, 'a', p('p1', 'X', 1), 0);
+    expect(back2.items[0].prices.map((x) => x.id)).toEqual(['p1', 'p2']);
+  });
+});

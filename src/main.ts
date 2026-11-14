@@ -26,7 +26,7 @@ import { RoomSync, inviteUrl, newRoomId, roomFromHash, toRoomDoc, fromRoomDoc, s
 import { SYNC_DB_URL } from './config';
 import { loadFx, saveFx, needsRefresh, fetchRate, activeRate, parseAmount } from './services/fx';
 import { renderFx, fxResult, formatTyping, type FxUi } from './ui/views/fx';
-import { loadShop, saveShop, type ShopStore } from './services/shop';
+import { loadShop, saveShop, parseItemInput, parsePriceInput, restoreItem, restorePrice, SHOP_LIMITS, type ShopStore } from './services/shop';
 import { renderShop, storeSuggestions, type ShopUi } from './ui/views/shop';
 import { safeGet, safeSet } from './storage/storage';
 
@@ -213,8 +213,44 @@ function renderFxPage() {
   fxSig = sig;
   const sw = `<div class="seg money-seg" role="tablist"><button class="${moneyView === 'fx' ? 'on' : ''}" data-act="money-view" data-v="fx" role="tab" aria-selected="${moneyView === 'fx'}">แปลงเงิน</button><button class="${moneyView === 'shop' ? 'on' : ''}" data-act="money-view" data-v="shop" role="tab" aria-selected="${moneyView === 'shop'}">ของที่จะซื้อ</button></div>`;
   const placeNames = app.places().filter((p) => p.category === 'fashion' || p.category === 'beauty' || p.category === 'market' || p.custom).map((p) => p.nameEn);
+  const kept = keepFormState();
   $('#fx').innerHTML = sw + (moneyView === 'fx' ? renderFx(fxUi, fxStore, app.online) : renderShop(shop, activeRate(fxStore), shopUi, storeSuggestions(shop, placeNames)));
-  (document.querySelector('#fx [data-autofocus]') as HTMLInputElement | null)?.focus();
+  if (!kept.restore()) (document.querySelector('#fx [data-autofocus]') as HTMLInputElement | null)?.focus();
+}
+
+/** เก็บค่าที่กำลังพิมพ์ในฟอร์มที่เปิดอยู่ แล้วใส่คืนหลังเรนเดอร์ใหม่ (เน็ตหลุด/อัตราอัปเดตระหว่างพิมพ์ ไม่ให้หาย) */
+function keepFormState() {
+  const forms = [...document.querySelectorAll('#fx form[data-form]')] as HTMLFormElement[];
+  const key = (f: HTMLFormElement) => `${f.dataset.form}|${f.dataset.item ?? ''}|${f.dataset.price ?? ''}`;
+  const saved = forms.map((f) => ({ key: key(f), values: [...f.elements].filter((e): e is HTMLInputElement => e instanceof HTMLInputElement && !!e.name).map((e) => [e.name, e.value] as const) }));
+  const act = document.activeElement as HTMLInputElement | null;
+  const focus = act?.form && act.name ? { key: key(act.form), name: act.name, start: act.selectionStart, end: act.selectionEnd } : null;
+  return {
+    /** คืนค่า true ถ้าใส่โฟกัสคืนแล้ว */
+    restore(): boolean {
+      for (const f of [...document.querySelectorAll('#fx form[data-form]')] as HTMLFormElement[]) {
+        const s = saved.find((x) => x.key === key(f));
+        if (!s) continue;
+        for (const [name, value] of s.values) {
+          const el = f.elements.namedItem(name);
+          if (el instanceof HTMLInputElement) el.value = value;
+        }
+        if (focus && focus.key === s.key) {
+          const el = f.elements.namedItem(focus.name);
+          if (el instanceof HTMLInputElement) {
+            el.focus();
+            try {
+              el.setSelectionRange(focus.start, focus.end);
+            } catch {
+              /* type=number ตั้งตำแหน่งเคอร์เซอร์ไม่ได้ */
+            }
+            return true;
+          }
+        }
+      }
+      return false;
+    },
+  };
 }
 
 /* ---------------- ของที่จะซื้อ (เก็บเฉพาะเครื่องนี้) ---------------- */
@@ -223,16 +259,15 @@ let shop: ShopStore = loadShop();
 const shopUi: ShopUi = { adding: false, editItem: null, priceFor: null, editPrice: null };
 const closeShopForms = () => Object.assign(shopUi, { adding: false, editItem: null, priceFor: null, editPrice: null });
 
-/** แก้รายการ: บันทึกลงเครื่อง + ปุ่มเลิกทำ (ถ้ามีข้อความ) */
-function shopCommit(mut: (s: ShopStore) => void, msg?: string, undoable = false) {
-  const before = clone(shop);
+/** แก้รายการ: บันทึกลงเครื่อง · undo = คืนเฉพาะสิ่งที่ลบ บนรายการปัจจุบัน (ไม่ทับการแก้อื่นที่เกิดหลังจากนั้น) */
+function shopCommit(mut: (s: ShopStore) => void, msg?: string, undo?: (current: ShopStore) => ShopStore) {
   const next = clone(shop);
   mut(next);
   shop = next;
   saveShop(shop);
   if (msg)
-    app.showToast(msg, undoable ? () => {
-      shop = before;
+    app.showToast(msg, undo ? () => {
+      shop = undo(shop);
       saveShop(shop);
       app.showToast('เลิกทำแล้ว');
       app.requestRender();
@@ -800,10 +835,11 @@ document.addEventListener('click', (ev) => {
       });
       return;
     case 'shop-del': {
-      const it = shop.items.find((x) => x.id === d.item);
-      if (!it) return;
+      const idx = shop.items.findIndex((x) => x.id === d.item);
+      if (idx < 0) return;
+      const it = clone(shop.items[idx]);
       closeShopForms();
-      shopCommit((s) => void (s.items = s.items.filter((x) => x.id !== d.item)), `ลบ ${it.name} แล้ว`, true);
+      shopCommit((s) => void (s.items = s.items.filter((x) => x.id !== d.item)), `ลบ ${it.name} แล้ว`, (cur) => restoreItem(cur, it, idx));
       return;
     }
     case 'shop-price-add':
@@ -815,16 +851,23 @@ document.addEventListener('click', (ev) => {
       shopUi.priceFor = d.item ?? null;
       shopUi.editPrice = d.price ?? null;
       break;
-    case 'shop-price-del':
+    case 'shop-price-del': {
+      const it0 = shop.items.find((x) => x.id === d.item);
+      const pIdx = it0 ? it0.prices.findIndex((x) => x.id === d.price) : -1;
+      if (!it0 || pIdx < 0) return;
+      const pr = clone(it0.prices[pIdx]);
       closeShopForms();
       shopCommit((s) => {
         const it = s.items.find((x) => x.id === d.item);
         if (it) it.prices = it.prices.filter((p) => p.id !== d.price);
-      }, 'ลบราคาแล้ว', true);
+      }, 'ลบราคาแล้ว', (cur) => restorePrice(cur, it0.id, pr, pIdx));
       return;
+    }
     case 'shop-clear-bought': {
-      const n = shop.items.filter((x) => x.bought).length;
-      confirmThen(`ลบ ${n} รายการที่ซื้อแล้ว?`, 'ลบ', () => shopCommit((s) => void (s.items = s.items.filter((x) => !x.bought)), `ลบ ${n} รายการแล้ว`, true));
+      const removed = shop.items.map((x, i) => [x, i] as const).filter(([x]) => x.bought).map(([x, i]) => [clone(x), i] as const);
+      confirmThen(`ลบ ${removed.length} รายการที่ซื้อแล้ว?`, 'ลบ', () =>
+        shopCommit((s) => void (s.items = s.items.filter((x) => !x.bought)), `ลบ ${removed.length} รายการแล้ว`, (cur) => removed.reduce((acc, [x, i]) => restoreItem(acc, x, i), cur)),
+      );
       return;
     }
     case 'fx-swap': {
@@ -1136,36 +1179,48 @@ document.addEventListener('submit', (ev) => {
     app.modal = null;
     app.commit((p) => p.customPlaces.push(place), 'เพิ่มสถานที่แล้ว');
   } else if (kind === 'shop-item') {
-    const name = String(fd.get('name') ?? '').trim().slice(0, 80);
-    if (!name) return;
-    const thbV = parseAmount(String(fd.get('thb') ?? ''));
-    const qty = Math.min(99, Math.max(1, Math.round(Number(fd.get('qty')) || 1)));
-    const label = String(fd.get('thbLabel') ?? '').trim().slice(0, 30);
-    const editId = form.dataset.item;
-    closeShopForms();
-    shopCommit((s) => {
-      const fields = { name, qty, thb: thbV && thbV > 0 ? thbV : null, thbLabel: label };
-      const it = editId ? s.items.find((x) => x.id === editId) : undefined;
-      if (it) Object.assign(it, fields);
-      else if (s.items.length < 200) s.items.push({ id: uid('si'), prices: [], bought: false, ...fields });
-    }, editId ? undefined : `เพิ่ม ${name} แล้ว — กด “＋ ราคาร้านในเกาหลี” เพื่อเทียบราคา`);
-  } else if (kind === 'shop-price') {
-    const store = String(fd.get('store') ?? '').trim().slice(0, 60);
-    const krw = parseAmount(String(fd.get('krw') ?? ''));
-    if (!store || !krw || krw <= 0) {
-      app.showToast('ใส่ชื่อร้านและราคาวอน');
+    const r = parseItemInput({ name: String(fd.get('name') ?? ''), thb: String(fd.get('thb') ?? ''), thbLabel: String(fd.get('thbLabel') ?? ''), qty: String(fd.get('qty') ?? '') });
+    if (!r.ok) {
+      app.showToast(r.error);
+      app.requestRender();
       return;
     }
+    const editId = form.dataset.item;
+    if (!editId && shop.items.length >= SHOP_LIMITS.items) {
+      app.showToast(`รายการเต็มแล้ว (${SHOP_LIMITS.items}) — ลบรายการที่ซื้อแล้วก่อน`);
+      app.requestRender();
+      return;
+    }
+    closeShopForms();
+    const { ok: _ok, ...fields } = r;
+    shopCommit((s) => {
+      const it = editId ? s.items.find((x) => x.id === editId) : undefined;
+      if (it) Object.assign(it, fields);
+      else s.items.push({ id: uid('si'), prices: [], bought: false, ...fields });
+    }, editId ? undefined : `เพิ่ม ${r.name} แล้ว — กด “＋ ราคาร้านในเกาหลี” เพื่อเทียบราคา`);
+  } else if (kind === 'shop-price') {
+    const r = parsePriceInput(String(fd.get('store') ?? ''), String(fd.get('krw') ?? ''));
     const itemId = form.dataset.item!;
     const priceId = form.dataset.price;
+    const target = shop.items.find((x) => x.id === itemId);
+    if (r.ok && !priceId && target && target.prices.length >= SHOP_LIMITS.prices) {
+      app.showToast(`ใส่ราคาได้สูงสุด ${SHOP_LIMITS.prices} ร้านต่อรายการ`);
+      app.requestRender();
+      return;
+    }
+    if (!r.ok) {
+      app.showToast(r.error);
+      app.requestRender();
+      return;
+    }
     closeShopForms();
     shopCommit((s) => {
-      s.lastStore = store;
+      s.lastStore = r.store;
       const it = s.items.find((x) => x.id === itemId);
       if (!it) return;
       const pr = priceId ? it.prices.find((x) => x.id === priceId) : undefined;
-      if (pr) Object.assign(pr, { store, krw });
-      else if (it.prices.length < 20) it.prices.push({ id: uid('sp'), store, krw });
+      if (pr) Object.assign(pr, { store: r.store, krw: r.krw });
+      else it.prices.push({ id: uid('sp'), store: r.store, krw: r.krw });
     });
   } else if (kind === 'fx-rate') {
     const v = parseFloat(String(fd.get('rate') ?? '').replace(/,/g, ''));
