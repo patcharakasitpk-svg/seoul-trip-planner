@@ -1,0 +1,982 @@
+{
+  "hotel": {
+    "stations": [
+      {
+        "name": "City Hall",
+        "nameKo": "시청역",
+        "lines": [
+          "1",
+          "2"
+        ],
+        "exit": "7",
+        "walkMin": 6
+      },
+      {
+        "name": "Hoehyeon",
+        "nameKo": "회현역",
+        "lines": [
+          "4"
+        ],
+        "exit": "7",
+        "walkMin": 7
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "Sotetsu Hotels official access: City Hall exit 7 ~6 min (exit 1 ~8 min, with elevator); Hoehyeon exit 7 ~7 min",
+        "url": "https://sotetsu-hotels.com/en/splaisir/myeong-dong/access/"
+      }
+    ]
+  },
+  "coex": {
+    "stations": [
+      {
+        "name": "Samseong",
+        "nameKo": "삼성역",
+        "lines": [
+          "2"
+        ],
+        "exit": "5/6",
+        "walkMin": 7
+      },
+      {
+        "name": "Bongeunsa",
+        "nameKo": "봉은사역",
+        "lines": [
+          "9"
+        ],
+        "exit": "7",
+        "walkMin": 4
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "COEX official directions: Samseong (Line 2) exit 5/6, Bongeunsa (Line 9) exit 7 via underground passage",
+        "url": "https://www.coex.co.kr/en/?p=49514"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (walkMin only)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "library": {
+    "stations": [
+      {
+        "name": "Samseong",
+        "nameKo": "삼성역",
+        "lines": [
+          "2"
+        ],
+        "exit": "5/6",
+        "walkMin": 4
+      },
+      {
+        "name": "Bongeunsa",
+        "nameKo": "봉은사역",
+        "lines": [
+          "9"
+        ],
+        "exit": "7",
+        "walkMin": 7
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "COEX official directions: Samseong (Line 2) exit 5/6, Bongeunsa (Line 9) exit 7 via underground passage",
+        "url": "https://www.coex.co.kr/en/?p=49514"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (walkMin only)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "starfield-coex-mall": {
+    "stations": [
+      {
+        "name": "Bongeunsa",
+        "nameKo": "봉은사역",
+        "lines": [
+          "9"
+        ],
+        "exit": "7",
+        "walkMin": 3
+      },
+      {
+        "name": "Samseong",
+        "nameKo": "삼성역",
+        "lines": [
+          "2"
+        ],
+        "exit": "5/6",
+        "walkMin": 8
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "COEX official directions: Samseong (Line 2) exit 5/6, Bongeunsa (Line 9) exit 7 via underground passage",
+        "url": "https://www.coex.co.kr/en/?p=49514"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (walkMin only)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "oliveyoung-coex": {
+    "stations": [
+      {
+        "name": "Bongeunsa",
+        "nameKo": "봉은사역",
+        "lines": [
+          "9"
+        ],
+        "exit": "7",
+        "walkMin": 3
+      },
+      {
+        "name": "Samseong",
+        "nameKo": "삼성역",
+        "lines": [
+          "2"
+        ],
+        "exit": "5/6",
+        "walkMin": 8
+      }
+    ],
+    "bus": null,
+    "status": "unverified",
+    "sources": [
+      {
+        "label": "COEX official directions: Samseong (Line 2) exit 5/6, Bongeunsa (Line 9) exit 7 via underground passage (for the mall, not this store)",
+        "url": "https://www.coex.co.kr/en/?p=49514"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min; in-mall walk to store varies",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "hadongkwan-coex": {
+    "stations": [
+      {
+        "name": "Bongeunsa",
+        "nameKo": "봉은사역",
+        "lines": [
+          "9"
+        ],
+        "exit": "7",
+        "walkMin": 3
+      },
+      {
+        "name": "Samseong",
+        "nameKo": "삼성역",
+        "lines": [
+          "2"
+        ],
+        "exit": "5/6",
+        "walkMin": 8
+      }
+    ],
+    "bus": null,
+    "status": "unverified",
+    "sources": [
+      {
+        "label": "COEX official directions: Samseong (Line 2) exit 5/6, Bongeunsa (Line 9) exit 7 via underground passage (for the mall, not this store)",
+        "url": "https://www.coex.co.kr/en/?p=49514"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min; in-mall walk to store varies",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "misari-chogyeguksu-coex": {
+    "stations": [
+      {
+        "name": "Bongeunsa",
+        "nameKo": "봉은사역",
+        "lines": [
+          "9"
+        ],
+        "exit": "7",
+        "walkMin": 3
+      },
+      {
+        "name": "Samseong",
+        "nameKo": "삼성역",
+        "lines": [
+          "2"
+        ],
+        "exit": "5/6",
+        "walkMin": 8
+      }
+    ],
+    "bus": null,
+    "status": "unverified",
+    "sources": [
+      {
+        "label": "COEX official directions: Samseong (Line 2) exit 5/6, Bongeunsa (Line 9) exit 7 via underground passage (for the mall, not this store)",
+        "url": "https://www.coex.co.kr/en/?p=49514"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min; in-mall walk to store varies",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "gwanghwamun-seokgalbi-coex": {
+    "stations": [
+      {
+        "name": "Bongeunsa",
+        "nameKo": "봉은사역",
+        "lines": [
+          "9"
+        ],
+        "exit": "7",
+        "walkMin": 3
+      },
+      {
+        "name": "Samseong",
+        "nameKo": "삼성역",
+        "lines": [
+          "2"
+        ],
+        "exit": "5/6",
+        "walkMin": 8
+      }
+    ],
+    "bus": null,
+    "status": "unverified",
+    "sources": [
+      {
+        "label": "COEX official directions: Samseong (Line 2) exit 5/6, Bongeunsa (Line 9) exit 7 via underground passage (for the mall, not this store)",
+        "url": "https://www.coex.co.kr/en/?p=49514"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min; in-mall walk to store varies",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "novotel-suwon": {
+    "stations": [
+      {
+        "name": "Suwon",
+        "nameKo": "수원역",
+        "lines": [
+          "1",
+          "SU",
+          "KORAIL"
+        ],
+        "exit": "4",
+        "walkMin": 3
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "Novotel Ambassador Suwon official: Suwon Station exit 4 (Line 1 / Suin-Bundang), 3 min on foot",
+        "url": "https://www.ambatel.com/novotel/suwon/en/main.do"
+      }
+    ]
+  },
+  "mangwon": {
+    "stations": [
+      {
+        "name": "Mangwon",
+        "nameKo": "망원역",
+        "lines": [
+          "6"
+        ],
+        "exit": "2",
+        "walkMin": 5
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "KoreaToDo – Mangwon Market: Mangwon Station exit 2, ~330 m",
+        "url": "https://www.koreatodo.com/mangwon-market-mangridan-gil"
+      },
+      {
+        "label": "The Soul of Seoul – Mangwon market: exit 2, ~5 min",
+        "url": "https://thesoulofseoul.net/mangwon-traditional-farmers-market/"
+      }
+    ]
+  },
+  "hongdae": {
+    "stations": [
+      {
+        "name": "Hongik Univ.",
+        "nameKo": "홍대입구역",
+        "lines": [
+          "2",
+          "AREX",
+          "GJ"
+        ],
+        "exit": "9",
+        "walkMin": 6
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "KoreaToDo – Hongdae: Hongik Univ. Station exit 9 (exits 8/9 most used)",
+        "url": "https://koreatodo.com/hongdae-hongik-university-street"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (walkMin only, from street-area centroid)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "museum": {
+    "stations": [
+      {
+        "name": "Ichon",
+        "nameKo": "이촌역",
+        "lines": [
+          "4",
+          "GJ"
+        ],
+        "exit": "2",
+        "walkMin": 7
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "Ichon Station exit 2 → underground walkway to museum (~400 m)",
+        "url": "https://www.hangeul.go.kr/lang/en/html/visitorInfomation/directions.do"
+      },
+      {
+        "label": "Wikipedia – Ichon station",
+        "url": "https://en.wikipedia.org/wiki/Ichon_station"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (walkMin only)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "bongeunsa": {
+    "stations": [
+      {
+        "name": "Bongeunsa",
+        "nameKo": "봉은사역",
+        "lines": [
+          "9"
+        ],
+        "exit": "1",
+        "walkMin": 3
+      },
+      {
+        "name": "Samseong",
+        "nameKo": "삼성역",
+        "lines": [
+          "2"
+        ],
+        "exit": "6",
+        "walkMin": 10
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "KoreaToDo – Bongeunsa: Bongeunsa Station exit 1 (~3 min); Samseong exit 6 ~600 m",
+        "url": "https://www.koreatodo.com/bongeunsa-temple"
+      },
+      {
+        "label": "Wikipedia – Bongeunsa station",
+        "url": "https://en.wikipedia.org/wiki/Bongeunsa_station"
+      }
+    ]
+  },
+  "deoksugung": {
+    "stations": [
+      {
+        "name": "City Hall",
+        "nameKo": "시청역",
+        "lines": [
+          "1"
+        ],
+        "exit": "2",
+        "walkMin": 1
+      },
+      {
+        "name": "City Hall",
+        "nameKo": "시청역",
+        "lines": [
+          "2"
+        ],
+        "exit": "12",
+        "walkMin": 2
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "KoreaToDo – Deoksugung: City Hall Station Line 1 exit 2 / Line 2 exit 12, ~1 min to Daehanmun gate",
+        "url": "https://www.koreatodo.com/deoksugung-palace"
+      },
+      {
+        "label": "A Fun Couple – Deoksugung guide",
+        "url": "https://afuncouple.com/deoksugung/"
+      }
+    ]
+  },
+  "seoul-museum-of-history": {
+    "stations": [
+      {
+        "name": "Gwanghwamun",
+        "nameKo": "광화문역",
+        "lines": [
+          "5"
+        ],
+        "exit": "7",
+        "walkMin": 7
+      },
+      {
+        "name": "Seodaemun",
+        "nameKo": "서대문역",
+        "lines": [
+          "5"
+        ],
+        "exit": "4",
+        "walkMin": 8
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "Seoul Museum of History official: Gwanghwamun exits 6/7/8 7 min (470 m); Seodaemun exit 4 8 min (600 m)",
+        "url": "https://museum.seoul.go.kr/eng/visit/location/locSubway.jsp"
+      }
+    ]
+  },
+  "gyeongbokgung": {
+    "stations": [
+      {
+        "name": "Gyeongbokgung",
+        "nameKo": "경복궁역",
+        "lines": [
+          "3"
+        ],
+        "exit": "5",
+        "walkMin": 6
+      },
+      {
+        "name": "Gwanghwamun",
+        "nameKo": "광화문역",
+        "lines": [
+          "5"
+        ],
+        "exit": "2",
+        "walkMin": 10
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "Wikipedia – Gyeongbokgung station (exit 5: Gyeongbokgung Palace); note exit 5 may close on night-opening evenings – use exit 4",
+        "url": "https://en.wikipedia.org/wiki/Gyeongbokgung_station"
+      },
+      {
+        "label": "A Fun Couple – Gyeongbokgung guide (Gwanghwamun exit 2 ~10 min)",
+        "url": "https://afuncouple.com/gyeongbokgung/"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (Gyeongbokgung walkMin)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "gwangjang": {
+    "stations": [
+      {
+        "name": "Jongno 5(o)-ga",
+        "nameKo": "종로5가역",
+        "lines": [
+          "1"
+        ],
+        "exit": "8",
+        "walkMin": 2
+      },
+      {
+        "name": "Euljiro 4(sa)-ga",
+        "nameKo": "을지로4가역",
+        "lines": [
+          "2",
+          "5"
+        ],
+        "exit": "4",
+        "walkMin": 5
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "Gwangjang Market guide: Jongno 5-ga exit 8 (~2 min); Euljiro 4-ga exit 4",
+        "url": "https://mileasia.com/korea/gwangjang-market/"
+      },
+      {
+        "label": "GPSmyCity – Gwangjang Market",
+        "url": "https://gpsmycity.com/blog/gwangjang-market-1192.html"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (Euljiro 4-ga walkMin)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "namdaemun": {
+    "stations": [
+      {
+        "name": "Hoehyeon",
+        "nameKo": "회현역",
+        "lines": [
+          "4"
+        ],
+        "exit": "5",
+        "walkMin": 2
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "Wikipedia – Hoehyeon station (exit 5: Namdaemun Market)",
+        "url": "https://en.wikipedia.org/wiki/Hoehyeon_station"
+      },
+      {
+        "label": "KoreaToDo – Namdaemun Market (Hoehyeon exit 5)",
+        "url": "https://koreatodo.com/namdaemun-market"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (walkMin only)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "gotomall": {
+    "stations": [
+      {
+        "name": "Express Bus Terminal",
+        "nameKo": "고속터미널역",
+        "lines": [
+          "3",
+          "7",
+          "9"
+        ],
+        "exit": "8",
+        "walkMin": 1
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "KoreaToDo – Express Bus Terminal shopping: exit 8 (8-1/8-2) into GOTO Mall",
+        "url": "https://www.koreatodo.com/express-bus-terminal-shopping"
+      }
+    ]
+  },
+  "n-seoul-tower": {
+    "stations": [
+      {
+        "name": "Myeongdong",
+        "nameKo": "명동역",
+        "lines": [
+          "4"
+        ],
+        "exit": "3",
+        "walkMin": 10
+      },
+      {
+        "name": "Chungmuro",
+        "nameKo": "충무로역",
+        "lines": [
+          "3",
+          "4"
+        ],
+        "exit": "2",
+        "walkMin": null
+      }
+    ],
+    "bus": "รถบัสวงกลมนัมซาน 01A/01B (ป้ายใกล้ทางออก 2 สถานีชุงมูโร / ลานจอดรถนัมซานเยจัง ใกล้สถานีมยองดง) – ตรวจเลขสายที่ป้ายอีกครั้ง",
+    "status": "verified",
+    "sources": [
+      {
+        "label": "The Seoul Guide – Namsan Cable Car: Myeongdong exit 3, ~10 min uphill walk to cable car base (then cable car)",
+        "url": "https://www.theseoulguide.com/namsan-cable-car/"
+      },
+      {
+        "label": "N Seoul Tower guide: Namsan circular bus from Chungmuro exit 2 / Myeongdong area",
+        "url": "https://www.theseoulguide.com/n-seoul-tower/"
+      }
+    ]
+  },
+  "myeongdong": {
+    "stations": [
+      {
+        "name": "Myeongdong",
+        "nameKo": "명동역",
+        "lines": [
+          "4"
+        ],
+        "exit": "6",
+        "walkMin": 5
+      },
+      {
+        "name": "Euljiro 1(il)-ga",
+        "nameKo": "을지로입구역",
+        "lines": [
+          "2"
+        ],
+        "exit": "6",
+        "walkMin": 4
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "KoreaToDo – Myeongdong shopping district (Myeongdong exit 6; Euljiro 1-ga exit 5/6)",
+        "url": "https://www.koreatodo.com/myeongdong-shopping-district"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (walkMin only)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "myeongdong-kyoja": {
+    "stations": [
+      {
+        "name": "Myeongdong",
+        "nameKo": "명동역",
+        "lines": [
+          "4"
+        ],
+        "exit": "8",
+        "walkMin": 3
+      },
+      {
+        "name": "Euljiro 1(il)-ga",
+        "nameKo": "을지로입구역",
+        "lines": [
+          "2"
+        ],
+        "exit": "5",
+        "walkMin": 7
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "KoreaToDo – Myeongdong best restaurants: Myeongdong Kyoja, Myeongdong Station exit 8",
+        "url": "https://www.koreatodo.com/myeongdong-best-restaurants-cafes"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (walkMin; Euljiro 1-ga exit)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "woo-lae-oak": {
+    "stations": [
+      {
+        "name": "Euljiro 4(sa)-ga",
+        "nameKo": "을지로4가역",
+        "lines": [
+          "2",
+          "5"
+        ],
+        "exit": "4",
+        "walkMin": 1
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "Time Out Seoul – Wooraeok (Euljiro 4-ga exit 4)",
+        "url": "https://www.timeout.com/seoul/food-drink/wooraeok"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (walkMin only)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "pildong-myeonok": {
+    "stations": [
+      {
+        "name": "Chungmuro",
+        "nameKo": "충무로역",
+        "lines": [
+          "3",
+          "4"
+        ],
+        "exit": "1",
+        "walkMin": 4
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "Time Out Seoul – Pildong Myeonok (Chungmuro, ~4 min); exit 1 per Chungmuro station guides",
+        "url": "https://www.timeout.com/seoul/food-drink/pildong-myeonok"
+      },
+      {
+        "label": "Audiala – Chungmuro Station (exit 1)",
+        "url": "https://audiala.com/en/south-korea/seoul/chungmuro-station"
+      }
+    ]
+  },
+  "jinokhwa-dakhanmari": {
+    "stations": [
+      {
+        "name": "Jongno 5(o)-ga",
+        "nameKo": "종로5가역",
+        "lines": [
+          "1"
+        ],
+        "exit": "5",
+        "walkMin": 5
+      },
+      {
+        "name": "Dongdaemun",
+        "nameKo": "동대문역",
+        "lines": [
+          "1",
+          "4"
+        ],
+        "exit": "9",
+        "walkMin": 9
+      }
+    ],
+    "bus": null,
+    "status": "verified",
+    "sources": [
+      {
+        "label": "KTripTips (VisitKorea data) – Jinokhwa: Dongdaemun exit 9 → IBK bank → alley; Jongno 5-ga exit 5 ~3–5 min",
+        "url": "https://www.ktriptips.com/eng/food/1336685"
+      },
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min (Dongdaemun walkMin)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "oliveyoung-myeongdong-global": {
+    "stations": [
+      {
+        "name": "Euljiro 1(il)-ga",
+        "nameKo": "을지로입구역",
+        "lines": [
+          "2"
+        ],
+        "exit": "5",
+        "walkMin": 4
+      },
+      {
+        "name": "Myeongdong",
+        "nameKo": "명동역",
+        "lines": [
+          "4"
+        ],
+        "exit": "6",
+        "walkMin": 6
+      }
+    ],
+    "bus": null,
+    "status": "unverified",
+    "sources": [
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "daiso-myeongdong-main": {
+    "stations": [
+      {
+        "name": "Euljiro 1(il)-ga",
+        "nameKo": "을지로입구역",
+        "lines": [
+          "2"
+        ],
+        "exit": "6",
+        "walkMin": 4
+      },
+      {
+        "name": "Myeongdong",
+        "nameKo": "명동역",
+        "lines": [
+          "4"
+        ],
+        "exit": "6",
+        "walkMin": 5
+      }
+    ],
+    "bus": null,
+    "status": "unverified",
+    "sources": [
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "hadongkwan-myeongdong": {
+    "stations": [
+      {
+        "name": "Euljiro 1(il)-ga",
+        "nameKo": "을지로입구역",
+        "lines": [
+          "2"
+        ],
+        "exit": "5",
+        "walkMin": 4
+      },
+      {
+        "name": "Myeongdong",
+        "nameKo": "명동역",
+        "lines": [
+          "4"
+        ],
+        "exit": "8",
+        "walkMin": 6
+      }
+    ],
+    "bus": null,
+    "status": "unverified",
+    "sources": [
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "musinsa-standard-myeongdong-jungang": {
+    "stations": [
+      {
+        "name": "Myeongdong",
+        "nameKo": "명동역",
+        "lines": [
+          "4"
+        ],
+        "exit": "6",
+        "walkMin": 2
+      },
+      {
+        "name": "Euljiro 1(il)-ga",
+        "nameKo": "을지로입구역",
+        "lines": [
+          "2"
+        ],
+        "exit": "6",
+        "walkMin": 7
+      }
+    ],
+    "bus": null,
+    "status": "unverified",
+    "sources": [
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min; store coords from OSM node \"Musinsa Standard\" (place has no lat/lng)",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "musinsa-standard-hongdae": {
+    "stations": [
+      {
+        "name": "Hongik Univ.",
+        "nameKo": "홍대입구역",
+        "lines": [
+          "2",
+          "AREX",
+          "GJ"
+        ],
+        "exit": "9",
+        "walkMin": 2
+      }
+    ],
+    "bus": null,
+    "status": "unverified",
+    "sources": [
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "yennaljip-hongdae": {
+    "stations": [
+      {
+        "name": "Hongik Univ.",
+        "nameKo": "홍대입구역",
+        "lines": [
+          "2",
+          "AREX",
+          "GJ"
+        ],
+        "exit": "8",
+        "walkMin": 2
+      }
+    ],
+    "bus": null,
+    "status": "unverified",
+    "sources": [
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  },
+  "oliveyoung-hongdae-town": {
+    "stations": [
+      {
+        "name": "Hongik Univ.",
+        "nameKo": "홍대입구역",
+        "lines": [
+          "2",
+          "AREX",
+          "GJ"
+        ],
+        "exit": "8",
+        "walkMin": 1
+      }
+    ],
+    "bus": null,
+    "status": "unverified",
+    "sources": [
+      {
+        "label": "OSM subway_entrance nodes (Overpass); walkMin computed = straight-line ×1.3 ÷ 80 m/min",
+        "url": "https://overpass-api.de"
+      }
+    ]
+  }
+}

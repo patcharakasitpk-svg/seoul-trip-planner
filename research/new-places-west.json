@@ -1,0 +1,295 @@
+[
+  {
+    "id": "yeonnam-mulgalbi-hongdae",
+    "nameTh": "ยอนนัมมุลกัลบี (ซี่โครงวัวต้มน้ำซุปเผ็ด ฮงแด)",
+    "nameEn": "Yeonnam Mulgalbi (Hongdae main branch)",
+    "nameKo": "연남물갈비",
+    "branch": "홍대본점",
+    "category": "food",
+    "area": "Hongdae/Yeonnam",
+    "address": "Geumyang Bldg, 37 Donggyo-ro 25-gil, Mapo-gu, Seoul (서울 마포구 동교로25길 37 금양빌딩; floor listed as 1F by OSM/blog, 2F by Polle)",
+    "lat": 37.5584621,
+    "lng": 126.9207078,
+    "coordStatus": "verified",
+    "coordSource": "OSM node 13946954263 (연남 물갈비, addr 동교로25길 37); same street address on Polle and a 2024 blog review",
+    "reasonTh": "ร้านมุลกัลบี (ซี่โครงวัวตุ๋นในน้ำซุปเผ็ด โปะเนื้อชาบูบนถั่วงอกกองสูง) ย่านยอนนัม-ฮงแด ปิดท้ายด้วยข้าวผัดในหม้อ ร้านคนท้องถิ่น/นักศึกษานิยม",
+    "suggestedStayMin": 75,
+    "budget": {
+      "textTh": "มุลกัลบี 2 ที่ 42,000 วอน (≈21,000 วอน/คน); ชุดกลางวัน 14,000 วอน/ที่",
+      "krwMin": 14000,
+      "krwMax": 26000,
+      "status": "source"
+    },
+    "hours": {
+      "text": "Daily 11:30-15:00, 17:00-23:00 (break 15:00-17:00) per a June 2024 blog review; not confirmed by Naver/official",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "unverified",
+      "closedWeekdays": []
+    },
+    "openTime": "11:30",
+    "closeTime": "23:00",
+    "indoor": true,
+    "food": {
+      "type": "bbq",
+      "menu": [
+        "연남물갈비 (2인분) ₩42,000",
+        "연남스지물갈비 / 곱창물갈비 (2인분) ₩52,000",
+        "[점심특선] 연남물갈비 ₩14,000"
+      ],
+      "mealMin": 75,
+      "minOrder": "2인분 (menu priced per 2 servings; lunch special per person) – unverified",
+      "diningZone": "other"
+    },
+    "fashionTypes": null,
+    "transit": {
+      "stations": [
+        { "name": "Hongik Univ.", "nameKo": "홍대입구", "lines": ["2", "AREX", "GJ"], "exit": "3", "walkMin": 6 }
+      ],
+      "bus": null,
+      "status": "unverified",
+      "sources": [
+        { "label": "OSM subway_entrance node 3404932004 (홍대입구 exit 3) – walk estimated from ~400 m straight-line distance", "url": "https://www.openstreetmap.org/node/3404932004" }
+      ]
+    },
+    "sources": [
+      { "label": "Polle – 연남물갈비 (address, menu & prices)", "url": "https://polle.com/place/1FQ9Qr/%EC%97%B0%EB%82%A8%EB%AC%BC%EA%B0%88%EB%B9%84" },
+      { "label": "Blog review 'Yeonnam Mulgalbi Hongdae' (Jun 2024, hours, phone)", "url": "https://phoramensoba.blogspot.com/2024/06/yeonnam-mulgalbi-hongdae.html" },
+      { "label": "AutoReserve – 연남물갈비 홍대본점", "url": "https://autoreserve.com/ko/restaurants/PzDCL9NRoJ6zf3eozFPq" },
+      { "label": "OSM node", "url": "https://www.openstreetmap.org/node/13946954263" }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "Identification: 'Hongdae mulgalbi' taken as 연남물갈비 홍대본점 (the Yeonnam Mulgalbi known to foreign visitors via blogs/AutoReserve; phone 02-332/333-9211 – sources differ). Alternative in OSM: 산장물갈비, 2 Yanghwa-ro 19-gil (37.5579309,126.9246846, near Hongik Univ. exit 3) – confirm with the user which one they mean. Hours come only from a 2024 blog (break 15:00-17:00); regular closed day unknown – check Naver Place before going. Prices: Polle lists 2인분 42,000 / lunch 14,000; AutoReserve shows older 18,000 per serving / lunch 13,000. Reservations via Naver Booking reportedly possible; no parking. No known closures 29 Nov–7 Dec 2026."
+  },
+  {
+    "id": "jangin-dakgalbi-hongdae",
+    "nameTh": "จังอินทักคาลบี สาขาฮงแด (ไก่ผัดซอสเผ็ดกระทะ)",
+    "nameEn": "Jangin Dakgalbi – Hongdae branch",
+    "nameKo": "장인닭갈비 홍대점",
+    "branch": "홍대 1호점 (1F) / 홍대 2호점 (2F), same building",
+    "category": "food",
+    "area": "Hongdae",
+    "address": "111-1 Eoulmadang-ro, Mapo-gu, Seoul, 1F & 2F (서울 마포구 어울마당로 111-1 1층·2층)",
+    "lat": 37.5549237,
+    "lng": 126.9228408,
+    "coordStatus": "verified",
+    "coordSource": "OSM node 13946954505 (장인닭갈비 홍대2호점, addr 어울마당로 111-1); address matches official store finder (jangindak.co.kr) and Polle",
+    "reasonTh": "ร้านทักคาลบี (ไก่ผัดซอสโคชูจังบนกระทะเหล็ก) เชนดังใกล้สถานีฮงอิกแด เพิ่มชีส/ต็อก แล้วปิดท้ายด้วยข้าวผัด เปิดถึงเที่ยงคืน",
+    "suggestedStayMin": 60,
+    "budget": {
+      "textTh": "ทักคาลบี 13,000 วอน/ที่, ชีสทักคาลบี 15,000 วอน/ที่ + ข้าวผัด 3,000 วอน",
+      "krwMin": 13000,
+      "krwMax": 20000,
+      "status": "source"
+    },
+    "hours": {
+      "text": "Mon-Fri 11:30-24:00; Sat-Sun 11:30-01:00 (next day) per official store list",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "verified",
+      "closedWeekdays": []
+    },
+    "openTime": "11:30",
+    "closeTime": "00:00",
+    "indoor": true,
+    "food": {
+      "type": "bbq",
+      "menu": [
+        "장인닭갈비 ₩13,000",
+        "치즈닭갈비 ₩15,000",
+        "장인볶음밥 (김치+날치알) ₩3,000"
+      ],
+      "mealMin": 60,
+      "minOrder": null,
+      "diningZone": "other"
+    },
+    "fashionTypes": null,
+    "transit": {
+      "stations": [
+        { "name": "Hongik Univ.", "nameKo": "홍대입구", "lines": ["2", "AREX", "GJ"], "exit": "9", "walkMin": 3 }
+      ],
+      "bus": null,
+      "status": "unverified",
+      "sources": [
+        { "label": "OSM subway_entrance node 3404932011 (홍대입구 exit 9) – walk estimated from ~130 m straight-line distance", "url": "https://www.openstreetmap.org/node/3404932011" }
+      ]
+    },
+    "sources": [
+      { "label": "Jangin Dakgalbi official store finder (홍대 1호점/2호점 address, phone, hours)", "url": "https://jangindak.co.kr/board/index.php?board=map_01&sca=all" },
+      { "label": "Polle – 장인닭갈비 홍대점 (1F, menu & prices)", "url": "https://polle.com/place/1dHd6J/%EC%9E%A5%EC%9D%B8%EB%8B%AD%EA%B0%88%EB%B9%84" },
+      { "label": "Polle – 장인닭갈비 홍대2호점 (2F)", "url": "https://polle.com/place/58FkIN/%EC%9E%A5%EC%9D%B8%EB%8B%AD%EA%B0%88%EB%B9%84" },
+      { "label": "OSM node", "url": "https://www.openstreetmap.org/node/13946954505" }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "User listed it twice; one entry covers the Hongdae branch. The official site lists 홍대 1호점 (1F) and 홍대 2호점 (2F) in the same building at 111-1 Eoulmadang-ro, sharing phone 0507-1366-8812 and hours – either floor works. Last order not published (other branches stop ~1 h before close). Minimum order not stated (dakgalbi shops commonly require 2 servings – unverified). Lunch sets A/B/C ₩26,000/40,000/54,000. Polle says no parking. No regular closed day listed, so open Sun 29 Nov and Sun 6 Dec. Popular at dinner with tourists – expect a wait on weekend evenings."
+  },
+  {
+    "id": "chosun-hwaro-gui-hongdae",
+    "nameTh": "โชซอนฮวาโรกุย (ปิ้งย่างเตาถ่าน ฮงแด)",
+    "nameEn": "Chosun Hwaro Gui (Chosun Brazier Grill) – Hongdae",
+    "nameKo": "조선화로구이",
+    "branch": "홍대",
+    "category": "food",
+    "area": "Hongdae",
+    "address": "5 World Cup buk-ro, Mapo-gu, Seoul 04031 (서울 마포구 월드컵북로 5; lot 서교동 351-18)",
+    "lat": 37.5555222,
+    "lng": 126.9208306,
+    "coordStatus": "verified",
+    "coordSource": "OSM node 11744981942 (조선 화로구이), ~3 m from OSM building way 691175051 tagged 월드컵북로 5; same address on VisitKorea/KTripTips, DiningCode, Tabling",
+    "reasonTh": "ร้านปิ้งย่างเตาถ่าน (ฮวาโร) เนื้อวัวฮันอูและซี่โครงหมูหมัก ห่างทางออก 1 สถานีฮงอิกแดไม่กี่นาที มีเมนูข้าว/ซุป/บะหมี่เย็นด้วย",
+    "suggestedStayMin": 90,
+    "budget": {
+      "textTh": "หมูหมัก/สามชั้น 18,000–19,000 วอน/ที่; เนื้อฮันอู 32,000–45,000 วอน/ที่; ยุกฮเวบิบิมบับ 12,000 วอน",
+      "krwMin": 18000,
+      "krwMax": 45000,
+      "status": "source"
+    },
+    "hours": {
+      "text": "Mon-Sat 11:30-24:00, break 15:00-17:00, last order 23:30; closed Sundays",
+      "closedDays": "Sunday",
+      "lastOrder": "23:30",
+      "status": "verified",
+      "closedWeekdays": [0]
+    },
+    "openTime": "11:30",
+    "closeTime": "00:00",
+    "indoor": true,
+    "food": {
+      "type": "bbq",
+      "menu": [
+        "한우생갈비살·양념갈비살 ₩32,000",
+        "생목살 돼지양념 ₩18,000",
+        "한우육회비빔밥 ₩12,000"
+      ],
+      "mealMin": 90,
+      "minOrder": null,
+      "diningZone": "other"
+    },
+    "fashionTypes": null,
+    "transit": {
+      "stations": [
+        { "name": "Hongik Univ.", "nameKo": "홍대입구", "lines": ["2", "AREX", "GJ"], "exit": "1", "walkMin": 3 }
+      ],
+      "bus": null,
+      "status": "verified",
+      "sources": [
+        { "label": "NOL World – ~4 min walk from Hongik Univ. Station exit 1", "url": "https://world.nol.com/en/content/pois/237c51d7-5b02-4ec7-b62e-34ed3f5f7063" },
+        { "label": "DiningCode – 1-2 min from exit 1 (blog-based)", "url": "https://www.diningcode.com/profile.php?rid=1frbv1ymf2ul" }
+      ]
+    },
+    "sources": [
+      { "label": "KTripTips / VisitKorea data – Chosun Hwaro Gui (hours, Sunday off, phone)", "url": "https://ktriptips.com/eng/food/3391236" },
+      { "label": "VisitKorea – Chosun Hwaro Gui", "url": "https://english.visitkorea.or.kr/svc/whereToGo/locIntrdn/rgnContentsView.do?vcontsId=214996" },
+      { "label": "DiningCode – 조선화로구이 (menu, hours)", "url": "https://www.diningcode.com/profile.php?rid=1frbv1ymf2ul" },
+      { "label": "Tabling – 조선화로구이 (Sunday closed)", "url": "https://www.tabling.co.kr/place/677cca7d66de5f06987b610b" },
+      { "label": "NOL World – Chosun Wharo Gui", "url": "https://world.nol.com/en/content/pois/237c51d7-5b02-4ec7-b62e-34ed3f5f7063" },
+      { "label": "OSM node", "url": "https://www.openstreetmap.org/node/11744981942" }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "CLOSED SUNDAYS → closed Sun 29 Nov and Sun 6 Dec 2026 (VisitKorea/KTripTips, DiningCode, Tabling agree). NOL World instead lists 11:30-15:30 & 17:00-02:00 with no closed day – treated as outdated. Break 15:00-17:00, last order 23:30. Phone 02-3143-1300. Not to be confused with 신선화로 (Sinsung Hwaro) at 136-2 Eoulmadang-ro, another charcoal-grill shop nearby. Hanwoo cuts priced per serving; budget range shown is per serving, not per person total."
+  },
+  {
+    "id": "mangwon-hangang-park",
+    "nameTh": "สวนสาธารณะริมแม่น้ำฮันมังวอน",
+    "nameEn": "Mangwon Hangang Park",
+    "nameKo": "망원한강공원",
+    "branch": null,
+    "category": "sight",
+    "area": "Mangwon",
+    "address": "467 Mapo-naru-gil, Mapo-gu, Seoul (서울 마포구 마포나루길 467; 망원동 205-4)",
+    "lat": 37.5501926,
+    "lng": 126.9021613,
+    "coordStatus": "verified",
+    "coordSource": "OSM way 330666503 (망원한강공원, park centroid); location consistent with official Hangang Park address 마포나루길 467 (망원동)",
+    "reasonTh": "สวนริมแม่น้ำฮันใกล้ตลาดมังวอน เดินเล่นชมวิวแม่น้ำ/สะพานซองซาน มีร้านสะดวกซื้อให้ลองรามยอนเครื่องต้มแบบคนเกาหลี และเรือรบ Seoul Battleship Park",
+    "suggestedStayMin": 45,
+    "budget": {
+      "textTh": "เข้าฟรี",
+      "krwMin": 0,
+      "krwMax": 0,
+      "status": "source"
+    },
+    "hours": {
+      "text": "Open 24 hours, year-round (park grounds); facilities such as convenience stores/Seoul Battleship Park have their own hours",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "verified",
+      "closedWeekdays": []
+    },
+    "openTime": null,
+    "closeTime": null,
+    "indoor": false,
+    "food": null,
+    "fashionTypes": null,
+    "transit": {
+      "stations": [
+        { "name": "Mangwon", "nameKo": "망원", "lines": ["6"], "exit": "1", "walkMin": 20 }
+      ],
+      "bus": "From Mangwon Stn exit 1 take village bus 마포09 to '한강공원입구' (stop 14556), then ~7 min walk (official Hangang Park guidance)",
+      "status": "unverified",
+      "sources": [
+        { "label": "Hangang Park official (bus 마포09 route, via search result)", "url": "https://hangang.seoul.go.kr/archives/46737" }
+      ]
+    },
+    "sources": [
+      { "label": "Hangang Park official – Mangwon introduction (address, facilities)", "url": "https://hangang.seoul.go.kr/www/contents/666.do?mid=468" },
+      { "label": "KTripTips – 망원한강공원 (always open, free)", "url": "https://www.ktriptips.com/kor/tourspot/1059638" },
+      { "label": "OSM park", "url": "https://www.openstreetmap.org/way/330666503" }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "Park is a 7.4 km riverside strip; the pin is the OSM centroid near the 망원 나들목 (underpass) area – walkers enter via the Mangwon-dong underpass. Walk time from Mangwon Stn exit 1 (~20 min) is an estimate; official guidance uses bus 마포09 + 7 min walk. Combine with Mangwon Market (id 'mangwon'). Early December: daytime ~0-7°C, colder and windy by the river, sunset ~17:15, lawns brown, water leisure/rentals and the summer pool closed; bring warm layers and visit before dark. Mangwon slope closed 1 Jun 2025-31 May 2028 (not relevant to walkers). Information centre 02-3780-0601~4."
+  },
+  {
+    "id": "yeouido-hangang-park",
+    "nameTh": "สวนสาธารณะริมแม่น้ำฮันยออีโด",
+    "nameEn": "Yeouido Hangang Park",
+    "nameKo": "여의도한강공원",
+    "branch": null,
+    "category": "sight",
+    "area": "Yeouido",
+    "address": "330 Yeouidong-ro, Yeongdeungpo-gu, Seoul 07337 (서울 영등포구 여의동로 330; 여의도동 8)",
+    "lat": 37.5256731,
+    "lng": 126.9360586,
+    "coordStatus": "verified",
+    "coordSource": "OSM relation 7550666 (여의도한강공원, addr 330); matches official Hangang Park address and Yeouinaru Stn exit 2/3 location",
+    "reasonTh": "สวนริมแม่น้ำฮันที่ดังที่สุดของโซล ออกจากสถานีอยออีนารุแล้วถึงเลย ชมวิวแม่น้ำ/ตึกยออีโด สั่งไก่ทอดหรือกินรามยอนจากเครื่องต้มในร้านสะดวกซื้อ วิวกลางคืนสวย",
+    "suggestedStayMin": 60,
+    "budget": {
+      "textTh": "เข้าฟรี",
+      "krwMin": 0,
+      "krwMax": 0,
+      "status": "source"
+    },
+    "hours": {
+      "text": "Open 24 hours, year-round (park grounds)",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "verified",
+      "closedWeekdays": []
+    },
+    "openTime": null,
+    "closeTime": null,
+    "indoor": false,
+    "food": null,
+    "fashionTypes": null,
+    "transit": {
+      "stations": [
+        { "name": "Yeouinaru", "nameKo": "여의나루", "lines": ["5"], "exit": "2 or 3", "walkMin": 1 },
+        { "name": "Yeouido", "nameKo": "여의도", "lines": ["5", "9"], "exit": "1", "walkMin": 18 }
+      ],
+      "bus": "Stops 여의나루역1번/2번.한강버스선착장 (e.g. 261, 360, 461, 662, 753); Hangang Bus (water bus) Yeouido pier connects directly",
+      "status": "verified",
+      "sources": [
+        { "label": "Hangang Park official – Yeouido directions", "url": "https://hangang.seoul.go.kr/www/contents/671.do?mid=476" }
+      ]
+    },
+    "sources": [
+      { "label": "Hangang Park official – Yeouido directions (subway exits, buses)", "url": "https://hangang.seoul.go.kr/www/contents/671.do?mid=476" },
+      { "label": "KTripTips – 여의도한강공원 (address, always open, free)", "url": "https://www.ktriptips.com/kor/tourspot/1059479" },
+      { "label": "Seoul Mediahub – Yeouido Hangang Park night view", "url": "https://mediahub.seoul.go.kr/archives/1501768" },
+      { "label": "OSM park relation", "url": "https://www.openstreetmap.org/relation/7550666" }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "User wrote 'Yeouido park'. Chose Yeouido Hangang Park (riverside, the typical tourist spot: river views, convenience-store ramyeon, Hangang cruises, Yeouinaru Stn exit 2/3 is 1 min away). The separate inland Yeouido Park (여의도공원, 68 Yeouigongwon-ro; OSM way 682334253 at 37.5255357,126.9215857; near Yeouido Stn lines 5/9) is a city park ~1.2 km west – mainly for walking/cherry blossoms, less relevant in December. The Hyundai Seoul / IFC Mall (indoor) are a good warm backup nearby. Early December: ~0-7°C, strong river wind, sunset ~17:15, fountains (물빛광장) off, rental/leisure facilities limited; dress warmly and plan an indoor stop. Info centre 02-3780-0561~6."
+  }
+]

@@ -339,6 +339,13 @@ label.block { display: block; margin: .4rem 0; }
 .foot-right { display: inline-flex; gap: .4rem; align-items: center; }
 .notice.trip { justify-content: space-between; }
 
+/* subway */
+.line-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; margin-right: 3px; border-radius: 999px; background: var(--lc); color: #fff; font-size: .72rem; font-weight: 600; line-height: 1; vertical-align: 1px; white-space: nowrap; }
+.stations { list-style: none; padding: 0; margin: .2rem 0 .4rem; font-size: .86rem; }
+.stations li { margin: .2rem 0; }
+.transit-block { margin: .4rem 0; }
+.transit-hint { font-size: .82rem; color: var(--text); margin: .1rem 0 .2rem; line-height: 1.7; }
+
 /* ค้นหาสถานที่ใดก็ได้ */
 .web-search { margin: .4rem 0 .6rem; padding: .5rem; border: 1px solid var(--line, #e3e5e8); border-radius: 10px; }
 .web-search:has(.web-search-head) { background: color-mix(in srgb, #e8453c 4%, transparent); }

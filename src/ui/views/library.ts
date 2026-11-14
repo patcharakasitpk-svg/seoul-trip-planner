@@ -3,6 +3,7 @@ import { app } from '../app';
 import { CATEGORY_ICON, CATEGORY_LABEL, DINING_ZONE_LABEL } from '../../data/places';
 import { esc, gmapsPlaceUrl } from '../util';
 import { closedOn, shortHours, weekdayTh } from '../../core/hours';
+import { stationBlock } from './transit';
 import { fmtDateTh } from '../../core/time';
 import { stopLocationId } from '../../core/schedule';
 import { findExisting, resultMapsUrl } from '../../services/placeSearch';
@@ -197,6 +198,7 @@ function placeDetails(p: Place): string {
     <div class="place-details">
       <p>${esc(p.reasonTh)}</p>
       <p class="small"><b>เวลาเปิด</b> ${hoursLine}<br>${verify}</p>
+      ${stationBlock(p, app.getPlace(app.day.startPlaceId) ?? app.getPlace('hotel'))}
       ${p.food?.menu?.length ? `<p class="small"><b>เมนู</b> ${p.food.menu.slice(0, 3).map(esc).join(', ')}</p>` : ''}
       ${p.budget && p.budget.textTh ? `<p class="small"><b>งบ</b> ${esc(p.budget.textTh)}${p.budget.status === 'estimate' ? ' (ประมาณ)' : ''}</p>` : ''}
       ${p.lat == null ? '<p class="small closed">ยังไม่มีพิกัด — ไม่ปักหมุด</p>' : p.coordStatus === 'area-center' ? '<p class="small muted">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อ</p>' : ''}

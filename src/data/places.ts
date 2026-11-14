@@ -1,9 +1,12 @@
 import type { Place } from '../core/types';
 import { BASE_PLACES } from './basePlaces';
 import research from './places.json';
+import transitExtra from './transit.json';
 
 /** ข้อมูลจากการค้นคว้า (ตรวจสอบเมื่อ checkedAt) — ฟิลด์ที่ตรวจไม่ได้เป็น null */
 const RESEARCH = research as unknown as Place[];
+/** สถานีใกล้สุดของสถานที่เดิม (ค้นคว้าแยก) — ใช้เมื่อสถานที่ยังไม่มีข้อมูล transit ของตัวเอง */
+const TRANSIT = transitExtra as unknown as Record<string, NonNullable<Place['transit']>>;
 
 /** รวมข้อมูลตั้งต้น + ผลค้นคว้า: สถานที่ตั้งต้นใช้พิกัดที่ผู้ใช้กำหนดเสมอ */
 export function buildPublicPlaces(): Place[] {
@@ -24,15 +27,16 @@ export function buildPublicPlaces(): Place[] {
         checkedAt: r.checkedAt ?? base.checkedAt,
         notes: r.notes ?? base.notes,
         food: r.food ?? base.food,
+        transit: r.transit ?? base.transit,
         fashionTypes: base.fashionTypes ?? r.fashionTypes,
         reasonTh: base.reasonTh,
       });
     } else {
       const coordsOk = r.lat != null && r.lng != null && r.coordStatus !== 'unverified';
-      out.set(r.id, { ...r, lat: coordsOk ? r.lat : null, lng: coordsOk ? r.lng : null, coordStatus: coordsOk ? r.coordStatus : 'unverified', kind: 'place' });
+      out.set(r.id, { ...r, lat: coordsOk ? r.lat : null, lng: coordsOk ? r.lng : null, coordStatus: coordsOk ? r.coordStatus : 'unverified', kind: r.kind ?? 'place' });
     }
   }
-  return [...out.values()];
+  return [...out.values()].map((p) => (p.transit || !TRANSIT[p.id] ? p : { ...p, transit: TRANSIT[p.id] }));
 }
 
 export const PUBLIC_PLACES = buildPublicPlaces();

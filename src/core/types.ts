@@ -38,6 +38,13 @@ export interface Place {
     diningZone: 'near-coex' | 'near-hotel' | 'between' | 'other';
   } | null;
   fashionTypes?: string[] | null;
+  /** สถานีรถไฟฟ้าใกล้สุด (จากแหล่งข้อมูล) */
+  transit?: {
+    stations: { name: string; nameKo?: string | null; lines: string[]; exit?: string | null; walkMin?: number | null }[];
+    bus?: string | null;
+    status: 'verified' | 'unverified';
+    sources?: Source[];
+  } | null;
   sources: Source[];
   checkedAt?: string | null;
   notes?: string | null;

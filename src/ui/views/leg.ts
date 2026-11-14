@@ -4,6 +4,7 @@ import { app } from '../app';
 import { esc, gmapsDirUrl, kakaoToUrl, MODE_ICON, MODE_LABEL } from '../util';
 import { fmtDur } from '../../core/time';
 import { fmtDist, roughEstimateMin, straightLineM } from '../../core/geo';
+import { legTransitHint } from './transit';
 
 export function straightDist(fromId: string | null, toId: string | null): number | null {
   const a = app.getPlace(fromId);
@@ -71,6 +72,7 @@ export function legRow(dayId: string, leg: LegInfo, target: string): string {
       ${main}
       ${from && to ? `<button class="icon-btn sm" data-act="toggle-leg" data-stop="${target}" aria-expanded="${open}" aria-label="ตัวเลือกการเดินทาง">${open ? '▴' : '⋯'}</button>` : ''}
     </div>
+    ${leg.mode === 'TRANSIT' ? legTransitHint(from, to) : ''}
     ${
       open
         ? `<div class="leg-more">

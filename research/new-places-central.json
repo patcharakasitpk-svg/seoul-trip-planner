@@ -1,0 +1,607 @@
+[
+  {
+    "id": "mibbedong-yeonnam",
+    "nameTh": "มิปปึดง (สาขายอนนัม)",
+    "nameEn": "Mibbedong (Yeonnam)",
+    "nameKo": "미쁘동 연남",
+    "branch": "Yeonnam-dong (연남동)",
+    "category": "food",
+    "area": "Yeonnam-dong / Hongdae",
+    "address": "2F, 33-21 Dongyo-ro 38-gil, Mapo-gu, Seoul (서울 마포구 동교로38길 33-21 2층)",
+    "lat": 37.5621018,
+    "lng": 126.9261894,
+    "coordStatus": "unverified",
+    "coordSource": "OSM node 13946953456 (미쁘동, 동교로38길 33-21) — single source; address matches Time Out/Polle",
+    "reasonTh": "ร้านดงบุริซาชิมิสไตล์ญี่ปุ่นที่ดังในโซเชียล ข้าวล้อมด้วยหอคอยซาชิมิ อูนิ และไข่แซลมอน กับบะหมี่แซลมอนซุปมะเขือเทศเย็น",
+    "suggestedStayMin": 60,
+    "budget": {
+      "textTh": "เมนูส่วนใหญ่ 17,000–30,000 วอน (미쁘동 18,000 / 토마토연어국수 22,000)",
+      "krwMin": 17000,
+      "krwMax": 30000,
+      "status": "source"
+    },
+    "hours": {
+      "text": "Daily 11:00-22:00 (Time Out; break time unknown)",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "unverified",
+      "closedWeekdays": []
+    },
+    "openTime": "11:00",
+    "closeTime": "22:00",
+    "indoor": true,
+    "food": {
+      "type": "one-dish",
+      "menu": [
+        "미쁘동 Mibbedong sashimi-uni-ikura donburi",
+        "토마토연어국수 tomato salmon noodles",
+        "연어소바 salmon soba"
+      ],
+      "mealMin": 45,
+      "minOrder": null,
+      "diningZone": "other"
+    },
+    "fashionTypes": null,
+    "transit": {
+      "stations": [
+        {
+          "name": "Hongik Univ.",
+          "nameKo": "홍대입구",
+          "lines": [
+            "2",
+            "AREX",
+            "GJ"
+          ],
+          "exit": "3",
+          "walkMin": 8
+        }
+      ],
+      "bus": null,
+      "status": "unverified",
+      "sources": [
+        {
+          "label": "OpenStreetMap node 13946953456",
+          "url": "https://www.openstreetmap.org/node/13946953456"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "Time Out Seoul - Mibbeudong",
+        "url": "https://www.timeout.com/seoul/restaurants/mibbeudong"
+      },
+      {
+        "label": "Polle - 미쁘동 (연남, menu/prices)",
+        "url": "https://polle.com/place/4K2ZDz/%EB%AF%B8%EC%81%98%EB%8F%99"
+      },
+      {
+        "label": "Polle - 미쁘동 (성수)",
+        "url": "https://polle.com/place/3c4tmu/%EB%AF%B8%EC%81%98%EB%8F%99"
+      },
+      {
+        "label": "SethLui - Mibbedong Seongsu review",
+        "url": "https://sethlui.com/mibbedong-korea/"
+      },
+      {
+        "label": "OpenStreetMap node 13946953456",
+        "url": "https://www.openstreetmap.org/node/13946953456"
+      }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "IDENTIFICATION: 'Mibbedong' = 미쁘동 (Japanese kaisendon/salmon soba chain, Instagram @mibbedong_official). No Myeongdong or Jung-gu/central branch was found in any source; known branches are Yeonnam-dong (this entry, likely the original) and Seongsu (2F, 11-12 Seoulsup 2-gil, Seongdong-gu, near Seoul Forest Station, Suin-Bundang line). Both are ~25-35 min by subway from Myeongdong. Yeonnam chosen because it has an OSM pin and Time Out listing. Long waits reported (even weekday lunch); Polle tags reservations possible. Hours from Time Out only; break time and closed days unknown - check Naver Map / call 070-4242-1881. Station exit/walk time estimated from map distance."
+  },
+  {
+    "id": "hanam-pig-myeongdong",
+    "nameTh": "ฮานัมดเวจีจิบ (ฮานัมพิก) สาขาเมียงดง",
+    "nameEn": "Hanam Pig House (Myeongdong)",
+    "nameKo": "하남돼지집 명동점",
+    "branch": "Myeongdong 1호점",
+    "category": "food",
+    "area": "Myeongdong",
+    "address": "12 Myeongdong 9ga-gil, Jung-gu, Seoul (서울 중구 명동9가길 12)",
+    "lat": 37.5649871,
+    "lng": 126.9838933,
+    "coordStatus": "unverified",
+    "coordSource": "OSM node 7202847888 (하남돼지집 on 명동9가길) — single source; street matches web listings",
+    "reasonTh": "ร้านหมูย่างเครือดังของเกาหลี พนักงานย่างให้ที่โต๊ะ หมูสามชั้นและคอหมูหนา ๆ ใกล้โรงแรม เหมาะเป็นมื้อเย็นบาร์บีคิว",
+    "suggestedStayMin": 75,
+    "budget": {
+      "textTh": "ประมาณ 18,000–22,000 วอนต่อ 1 ที่ (เนื้อ) + ข้าว/เครื่องเคียง (ประมาณการ)",
+      "krwMin": 20000,
+      "krwMax": 40000,
+      "status": "estimate"
+    },
+    "hours": {
+      "text": "Unknown - check Naver/Kakao Map (chain branches typically open ~11:30/17:00 until ~23:00)",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "unverified",
+      "closedWeekdays": []
+    },
+    "openTime": null,
+    "closeTime": null,
+    "indoor": true,
+    "food": {
+      "type": "bbq",
+      "menu": [
+        "본삼겹 pork belly",
+        "목살 pork neck",
+        "된장찌개 doenjang-jjigae"
+      ],
+      "mealMin": 60,
+      "minOrder": null,
+      "diningZone": "near-hotel"
+    },
+    "fashionTypes": null,
+    "transit": {
+      "stations": [
+        {
+          "name": "Euljiro 1(il)-ga",
+          "nameKo": "을지로입구",
+          "lines": [
+            "2"
+          ],
+          "exit": null,
+          "walkMin": 5
+        },
+        {
+          "name": "Myeongdong",
+          "nameKo": "명동",
+          "lines": [
+            "4"
+          ],
+          "exit": null,
+          "walkMin": 8
+        }
+      ],
+      "bus": null,
+      "status": "unverified",
+      "sources": [
+        {
+          "label": "OpenStreetMap node 7202847888",
+          "url": "https://www.openstreetmap.org/node/7202847888"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "TheWackyDuo - Hanam Pig Myeongdong review",
+        "url": "https://www.thewackyduo.com/2023/05/hanam-pig-myeongdong-review-authentic.html"
+      },
+      {
+        "label": "Wanderlog - Hanam Pig",
+        "url": "https://wanderlog.com/place/details/1914443/hanam-pig"
+      },
+      {
+        "label": "OpenStreetMap node 7202847888",
+        "url": "https://www.openstreetmap.org/node/7202847888"
+      }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "Address 명동9가길 12 ('명동1호점') from travel listings; OSM pin is on 명동9가길 but has no house number. Opening hours, break time and min-order NOT found in any accessible source - verify on Naver Map. Reviews mention per-person ordering rules for meats (so a 2-portion/인분 minimum is likely but unconfirmed - minOrder left null) and smoky dining room at peak. Station exits/walk times are map estimates. Not to be confused with Hadongkwan (명동9길 12) nearby. Prices are an estimate (no current menu found)."
+  },
+  {
+    "id": "odarijip-myeongdong",
+    "nameTh": "โอดาริจิบ (ปูดองซีอิ๊ว) เมียงดง",
+    "nameEn": "Odarijip Ganjang Gejang (Myeongdong)",
+    "nameKo": "오다리집 간장게장 명동점",
+    "branch": "Myeongdong (명동8나길 28, 2F-3F)",
+    "category": "food",
+    "area": "Myeongdong",
+    "address": "2F, 28 Myeongdong 8na-gil, Jung-gu, Seoul (서울 중구 명동8나길 28 2층)",
+    "lat": 37.5614314,
+    "lng": 126.9834585,
+    "coordStatus": "unverified",
+    "coordSource": "OSM node 3611957673 (오다리집, addr 명동8나길 28) — single source; address matches Trip.com/Menufans/Creatrip",
+    "reasonTh": "ร้านกันจังเคจัง (ปูดองซีอิ๊ว) ชื่อดังกลางเมียงดง ชุดปูดองเสิร์ฟกับข้าวและเครื่องเคียง ใกล้โรงแรมเดินไปได้",
+    "suggestedStayMin": 60,
+    "budget": {
+      "textTh": "ชุดปูดองซีอิ๊ว M ประมาณ 37,500 วอน / L ประมาณ 40,800 วอน ต่อชุด",
+      "krwMin": 37500,
+      "krwMax": 43000,
+      "status": "source"
+    },
+    "hours": {
+      "text": "Daily 10:00-23:00 (OSM opening_hours; older Trazy listing says 07:30-23:30)",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "unverified",
+      "closedWeekdays": []
+    },
+    "openTime": "10:00",
+    "closeTime": "23:00",
+    "indoor": true,
+    "food": {
+      "type": "one-dish",
+      "menu": [
+        "간장게장 정식 ganjang-gejang soy crab set",
+        "양념게장 yangnyeom-gejang spicy crab",
+        "간장새우장 soy-marinated shrimp"
+      ],
+      "mealMin": 45,
+      "minOrder": null,
+      "diningZone": "near-hotel"
+    },
+    "fashionTypes": null,
+    "transit": {
+      "stations": [
+        {
+          "name": "Myeongdong",
+          "nameKo": "명동",
+          "lines": [
+            "4"
+          ],
+          "exit": "6",
+          "walkMin": 2
+        }
+      ],
+      "bus": null,
+      "status": "unverified",
+      "sources": [
+        {
+          "label": "Creatrip Myeongdong food guide",
+          "url": "https://creatrip.com/en/blog/3001"
+        },
+        {
+          "label": "Trip.com - Odarijip Myeongdong",
+          "url": "https://nz.trip.com/restaurant/south%20korea/seoul/detail/Odarijip%20Myeongdong-13588708"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "Trip.com - Odarijip Myeongdong",
+        "url": "https://nz.trip.com/restaurant/south%20korea/seoul/detail/Odarijip%20Myeongdong-13588708"
+      },
+      {
+        "label": "Menufans - 오다리집 간장게장 (menu, AI-generated data)",
+        "url": "https://menufans.com/place/odarijip-ganjang-gejang-019b89a13944744997a58d5256a94287"
+      },
+      {
+        "label": "Trazy - Odarijip",
+        "url": "https://www.trazy.com/spot/584/odarijip-오다리집-restaurant-cafe"
+      },
+      {
+        "label": "Creatrip Myeongdong food guide",
+        "url": "https://creatrip.com/en/blog/3001"
+      },
+      {
+        "label": "OpenStreetMap node 3611957673",
+        "url": "https://www.openstreetmap.org/node/3611957673"
+      }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "Identified as 오다리집 간장게장 (soy-sauce crab), the Myeongdong original at 명동8나길 28. Chain has other locations: OSM also shows '오다리집 간장게장 명동3호점' on 명동8길 (~37.5619,126.9844) and a Gangnam branch (논현로94길); a Savoy Hotel branch is also listed online. Hours conflict (OSM 10:00-23:00 vs old Trazy 07:30-23:30) - verify on Naver. Prices from Menufans (flagged as AI-generated data there) - treat as approximate. Raw marinated crab: not for those avoiding raw seafood."
+  },
+  {
+    "id": "jeonwon-jipbul-ppyeogui",
+    "nameTh": "จอนวอน ชิปบุล ปยอกุย (กระดูกหมูย่างไฟฟาง) ยองดึงโพ",
+    "nameEn": "Jeonwon Straw-Fire Bone Grill",
+    "nameKo": "전원 짚불 뼈구이",
+    "branch": "Yangpyeong-dong, Yeongdeungpo (only location found)",
+    "category": "food",
+    "area": "Yeongdeungpo (Yangpyeong-dong / Dangsan)",
+    "address": "2F, 12 Yangpyeong-ro 14-gil, Yeongdeungpo-gu, Seoul (서울 영등포구 양평로14길 12 2층)",
+    "lat": 37.5362681,
+    "lng": 126.8998022,
+    "coordStatus": "unverified",
+    "coordSource": "OSM node 13930561526 (전원 짚불 뼈구이, addr 양평로14길 12) — single source; address matches Polle",
+    "reasonTh": "ร้านกระดูกหมูย่างไฟฟาง (뼈구이) หอมกลิ่นควันฟาง ทานคู่ชีสพาจอนกรอบและข้าวปั้นทำเอง ร้านท้องถิ่นที่คนเกาหลีต่อคิว",
+    "suggestedStayMin": 75,
+    "budget": {
+      "textTh": "짚불 뼈구이 (เล็ก) 38,000 วอน แชร์ 2 คน; เซ็ตกลางวันวันธรรมดา 13,000 วอน",
+      "krwMin": 13000,
+      "krwMax": 39500,
+      "status": "source"
+    },
+    "hours": {
+      "text": "Unknown (weekday-lunch set exists, so open at lunch on weekdays)",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "unverified",
+      "closedWeekdays": []
+    },
+    "openTime": null,
+    "closeTime": null,
+    "indoor": true,
+    "food": {
+      "type": "bbq",
+      "menu": [
+        "짚불 뼈구이 straw-fire grilled pork bones",
+        "크리스피 치즈전 crispy cheese jeon",
+        "뼈 칼국수 pork-bone kalguksu"
+      ],
+      "mealMin": 60,
+      "minOrder": null,
+      "diningZone": "other"
+    },
+    "fashionTypes": null,
+    "transit": {
+      "stations": [
+        {
+          "name": "Dangsan",
+          "nameKo": "당산",
+          "lines": [
+            "2",
+            "9"
+          ],
+          "exit": null,
+          "walkMin": 6
+        },
+        {
+          "name": "Seonyudo",
+          "nameKo": "선유도",
+          "lines": [
+            "9"
+          ],
+          "exit": null,
+          "walkMin": 10
+        }
+      ],
+      "bus": null,
+      "status": "unverified",
+      "sources": [
+        {
+          "label": "OpenStreetMap node 13930561526",
+          "url": "https://www.openstreetmap.org/node/13930561526"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "Polle - 전원 짚불 뼈구이 (address, menu, reviews)",
+        "url": "https://polle.com/place/24Zxeo/%EC%A0%84%EC%9B%90%20%EC%A7%9A%EB%B6%88%20%EB%BC%88%EA%B5%AC%EC%9D%B4"
+      },
+      {
+        "label": "OpenStreetMap node 13930561526",
+        "url": "https://www.openstreetmap.org/node/13930561526"
+      }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "IDENTIFICATION: 'Jeonwon Straw-Fire Bone grill' matches 전원 짚불 뼈구이 word-for-word (전원=Jeonwon, 짚불=straw-fire, 뼈구이=bone grill); only one Seoul location found (Yeongdeungpo). Not in central Seoul: ~30 min by subway from Myeongdong (Line 2 to Dangsan). Hours, break time, closed days not found - verify on Naver Map. Reviews: waiting even on Sunday 13:00; some find it salty / porky smell; menu items sized 소 (small) for sharing. Station walk times are map estimates (Dangsan ~400 m). Other straw-fire chains in Seoul (낭만짚불구이, 짚불돈 in Mangwon) are different restaurants."
+  },
+  {
+    "id": "myeongdong-cathedral",
+    "nameTh": "มหาวิหารเมียงดง",
+    "nameEn": "Myeongdong Cathedral",
+    "nameKo": "명동대성당",
+    "branch": null,
+    "category": "sight",
+    "area": "Myeongdong",
+    "address": "74 Myeongdong-gil, Jung-gu, Seoul 04537 (서울 중구 명동길 74)",
+    "lat": 37.5631588,
+    "lng": 126.9871556,
+    "coordStatus": "verified",
+    "coordSource": "OSM way 355630939 (명동대성당, 명동길 74) + English Wikipedia coords 37.5633,126.9873 (~20 m apart)",
+    "reasonTh": "โบสถ์โกธิกอิฐแดงเก่าแก่ที่สุดแห่งหนึ่งของเกาหลี (ค.ศ. 1898) เข้าชมฟรี ช่วงปลายปีมีไฟประดับคริสต์มาส อยู่ใกล้โรงแรม",
+    "suggestedStayMin": 40,
+    "budget": {
+      "textTh": "เข้าชมฟรี",
+      "krwMin": 0,
+      "krwMax": 0,
+      "status": "source"
+    },
+    "hours": {
+      "text": "Grounds daily 06:00-22:00; interior access limited during Mass (Sun many Masses incl. 09:00 English)",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "unverified",
+      "closedWeekdays": []
+    },
+    "openTime": "06:00",
+    "closeTime": "22:00",
+    "indoor": false,
+    "food": null,
+    "fashionTypes": null,
+    "transit": {
+      "stations": [
+        {
+          "name": "Myeongdong",
+          "nameKo": "명동",
+          "lines": [
+            "4"
+          ],
+          "exit": "8",
+          "walkMin": 6
+        },
+        {
+          "name": "Euljiro 3(sam)-ga",
+          "nameKo": "을지로3가",
+          "lines": [
+            "2",
+            "3"
+          ],
+          "exit": "12",
+          "walkMin": 5
+        }
+      ],
+      "bus": "Myeongdong Cathedral stop: 470, 472, 741",
+      "status": "unverified",
+      "sources": [
+        {
+          "label": "The Seoul Guide - Myeongdong Cathedral",
+          "url": "https://www.theseoulguide.com/myeongdong-cathedral/"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "The Seoul Guide - Myeongdong Cathedral",
+        "url": "https://www.theseoulguide.com/myeongdong-cathedral/"
+      },
+      {
+        "label": "Wikipedia - Myeongdong Cathedral",
+        "url": "https://en.wikipedia.org/wiki/Myeongdong_Cathedral"
+      },
+      {
+        "label": "OpenStreetMap way 355630939",
+        "url": "https://www.openstreetmap.org/way/355630939"
+      }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "Active place of worship: no sightseeing inside during Mass, keep quiet. Sources disagree on hours (06:00-22:00 grounds per The Seoul Guide; others say interior 09:00-18:00/21:00) - treat interior hours as unverified. Sunday 6 Dec 2026 and Sun 29 Nov will be busy with Masses (Advent). Christmas lights/decorations usually up from early December. Walking from hotel ~10 min."
+  },
+  {
+    "id": "shinsegae-main-store",
+    "nameTh": "ห้างชินเซเก สาขาหลัก (เมียงดง)",
+    "nameEn": "Shinsegae Department Store Main Store",
+    "nameKo": "신세계백화점 본점",
+    "branch": "Main Store (본점)",
+    "category": "fashion",
+    "area": "Myeongdong / Hoehyeon",
+    "address": "63 Sogong-ro, Jung-gu, Seoul 04530 (서울 중구 소공로 63)",
+    "lat": 37.5609817,
+    "lng": 126.9811521,
+    "coordStatus": "unverified",
+    "coordSource": "OSM way 301284818 (신세계백화점 본점 더 리저브, 소공로) — single source",
+    "reasonTh": "ห้างหรูเก่าแก่ที่สุดของเกาหลี อาคารสไตล์คลาสสิก แบรนด์เนมครบ และช่วงธันวาคมมีการฉายไฟ/มีเดียอาร์ตคริสต์มาสบนผนังอาคารที่คนนิยมไปถ่ายรูป",
+    "suggestedStayMin": 90,
+    "budget": {
+      "textTh": "ขึ้นกับการช้อปปิ้ง",
+      "krwMin": null,
+      "krwMax": null,
+      "status": "unknown"
+    },
+    "hours": {
+      "text": "Mon-Thu 10:30-20:00; Fri-Sun & holidays 10:30-20:30 (some listings say 20:00 daily)",
+      "closedDays": "Irregular monthly closure (usually a Monday) - check official site",
+      "lastOrder": null,
+      "status": "unverified",
+      "closedWeekdays": []
+    },
+    "openTime": "10:30",
+    "closeTime": "20:00",
+    "indoor": true,
+    "food": null,
+    "fashionTypes": [
+      "luxury",
+      "department store",
+      "cosmetics"
+    ],
+    "transit": {
+      "stations": [
+        {
+          "name": "Hoehyeon",
+          "nameKo": "회현",
+          "lines": [
+            "4"
+          ],
+          "exit": "7",
+          "walkMin": 1
+        },
+        {
+          "name": "Myeongdong",
+          "nameKo": "명동",
+          "lines": [
+            "4"
+          ],
+          "exit": "5",
+          "walkMin": 6
+        }
+      ],
+      "bus": null,
+      "status": "unverified",
+      "sources": [
+        {
+          "label": "KoreaToDo - Shinsegae Department Store",
+          "url": "https://www.koreatodo.com/shinsegae-department-store"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "KTripTips - 신세계백화점 (본점)",
+        "url": "https://www.ktriptips.com/kor/shopping/132642"
+      },
+      {
+        "label": "KoreaToDo - Shinsegae Department Store",
+        "url": "https://www.koreatodo.com/shinsegae-department-store"
+      },
+      {
+        "label": "Creatrip - Shinsegae Myeongdong Main Store",
+        "url": "https://creatrip.com/en/blog/14393"
+      },
+      {
+        "label": "OpenStreetMap way 301284818",
+        "url": "https://www.openstreetmap.org/way/301284818"
+      }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "Hoehyeon Stn exit 7 is directly connected. Store spans several buildings (The Reserve = 본관, The Heritage = luxury hall, The Estate, Shinsegae Duty Free in upper floors of the new wing). Department stores close roughly one Monday per month - check whether Mon 30 Nov or Mon 7 Dec 2026 is a closure day (shinsegae.com). closeTime set to the conservative 20:00. Dec Christmas facade show runs in the evening (verify 2026 dates). ~7 min walk from hotel."
+  },
+  {
+    "id": "naksan-park",
+    "nameTh": "สวนนักซาน",
+    "nameEn": "Naksan Park",
+    "nameKo": "낙산공원",
+    "branch": null,
+    "category": "sight",
+    "area": "Hyehwa / Ihwa-dong (Jongno)",
+    "address": "41 Naksan-gil, Jongno-gu, Seoul (서울 종로구 낙산길 41)",
+    "lat": 37.5805339,
+    "lng": 127.0076085,
+    "coordStatus": "verified",
+    "coordSource": "OSM way 229027411 (낙산공원, 낙산길 41) + Korean Wikipedia '낙산' coords 37.580467,127.007575 (~10 m apart)",
+    "reasonTh": "เดินเลียบกำแพงเมืองโซลบนเนินเขา วิวเมืองยามค่ำสวยมาก ต่อด้วยหมู่บ้านจิตรกรรมฝาผนังอีฮวาได้ เข้าฟรีเปิด 24 ชม.",
+    "suggestedStayMin": 60,
+    "budget": {
+      "textTh": "เข้าชมฟรี",
+      "krwMin": 0,
+      "krwMax": 0,
+      "status": "source"
+    },
+    "hours": {
+      "text": "Park open 24 hours; Naksan Exhibition Hall 09:00-17:00",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "unverified",
+      "closedWeekdays": []
+    },
+    "openTime": "00:00",
+    "closeTime": "23:59",
+    "indoor": false,
+    "food": null,
+    "fashionTypes": null,
+    "transit": {
+      "stations": [
+        {
+          "name": "Hyehwa",
+          "nameKo": "혜화",
+          "lines": [
+            "4"
+          ],
+          "exit": "2",
+          "walkMin": 15
+        }
+      ],
+      "bus": "Jongno 03 village bus from Hyehwa Stn",
+      "status": "unverified",
+      "sources": [
+        {
+          "label": "Seoul City Wall - Naksan course",
+          "url": "https://seoulcitywall.seoul.go.kr/en/wallcourse/2.do"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "label": "Time Out Seoul - Naksan Park",
+        "url": "https://www.timeout.com/seoul/things-to-do/naksan-park"
+      },
+      {
+        "label": "Seoul City Wall - Naksan course",
+        "url": "https://seoulcitywall.seoul.go.kr/en/wallcourse/2.do"
+      },
+      {
+        "label": "Seoul Parks - Naksan map PDF",
+        "url": "https://parks.seoul.go.kr/maps/naksan/naksan_map_KR&EN.pdf"
+      },
+      {
+        "label": "OpenStreetMap way 229027411",
+        "url": "https://www.openstreetmap.org/way/229027411"
+      }
+    ],
+    "checkedAt": "2026-11-14",
+    "notes": "Uphill 15-20 min walk from Hyehwa Stn exit 2 (steep; village bus 종로03 shortens it - bus info unverified). Outdoor and exposed: cold/windy in early December, path can be icy. Address listed as 41 or 54 Naksan-gil depending on source. Combine with Ihwa Mural Village and Daehangno. Myeongdong to Hyehwa: Line 4 direct (~10 min)."
+  }
+]
