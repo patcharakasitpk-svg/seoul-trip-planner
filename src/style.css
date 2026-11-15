@@ -855,3 +855,5 @@ body[data-tab="places"] .pp-page { display: grid; gap: 1rem; padding: 1rem; }
 .bottom-nav .ico { margin-bottom: 3px; }
 .settings-tpl { display: grid; gap: .35rem; justify-items: start; margin-bottom: 1rem; padding: .8rem; }
 .settings-tpl p { margin: 0; }
+.pp-cat-field { display: grid; gap: .3rem; font-size: .9rem; }
+.pp-cats { display: flex; flex-wrap: wrap; gap: .35rem; }

@@ -85,7 +85,7 @@ export function renderMyPlaces() {
 function listHtml(): string {
   const ps = mine();
   return `
-    <div class="pp-head"><h2>สถานที่ของฉัน <span class="muted">(${ps.length})</span></h2>${form ? '' : '<button class="btn primary" data-pp="add">＋ เพิ่มสถานที่</button>'}</div>
+    <div class="pp-head"><h2>สถานที่ที่เพิ่มเอง <span class="muted">(${ps.length})</span></h2>${form ? '' : '<button class="btn primary" data-pp="add">＋ เพิ่มสถานที่</button>'}</div>
     <p class="muted small pp-intro">ร้าน/ที่เที่ยวที่ไม่มีในรายการ — ใส่ตำแหน่ง แล้วเพิ่มรูปกับลิงก์ไว้ จะได้จำได้ว่าที่ไหน · ใช้ในหน้า “จัดแผน” ได้ทุกวัน</p>
     ${form && !form.id ? formHtml() : ''}
     ${ps.length ? ps.map(card).join('') : form ? '' : '<p class="empty">ยังไม่มีสถานที่ที่เพิ่มเอง — กด “＋ เพิ่มสถานที่”</p>'}`;
@@ -97,11 +97,10 @@ function formHtml(): string {
   return `<form class="pp-form card" data-pp-form>
     <h3>${f.id ? 'แก้สถานที่' : 'เพิ่มสถานที่'}</h3>
     <label>ชื่อสถานที่<input class="inp" data-pp-field="name" value="${esc(f.name)}" maxlength="120" placeholder="เช่น Onion Anguk" required ${f.id ? '' : 'data-autofocus'}></label>
-    <label>หมวด<select class="inp" data-pp-field="category">${(Object.entries(OWN_CATEGORY_LABEL) as [OwnCategory, string][]).map(([k, v]) => `<option value="${k}" ${k === f.category ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>
+    <div class="pp-cat-field"><span>ประเภท</span><div class="chips pp-cats" role="radiogroup" aria-label="ประเภทสถานที่">${(Object.entries(OWN_CATEGORY_LABEL) as [OwnCategory, string][]).map(([k, v]) => `<button type="button" class="chip ${k === f.category ? 'on' : ''}" data-pp="cat" data-pp-cat="${k}" role="radio" aria-checked="${k === f.category}">${esc(v)}</button>`).join('')}</div></div>
     <label>ตำแหน่ง <span class="muted small">— วางพิกัด, Plus Code (เช่น HX7M+HQ8) หรือลิงก์ Google Maps แบบเต็ม</span>
       <span class="pp-coord"><input class="inp" data-pp-field="coord" value="${esc(f.coord)}" placeholder="37.5639, 126.9844" inputmode="text"><button type="button" class="btn sm ${picking ? 'primary' : ''}" data-pp="pick">${picking ? 'กำลังเลือก… แตะบนแผนที่' : '📍 แตะบนแผนที่'}</button></span></label>
     <p class="pp-coord-msg ${f.error ? 'bad-text' : 'muted'} small">${f.error ? esc(f.error) : pt ? `✓ ได้ตำแหน่งแล้ว (${pt.lat.toFixed(5)}, ${pt.lng.toFixed(5)}) — ดูหมุดแดงบนแผนที่ แล้วเช็กใน <a href="https://www.google.com/maps/search/?api=1&query=${pt.lat},${pt.lng}" target="_blank" rel="noopener">Google Maps ↗</a>` : 'ยังไม่มีตำแหน่งก็บันทึกได้ (จะยังไม่ปักหมุด)'}</p>
-    <label>อยู่ประมาณ<select class="inp" data-pp-field="stay">${[20, 30, 45, 60, 90, 120, 180].map((m) => `<option value="${m}" ${m === f.stay ? 'selected' : ''}>${m < 60 ? `${m} นาที` : `${m / 60} ชม.`}</option>`).join('')}</select></label>
     <label>โน้ต <span class="muted small">(ไม่บังคับ)</span><textarea class="inp" data-pp-field="note" rows="2" maxlength="500" placeholder="เช่น ร้านคาเฟ่ในบ้านเก่า สั่งขนมปังเกลือ">${esc(f.note)}</textarea></label>
     <label>ลิงก์ <span class="muted small">— บรรทัดละ 1 ลิงก์ (Google Maps, IG, รีวิว)</span><textarea class="inp" data-pp-field="links" rows="2" placeholder="https://…">${esc(f.links)}</textarea></label>
     <p class="muted small">เพิ่มรูปได้หลังบันทึก (ปุ่ม 📷 บนการ์ด)</p>
@@ -219,6 +218,9 @@ function onClick(e: Event) {
       break;
     case 'pick':
       picking = !picking;
+      break;
+    case 'cat':
+      if (form) form.category = (el.dataset.ppCat as OwnCategory) ?? form.category;
       break;
     case 'select':
       select(id);

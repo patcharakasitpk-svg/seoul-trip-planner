@@ -354,16 +354,8 @@ function infoPop(): string {
 
 const photoLink = (p: Place | undefined) => (hasOwnInfo(p) ? ownInfoBtn(p!, 'ดูรูป') : p && p.category !== 'base' ? `<a class="pl-photo" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" title="ดูรูป ${esc(p.nameTh)}">ดูรูป ↗</a>` : '');
 
-const CATS: [string, string][] = [
-  ['', 'ทั้งหมด'],
-  ['food', 'อาหาร'],
-  ['cafe', 'คาเฟ่'],
-  ['fashion', 'เสื้อผ้า'],
-  ['beauty', 'ความงาม/ของใช้'],
-  ['market', 'ตลาด'],
-  ['sight', 'เที่ยว'],
-  ['base', 'จุดหลัก'],
-];
+/** หมวดในการค้นหา — ชุดเดียวกับหมวดตอนเพิ่มสถานที่เอง (ชื่อตรงกันทุกหน้า) */
+const CATS: [string, string][] = [['', 'ทั้งหมด'], ...(Object.entries(OWN_CATEGORY_LABEL) as [string, string][]), ['base', 'จุดหลัก']];
 
 const matchCat = (p: Place, cat: string) =>
   !cat || (cat === 'cafe' ? p.food?.type === 'cafe' : cat === 'food' ? p.category === 'food' && p.food?.type !== 'cafe' : p.category === cat);

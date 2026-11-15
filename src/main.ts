@@ -46,7 +46,7 @@ document.querySelector('#app')!.innerHTML = `
     <button data-act="tab" data-tab="today">วันนี้</button>
     <button data-act="tab" data-tab="plan">แผนของฉัน</button>
     <button data-act="nav-planner">จัดแผน</button>
-    <button data-act="tab" data-tab="places">สถานที่</button>
+    <button data-act="tab" data-tab="places">เพิ่มสถานที่</button>
     <button data-act="tab" data-tab="fx">แปลงเงิน</button>
   </nav>
   <div class="top-actions">
@@ -66,13 +66,13 @@ document.querySelector('#app')!.innerHTML = `
   <section class="panel right" id="right" aria-live="polite"></section>
 </main>
 <section id="fx" class="fx" aria-label="แปลงสกุลเงิน"></section>
-<section id="places-page" class="pp-page" aria-label="สถานที่ของฉัน"></section>
+<section id="places-page" class="pp-page" aria-label="เพิ่มสถานที่"></section>
 <nav class="bottom-nav" aria-label="เมนูหลัก">
   <button data-act="tab" data-tab="today">${ICON.today}วันนี้</button>
   <button data-act="tab" data-tab="map">${ICON.map}แผนที่</button>
   <button data-act="tab" data-tab="plan">${ICON.plan}แผนของฉัน</button>
   <button data-act="nav-planner" class="nav-planner">${ICON.planner}จัดแผน</button>
-  <button data-act="tab" data-tab="places">${ICON.places}สถานที่</button>
+  <button data-act="tab" data-tab="places">${ICON.places}เพิ่มสถานที่</button>
   <button data-act="tab" data-tab="fx">${ICON.fx}แปลงเงิน</button>
 </nav>
 <div id="modal-root"></div>

@@ -792,7 +792,9 @@ test('แท็บสถานที่: เพิ่มชื่อ + ตำแ
   await expect(pp.locator('#pp-map .leaflet-container, #pp-map.leaflet-container')).toBeVisible();
   await pp.locator('[data-pp="add"]').click();
   await pp.locator('[data-pp-field="name"]').fill('Onion Anguk');
-  await pp.locator('[data-pp-field="category"]').selectOption('cafe');
+  await pp.locator('[data-pp-cat="cafe"]').click();
+  await expect(pp.locator('[data-pp-cat="cafe"]')).toHaveAttribute('aria-checked', 'true');
+  await expect(pp.locator('[data-pp-field="stay"]')).toHaveCount(0);
   await pp.locator('[data-pp-field="coord"]').fill('HX7M+HQ8');
   await expect(pp.locator('.pp-coord-msg')).toContainText('ได้ตำแหน่งแล้ว');
   await expect(pp.locator('.pp-pin.preview span')).toBeVisible();
@@ -866,7 +868,7 @@ test('แถบเมนูบน: ตัวอักษรล้วน ไม�
   await page.goto('/');
   await expect(page.locator('.topbar [data-act="open-templates"]')).toHaveCount(0);
   const labels = await page.locator('.main-menu button').allInnerTexts();
-  expect(labels).toEqual(['วันนี้', 'แผนของฉัน', 'จัดแผน', 'สถานที่', 'แปลงเงิน']);
+  expect(labels).toEqual(['วันนี้', 'แผนของฉัน', 'จัดแผน', 'เพิ่มสถานที่', 'แปลงเงิน']);
   await openTemplates(page);
   await expect(page.locator('.modal')).toContainText('เลือกแผนรายวัน');
 });

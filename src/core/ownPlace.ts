@@ -3,7 +3,7 @@ import { coordError, parseLatLng } from './coords';
 import { straightLineM } from './geo';
 
 export type OwnCategory = 'food' | 'cafe' | 'fashion' | 'beauty' | 'market' | 'sight';
-export const OWN_CATEGORY_LABEL: Record<OwnCategory, string> = { food: 'อาหาร', cafe: 'คาเฟ่', fashion: 'เสื้อผ้า/ร้านค้า', beauty: 'ความงาม/ของใช้', market: 'ตลาด', sight: 'เที่ยว' };
+export const OWN_CATEGORY_LABEL: Record<OwnCategory, string> = { food: 'อาหาร', cafe: 'คาเฟ่', fashion: 'เสื้อผ้า', beauty: 'ความงาม/ของใช้', market: 'ตลาด', sight: 'เที่ยว' };
 
 /**
  * สร้างสถานที่ที่ผู้ใช้เพิ่มเอง (ชื่อ + พิกัดที่วางมา) — ย่านเดาจากสถานที่ที่ใกล้ที่สุด (≤ 2 กม.) ไม่งั้น "เพิ่มเอง"
