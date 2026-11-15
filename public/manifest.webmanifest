@@ -1,2 +1,2 @@
-{ "name": "Seoul Trip Planner", "short_name": "Seoul Plan", "start_url": "./", "display": "standalone", "background_color": "#f5f8fc", "theme_color": "#1f5fd6", "lang": "th",
+{ "name": "Travel planner", "short_name": "Travel planner", "start_url": "./", "display": "standalone", "background_color": "#f5f8fc", "theme_color": "#1f5fd6", "lang": "th",
   "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }] }

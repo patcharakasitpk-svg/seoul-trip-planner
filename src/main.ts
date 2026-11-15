@@ -42,7 +42,7 @@ const $ = (sel: string) => document.querySelector(sel) as HTMLElement;
 
 document.querySelector('#app')!.innerHTML = `
 <header class="topbar">
-  <div class="brand"><b>Seoul Trip</b><span class="plan-name" id="plan-name"></span></div>
+  <div class="brand"><b>Travel planner</b><span class="plan-name" id="plan-name"></span></div>
   <nav class="main-menu desk-only" aria-label="เมนูหลัก">
     <button data-act="tab" data-tab="today">วันนี้</button>
     <button data-act="tab" data-tab="plan">แผนของฉัน</button>
