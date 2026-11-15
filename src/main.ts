@@ -21,7 +21,7 @@ import { TEMPLATES, templateDayStops, applyDatedTemplate, mergeDayStops } from '
 import { tplTargetDay } from './ui/views/modals';
 import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
 import { stopLocationId } from './core/schedule';
-import { MEALS, mealName, newMeal, mealInsertIndex, type Meal } from './core/meals';
+import { MEALS, mealName, mealOf, newMeal, mealInsertIndex, type Meal } from './core/meals';
 import { searchPlaces, placeFromResult, findExisting } from './services/placeSearch';
 import { SEARCH_PREFIX } from './ui/mapSpecs';
 import { RoomSync, inviteUrl, newRoomId, roomFromHash, toRoomDoc, fromRoomDoc, shouldApplyRemote, type RoomDoc, type SyncState } from './services/sync';
@@ -554,7 +554,8 @@ function quickToggle(placeId: string) {
     applyWithUndo(day.id, nd, `เอา ${p.nameTh} ออกจากวัน ${n}`);
     return;
   }
-  const emptyDinner = p.food ? day.stops.find((s) => s.kind === 'dinner' && !s.placeId && !s.skipped) : undefined;
+  // คาเฟ่เติมได้เฉพาะช่องมื้อระหว่างทาง (ไม่ไปแทนมื้อหลัก)
+  const emptyDinner = p.food ? day.stops.find((s) => s.kind === 'dinner' && !s.placeId && !s.skipped && (p.food!.type !== 'cafe' || mealOf(s) === 'snack')) : undefined;
   const nd = emptyDinner
     ? updateStop(day, emptyDinner.uid, { placeId, stayMin: app.stayFor(placeId) })
     : insertStop(day, defaultInsertIndex(day), stopForPlace(placeId));

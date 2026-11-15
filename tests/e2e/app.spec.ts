@@ -516,7 +516,16 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="clear-stops"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
-  await expect(pl.locator('.pl-group').first()).toContainText('สถานที่หลัก');
+  // ตัวกรองหมวด "จุดหลัก" → มีโรงแรม/COEX/สนามบิน
+  await pl.locator('[data-pl="cat"][data-v="base"]').click();
+  await expect(pl.locator('.pl-lane-list')).toContainText('Sotetsu');
+  await expect(pl.locator('.pl-lane-list')).not.toContainText('Gwangjang Market');
+  await pl.locator('[data-pl="cat"][data-v=""]').click();
+  // กรองย่าน → เหลือหัวข้อย่านเดียว
+  await pl.locator('[data-pl-change="zone"]').selectOption('hongdae');
+  await expect(pl.locator('.pl-group').first()).toContainText('ฮงแด');
+  await expect(pl.locator('.pl-lane-list')).not.toContainText('Gwangjang Market');
+  await pl.locator('[data-pl-change="zone"]').selectOption('');
   await pl.locator('[data-pl="add"][data-place="hotel"]').click();
   await pl.locator('[data-pl-input="q"]').fill('กวางจัง');
   // แตะชื่อ = ดูหมุดแดงก่อน (ยังไม่ใส่) พร้อมระยะจากจุดก่อนหน้า
@@ -537,6 +546,11 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await expect(pl.locator('.pl-pin span', { hasText: ',' }).first()).toBeVisible();
   await pl.locator('.pl-row.stop', { hasText: 'Sotetsu' }).last().locator('[data-pl="remove"]').click();
   await expect(pl.locator('.pl-row.stop', { hasText: 'Sotetsu' })).toHaveCount(1);
+  // หลังใส่ตลาดกวางจัง (จุดสุดท้าย) → กลุ่ม "ใกล้ Gwangjang Market" มีร้านในระยะเดิน
+  await pl.locator('[data-pl-input="q"]').fill('');
+  await pl.locator('[data-pl-input="q"]').dispatchEvent('input');
+  await expect(pl.locator('.pl-group.near')).toContainText('ใกล้ Gwangjang Market');
+  await expect(pl.locator('.pl-lane-list')).toContainText('Soha Salt Pond');
   const row = pl.locator('.pl-row.stop', { hasText: 'Gwangjang Market' });
   await expect(row).toBeVisible();
   await row.locator('[data-pl-change="stay"]').selectOption('120');

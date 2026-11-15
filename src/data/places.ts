@@ -59,7 +59,7 @@ export const CATEGORY_LABEL: Record<string, string> = {
 export const CATEGORY_ICON: Record<string, string> = { base: '📍', food: '🍜', fashion: '👕', beauty: '💄', market: '🍢', sight: '🏛️' };
 
 export const DINING_ZONE_LABEL: Record<string, string> = { 'near-coex': 'ใกล้ COEX', 'near-hotel': 'ใกล้โรงแรม', between: 'ระหว่าง COEX–โรงแรม', other: 'ย่านอื่น' };
-export const FOOD_TYPE_LABEL: Record<string, string> = { 'one-dish': 'จานเดียว', noodle: 'อาหารเส้น', bbq: 'ปิ้งย่าง', market: 'อาหารตลาด' };
+export const FOOD_TYPE_LABEL: Record<string, string> = { 'one-dish': 'จานเดียว', noodle: 'อาหารเส้น', bbq: 'ปิ้งย่าง', market: 'อาหารตลาด', cafe: 'คาเฟ่' };
 
 export const COORD_LABEL: Record<string, string> = {
   given: 'พิกัดตั้งต้น',

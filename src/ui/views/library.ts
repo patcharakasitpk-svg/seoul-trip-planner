@@ -12,6 +12,7 @@ import { isGoogleReady } from '../../services/google';
 const CATS: [string, string][] = [
   ['', 'ทั้งหมด'],
   ['food', '🍜 ร้านอาหาร'],
+  ['cafe', '☕ คาเฟ่'],
   ['fashion', '👕 เสื้อผ้า'],
   ['beauty', '💄 ความงาม'],
   ['market', '🍢 ตลาด'],
@@ -79,6 +80,8 @@ export function filteredPlaces(): Place[] {
   return app.places().filter((p) => {
     if (f.cat === 'saved') {
       if (!app.plan.saved.includes(p.id)) return false;
+    } else if (f.cat === 'cafe') {
+      if (p.food?.type !== 'cafe') return false;
     } else if (f.cat && p.category !== f.cat) return false;
     if (!f.cat && p.category === 'base' && p.kind) return false;
     if (f.area && p.area !== f.area) return false;

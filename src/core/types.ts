@@ -33,7 +33,7 @@ export interface Place {
   closeTime?: string | null;
   indoor: boolean;
   food?: {
-    type: 'one-dish' | 'noodle' | 'bbq' | 'market';
+    type: 'one-dish' | 'noodle' | 'bbq' | 'market' | 'cafe';
     menu: string[];
     mealMin: number;
     minOrder: string | null;

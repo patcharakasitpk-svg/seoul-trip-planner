@@ -17,6 +17,7 @@ import { systemDayDefaults, recommendedStops } from '../core/dayDefaults';
 import type { Day, Place, Stop, TravelMode } from '../core/types';
 import type { DaySchedule } from '../core/schedule';
 import { fmtDist, straightLineM } from '../core/geo';
+import { ZONES, zoneOf, type Zone } from '../core/zones';
 import { searchPlaces, placeFromResult, findExisting, resultMapsUrl, type SearchResult } from '../services/placeSearch';
 import { uid } from '../core/planOps';
 
@@ -35,6 +36,9 @@ interface PState {
   orig: Day;
   /** สถานที่ที่กำลังดูหมุดแดงก่อนใส่ */
   preview: string | null;
+  /** ตัวกรองในแท็บค้นหา: หมวด และย่าน */
+  cat: string;
+  zone: string;
   /** ค้นหาบนแผนที่ (นอกรายการที่เตรียมไว้) */
   web: { q: string; status: 'loading' | 'done' | 'error'; results: SearchResult[]; note?: string } | null;
 }
@@ -57,7 +61,7 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
   const day = app.findDay(dayId);
   if (!day) return;
   onDone = done;
-  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null, web: null };
+  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null, web: null, cat: '', zone: '' };
   if (!root) {
     root = document.createElement('div');
     root.id = 'planner';
@@ -211,6 +215,70 @@ function step1(): string {
 /** ลิงก์ดูรูปสถานที่ (เปิดแท็บใหม่) — ชื่อแปลก ๆ จะได้นึกออกว่าหน้าตาเป็นยังไง */
 const photoLink = (p: Place | undefined) => (p && p.category !== 'base' ? `<a class="pl-photo" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" title="ดูรูป ${esc(p.nameTh)}">ดูรูป ↗</a>` : '');
 
+const CATS: [string, string][] = [
+  ['', 'ทั้งหมด'],
+  ['food', 'อาหาร'],
+  ['cafe', 'คาเฟ่'],
+  ['fashion', 'เสื้อผ้า'],
+  ['beauty', 'ความงาม/ของใช้'],
+  ['market', 'ตลาด'],
+  ['sight', 'เที่ยว'],
+  ['base', 'จุดหลัก'],
+];
+
+const matchCat = (p: Place, cat: string) =>
+  !cat || (cat === 'cafe' ? p.food?.type === 'cafe' : cat === 'food' ? p.category === 'food' && p.food?.type !== 'cafe' : p.category === cat);
+
+function searchFilters(): string {
+  const used = new Set(app.places().map((p) => zoneOf(p.area)));
+  return `<div class="pl-filters">
+    <div class="chips pl-cats">${CATS.map(([v, t]) => `<button class="chip ${st!.cat === v ? 'on' : ''}" data-pl="cat" data-v="${v}">${t}</button>`).join('')}</div>
+    <label class="pl-zone">ย่าน <select class="inp sm" data-pl-change="zone"><option value="">ทุกย่าน</option>${(Object.keys(ZONES) as Zone[]).filter((z) => used.has(z)).map((z) => `<option value="${z}" ${st!.zone === z ? 'selected' : ''}>${esc(ZONES[z].th)}</option>`).join('')}</select></label>
+  </div>`;
+}
+
+const distM = (a: Place, b: Place) => (a.lat == null || b.lat == null ? Infinity : straightLineM({ lat: a.lat, lng: a.lng! }, { lat: b.lat, lng: b.lng! }));
+
+/** ผลค้นหา: "ใกล้ <จุดก่อนช่องที่เลือก>" ก่อน แล้วแบ่งหัวข้อตามย่าน (ย่านที่ใกล้แผนวันนั้นขึ้นก่อน) */
+function searchLane(): string {
+  const q = st!.q.trim().toLowerCase();
+  const list = app
+    .places()
+    .filter((p) => !q || [p.nameTh, p.thaiName, p.nameEn, p.nameKo, p.area, ...(p.food?.menu ?? [])].join(' ').toLowerCase().includes(q))
+    .filter((p) => matchCat(p, st!.cat))
+    .filter((p) => !st!.zone || zoneOf(p.area) === st!.zone);
+  if (!list.length) return '<p class="muted">ไม่พบในรายการที่เตรียมไว้</p>';
+  const anchor = anchorPlace();
+  const dayPlaces = st!.draft.stops.map(placeOf).filter((p): p is Place => !!p && p.lat != null);
+  const toDay = (p: Place) => (dayPlaces.length ? Math.min(...dayPlaces.map((a) => distM(a, p))) : anchor ? distM(anchor, p) : 0);
+  const item = (p: Place) => laneItem(p, false);
+  let html = '';
+  // ใกล้จุดที่จะต่อ (เดินถึง ~1.2 กม.)
+  if (anchor && anchor.lat != null) {
+    const near = list
+      .filter((p) => p.id !== anchor.id && p.category !== 'base' && !st!.draft.stops.some((x) => x.placeId === p.id))
+      .map((p) => ({ p, d: distM(anchor, p) }))
+      .filter((x) => x.d <= 1200)
+      .sort((a, b) => a.d - b.d)
+      .slice(0, 6);
+    if (near.length)
+      html += `<p class="pl-group near">ใกล้ ${esc(anchor.id === 'hotel' ? 'โรงแรม' : anchor.nameTh)} <span class="muted">(${st!.slot == null ? 'จุดสุดท้ายของวัน' : 'จุดก่อนช่องที่เลือก'} · เดินถึง)</span></p>${near.map((x) => item(x.p).replace('<span class="muted small">', `<span class="muted small"><b class="pl-dist">${fmtDist(x.d)}</b> · `)).join('')}`;
+  }
+  // แบ่งตามย่าน
+  const groups = new Map<Zone, Place[]>();
+  for (const p of list) {
+    const z = zoneOf(p.area);
+    groups.set(z, [...(groups.get(z) ?? []), p]);
+  }
+  const zoneDist = (ps: Place[]) => Math.min(...ps.map(toDay));
+  const ordered = [...groups.entries()].sort((a, b) => zoneDist(a[1]) - zoneDist(b[1]));
+  for (const [z, ps] of ordered) {
+    ps.sort((a, b) => (a.category === 'base' ? -1 : 0) - (b.category === 'base' ? -1 : 0) || toDay(a) - toDay(b));
+    html += `<p class="pl-group">${esc(ZONES[z].th)} <span class="muted">(${ps.length})</span></p>${ps.map(item).join('')}`;
+  }
+  return html;
+}
+
 /** ค้นหาบนแผนที่ (OSM/Google) เมื่อไม่เจอในรายการ — เลือกแล้วเพิ่มเป็นสถานที่ของแผน */
 function webBlock(): string {
   const q = st!.q.trim();
@@ -307,26 +375,13 @@ function step2(s: DaySchedule): string {
       )
       .join('');
   } else {
-    const q = st!.q.trim().toLowerCase();
-    const list = app
-      .places()
-      .filter((p) => !q || [p.nameTh, p.thaiName, p.nameEn, p.nameKo, p.area, ...(p.food?.menu ?? [])].join(' ').toLowerCase().includes(q));
-    // ใกล้จุดในแผนก่อน
-    const anchors = d.stops.map(placeOf).filter((p): p is Place => !!p && p.lat != null);
-    const dist = (p: Place) => (p.lat == null ? 1e9 : anchors.length ? Math.min(...anchors.map((a) => straightLineM({ lat: a.lat!, lng: a.lng! }, { lat: p.lat!, lng: p.lng! }))) : 0);
-    list.sort((a, b) => dist(a) - dist(b));
-    const main = list.filter((p) => p.category === 'base');
-    const others = list.filter((p) => p.category !== 'base');
-    laneBody = list.length
-      ? `${main.length ? `<p class="pl-group">สถานที่หลัก</p>${main.map((p) => laneItem(p, inDay.has(p.id))).join('')}` : ''}${others.length ? `<p class="pl-group">สถานที่อื่น ๆ <span class="muted">(ใกล้จุดในแผนก่อน)</span></p>${others.slice(0, 80).map((p) => laneItem(p, inDay.has(p.id))).join('')}` : ''}`
-      : `<p class="muted">ไม่พบในรายการที่เตรียมไว้</p>`;
-    laneBody += webBlock();
+    laneBody = searchLane() + webBlock();
   }
   const slotLabel = st!.slot == null ? 'ท้ายวัน' : `ช่องที่ ${st!.slot + 1}`;
   return `<div class="pl-lanes">
     <section class="pl-lane left">
       <div class="seg pl-lane-tabs"><button class="${st!.lane === 'cards' ? 'on' : ''}" data-pl="lane" data-v="cards">แผนแนะนำ</button><button class="${st!.lane === 'search' ? 'on' : ''}" data-pl="lane" data-v="search">ค้นหาทั้งหมด</button></div>
-      ${st!.lane === 'search' ? `<input class="inp" type="search" placeholder="ค้นหาร้าน ย่าน เมนู" value="${esc(st!.q)}" data-pl-input="q" data-autofocus>` : ''}
+      ${st!.lane === 'search' ? `<input class="inp" type="search" placeholder="ค้นหาร้าน ย่าน เมนู (ไทย/อังกฤษ/เกาหลี)" value="${esc(st!.q)}" data-pl-input="q" data-autofocus>${searchFilters()}` : ''}
       <p class="muted small">ลากไปวางในช่องทางขวา หรือกด ＋ เพื่อใส่ <b>${slotLabel}</b> · มื้ออาหาร: ${(Object.keys(MEALS) as Meal[]).map((m) => `<button class="link" data-pl="add-meal" data-v="${m}">${MEALS[m].th.replace('มื้อ', '')}</button>`).join(' · ')}</p>
       <div class="pl-lane-list">${laneBody}</div>
     </section>
@@ -499,7 +554,7 @@ function addPlace(placeId: string, at: number | null) {
   const d = st!.draft;
   const i = at ?? d.stops.length;
   // ร้านอาหาร → เติมช่องมื้อที่ยังว่างก่อน
-  const emptyMeal = p.category === 'food' ? d.stops.find((x) => x.kind === 'dinner' && !x.placeId) : undefined;
+  const emptyMeal = p.category === 'food' ? d.stops.find((x) => x.kind === 'dinner' && !x.placeId && (p.food?.type !== 'cafe' || mealOf(x) === 'snack')) : undefined;
   if (emptyMeal && at == null) edit((x) => updateStop(x, emptyMeal.uid, { placeId }));
   else edit((x) => insertStop(x, i, newStop('place', placeId, p.suggestedStayMin || 60)));
   st!.slot = null;
@@ -558,6 +613,9 @@ function onClick(e: Event) {
       st.draft = v === '__end' ? { ...st.draft, endLeg: { ...st.draft.endLeg, ...clear } } : updateStop(st.draft, v!, { legIn: { ...st.draft.stops.find((y) => y.uid === v)!.legIn, ...clear } });
       break;
     }
+    case 'cat':
+      st.cat = v ?? '';
+      break;
     case 'web-search':
       void runWebSearch();
       return;
@@ -631,6 +689,9 @@ function onChange(e: Event) {
     case 'startPlaceId':
     case 'endPlaceId':
       st.draft = { ...d, [k]: el.value || null };
+      break;
+    case 'zone':
+      st.zone = el.value;
       break;
     case 'stay':
       st.draft = updateStop(d, el.dataset.uid!, { stayMin: Number(el.value) });
