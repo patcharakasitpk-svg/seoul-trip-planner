@@ -44,7 +44,8 @@ describe('share & import', () => {
   });
   it('แผนใหญ่เกินไปให้ใช้ JSON แทน', () => {
     const p = newPlan();
-    for (const d of p.days) for (let i = 0; i < 40; i++) d.stops.push(newStop('place', `custom-${i}-${Math.random()}`, 30, { note: 'x'.repeat(200) + Math.random() }));
+    const rnd = () => Array.from({ length: 480 }, () => String.fromCharCode(0x0e01 + Math.floor(Math.random() * 46))).join('');
+    for (const d of p.days) for (let i = 0; i < 40; i++) d.stops.push(newStop('place', `custom-${i}-${Math.random()}`, 30, { note: rnd() }));
     expect(buildShareUrl(p, 'https://x.y/').ok).toBe(false);
   });
 });
@@ -69,5 +70,51 @@ d2('ข้อมูลที่อ่านไม่ได้ ไม่ถูก
     const backups = [...store.keys()].filter((k) => k.startsWith('stp.v1.plans.backup-'));
     e2(backups).toHaveLength(1);
     e2(store.get(backups[0])).toBe('{"plans":[{"version":99}]}');
+  });
+});
+
+import { TEMPLATES, applyDatedTemplate } from '../../src/data/templates';
+import { newPlan as np2 } from '../../src/core/planOps';
+import { MAX_QR_URL } from '../../src/storage/share';
+d2('ส่งแผนทั้งทริปไปมือถือ', () => {
+  const fullTrip = () => {
+    const p = np2();
+    applyDatedTemplate(p, TEMPLATES.find((t) => t.days.some((d) => d.date))!);
+    for (const d of p.days) for (const s of d.stops) s.note = 'ซื้อของฝาก ลองชิมเมนูเด็ด';
+    p.days[1].prefs = { lessWalking: true, fewerTransfers: false, fastest: false };
+    p.days[1].stops[0].legIn = { mode: 'WALKING', manualMin: 9, manualKind: 'user' };
+    p.days[2].actual = { __start: { d: '09:10' } };
+    return p;
+  };
+  i2('ลิงก์แบบย่อเปิดกลับได้เหมือนเดิมทุกค่า', () => {
+    const p = fullTrip();
+    const back = decodeFragment('#' + encodePlan(p))!;
+    const direct = validatePlan(JSON.parse(JSON.stringify(p)));
+    e2(back.ok && direct.ok).toBe(true);
+    if (!back.ok || !direct.ok) return;
+    e2({ ...back.plan, updatedAt: '' }).toEqual({ ...direct.plan, updatedAt: '' });
+  });
+  i2('แผนทั้งทริปส่งเป็นลิงก์ได้เสมอ · QR เฉพาะเมื่อสั้นพอ', () => {
+    const base = 'https://patcharakasitpk-svg.github.io/seoul-trip-planner/';
+    const big = buildShareUrl(fullTrip(), base);
+    e2(big.ok).toBe(true);
+    if (big.ok) e2(big.qr).toBe(big.url.length <= MAX_QR_URL);
+    const small = buildShareUrl(np2(), base);
+    e2(small.ok && small.qr).toBe(true);
+  });
+});
+
+import { keepLocalCheckins } from '../../src/storage/share';
+d2('รับแผนใหม่ในมือถือ', () => {
+  i2('เวลาเช็กอินในเครื่องนี้ไม่หาย · ถ้าแผนที่ส่งมามีเช็กอินแล้วใช้ของที่ส่งมา', () => {
+    const local = np2();
+    local.days[0].actual = { __start: { d: '08:05' } };
+    local.days[1].actual = { __start: { d: '09:00' } };
+    const incoming = JSON.parse(JSON.stringify(local));
+    delete incoming.days[0].actual;
+    incoming.days[1].actual = { __start: { d: '09:30' } };
+    const out = keepLocalCheckins(incoming, local);
+    e2(out.days[0].actual).toEqual({ __start: { d: '08:05' } });
+    e2(out.days[1].actual).toEqual({ __start: { d: '09:30' } });
   });
 });

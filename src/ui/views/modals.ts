@@ -1,6 +1,6 @@
 import type { Day, Place, TravelMode } from '../../core/types';
 import { app, type Modal } from '../app';
-import { esc, dayColor, MODE_ICON, MODE_LABEL, gmapsDirUrl, kakaoToUrl, photosUrl, naverBtn, naverRouteUrl } from '../util';
+import { esc, dayColor, MODE_ICON, MODE_LABEL, gmapsDirUrl, kakaoToUrl, photosUrl, naverBtn, naverRouteUrl, naverLabel } from '../util';
 import { diffDays as diffSchedules } from '../../core/compare';
 import { fmtDur, fmtHM, fmtDateTh, parseHM } from '../../core/time';
 import { routeSummary, stepsText, straightDist } from './leg';
@@ -14,7 +14,7 @@ import { stopInfoBody } from './day';
 import { MEALS, mealName, type Meal } from '../../core/meals';
 import { OWN_CATEGORY_LABEL, type OwnCategory } from '../../core/ownPlace';
 import { placeCard } from './library';
-import { buildShareUrl, MAX_FRAGMENT } from '../../storage/share';
+import { buildShareUrl } from '../../storage/share';
 import { googleStatus } from '../../services/google';
 import { inviteUrl } from '../../services/sync';
 import { SYNC_DB_URL } from '../../config';
@@ -36,7 +36,7 @@ export function renderModal(): string {
       [title, body] = ['แม่แบบแผนเที่ยว', templatesBody(m)];
       break;
     case 'share':
-      [title, body] = ['บันทึก / ส่งแผนข้ามอุปกรณ์', shareBody()];
+      [title, body] = ['ส่งไปมือถือ / แชร์ / สำรอง', shareBody()];
       break;
     case 'import':
       [title, body] = ['นำเข้าแผน', importBody(m)];
@@ -290,7 +290,7 @@ function routeBody(m: Extract<Modal, { type: 'route' }>): string {
     <label class="small">เปลี่ยนเวลาออก <input class="inp xs" type="time" value="${m.departMins != null ? fmtHM(m.departMins).slice(0, 5) : ''}" data-act-change="route-depart"></label>
     ${dist != null ? `<p class="muted small">ระยะเส้นตรง ${fmtDist(dist)} — ไม่ใช่ระยะเดินทางจริง</p>` : ''}
     <div class="mode-grid">${cards}</div>
-    <p class="small">${naverBtn(naverRouteUrl(from, to), '🟢 ดูรถเมล์/รถไฟใน Naver Map')} <span class="muted">แม่นที่สุดในเกาหลี: สายรถเมล์ เวลารถมา ทางออกสถานี</span></p>
+    <p class="small">${naverBtn(naverRouteUrl(from, to), naverLabel('ดูรถเมล์/รถไฟใน Naver Map'))} <span class="muted">แม่นที่สุดในเกาหลี: สายรถเมล์ เวลารถมา ทางออกสถานี</span></p>
     ${kakaoToUrl(to) ? `<p class="small"><a target="_blank" rel="noopener" href="${esc(kakaoToUrl(to)!)}">เปิดใน KakaoMap ↗</a> (มีเส้นทางเดิน/รถในเกาหลี)</p>` : ''}`;
 }
 
@@ -363,20 +363,30 @@ function syncSection(): string {
     <button class="btn ghost sm danger" data-act="sync-stop">หยุดซิงก์ในเครื่องนี้</button></div>`;
 }
 
+/** ส่งแผนจากโน้ตบุ๊ก/iPad ไปมือถือ: ลิงก์มีแผนทั้งหมด → มือถือเปิดแล้วกด "ใช้แผนนี้ในมือถือ" */
+function phoneSection(r: ReturnType<typeof buildShareUrl>): string {
+  if (!r.ok) return `<div class="card phone-card"><h4>📱 ส่งแผนไปมือถือ</h4><p class="warn-text">แผนใหญ่เกินไปสำหรับลิงก์ — ใช้ Export JSON แล้วเปิดไฟล์ในมือถือ</p></div>`;
+  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  return `<div class="card phone-card">
+    <h4>📱 ส่งแผนไปมือถือ</h4>
+    <ol class="phone-steps small">
+      <li>กด “ยืนยันแผนวันนี้” ให้ครบทุกวันที่แก้ก่อน</li>
+      <li>${canShare ? 'กด <b>ส่งลิงก์</b> → เลือก AirDrop / LINE / ข้อความ ไปที่มือถือ' : 'กด <b>คัดลอกลิงก์</b> แล้วส่งให้ตัวเองทาง LINE / อีเมล'}${r.qr ? ' หรือสแกน QR ด้วยกล้องมือถือ' : ''}</li>
+      <li>เปิดลิงก์ในมือถือ → กด <b>ใช้แผนนี้ในมือถือ</b> · หน้า “วันนี้” จะแสดงมื้ออาหารและการเดินทางตามแผน</li>
+    </ol>
+    <div class="share-row"><input class="inp" readonly value="${esc(r.url)}" aria-label="ลิงก์แผน" id="share-url">${canShare ? '<button class="btn primary" data-act="share-native">📤 ส่งลิงก์</button>' : ''}<button class="btn ${canShare ? '' : 'primary'}" data-act="copy-link">คัดลอก</button></div>
+    ${r.qr ? '<div class="qr-wrap"><canvas id="qr" aria-label="QR code ลิงก์แผน"></canvas></div>' : '<p class="muted small">แผนยาวเกินกว่าจะใส่ QR ได้ — ใช้ปุ่มส่งลิงก์แทน</p>'}
+    <p class="muted small">ลิงก์คือ<b>สำเนาแผน ณ ตอนนี้</b> — แก้แผนอีกครั้งต้องส่งใหม่ · ข้อมูลอยู่ในส่วน # ของลิงก์ (ไม่ถูกส่งไปเซิร์ฟเวอร์) · การเช็กอินในมือถือไม่หายเมื่อรับแผนใหม่${location.protocol !== 'https:' ? '<br><b class="warn-text">ตอนนี้เปิดจาก ' + esc(location.origin) + ' — มือถืออาจเปิดไม่ได้ ใช้เว็บที่ github.io</b>' : ''}</p>
+  </div>`;
+}
+
 function shareBody(): string {
   const r = buildShareUrl(app.plan, location.href);
   return `
+    ${phoneSection(r)}
     ${syncSection()}
-    <p class="notice">ลิงก์/QR ด้านล่างเป็น<b>สำเนาแผน ณ เวลาที่แชร์</b> ไม่ใช่การซิงก์สด · ข้อมูลอยู่ในส่วน # ของลิงก์ (ไม่ถูกส่งไปเซิร์ฟเวอร์) · ไม่รวม API Key หรือข้อมูลจากบริการ</p>
     <p class="small">${app.storageOk ? (app.saveOk ? '✓ บันทึกในเครื่องนี้ (localStorage) แล้ว — แต่ไม่ซิงก์ไปเครื่องอื่นเอง' : '⚠ บันทึกในเครื่องไม่สำเร็จ (พื้นที่เต็ม?) — โปรด Export JSON') : '⚠ เบราว์เซอร์นี้บันทึกในเครื่องไม่ได้ (เช่น โหมดส่วนตัว) — โปรด Export JSON ก่อนปิด'}</p>
-    <h4>ลิงก์แผน + QR Code</h4>
-    ${
-      r.ok
-        ? `<div class="share-row"><input class="inp" readonly value="${esc(r.url)}" aria-label="ลิงก์แผน" id="share-url"><button class="btn primary" data-act="copy-link">คัดลอกลิงก์</button></div>
-           <div class="qr-wrap"><canvas id="qr" aria-label="QR code ลิงก์แผน"></canvas><p class="muted small">สแกนด้วยมือถือเพื่อเปิดแผนนี้ (ลิงก์ ${r.length} ตัวอักษร)${location.protocol !== 'https:' ? '<br><b class="warn-text">ตอนนี้เปิดจาก ' + esc(location.origin) + ' — มือถือภายนอกอาจเปิดไม่ได้ ต้องเผยแพร่ผ่าน HTTPS ก่อน</b>' : ''}</p></div>`
-        : `<p class="warn-text">แผนใหญ่เกินไปสำหรับลิงก์ (${r.length} > ${MAX_FRAGMENT} ตัวอักษร) — โปรดใช้ Export JSON แล้วส่งไฟล์แทน</p>`
-    }
-    <h4>ข้อความ / ไฟล์</h4>
+    <h4>ข้อความ / ไฟล์ (สำรองข้อมูล)</h4>
     <div class="row-btns">
       <button class="btn" data-act="copy-text">คัดลอกแผนเป็นข้อความ</button>
       <button class="btn" data-act="export-json">Export JSON</button>
@@ -389,10 +399,11 @@ function shareBody(): string {
 
 function importBody(m: Extract<Modal, { type: 'import' }>): string {
   const p = m.plan;
-  return `<p>พบแผน <b>${esc(p.name)}</b> (${p.days.length} วัน${p.days[0]?.date ? `, เริ่ม ${esc(fmtDateTh(p.days[0].date))}` : ''}) จาก${m.source === 'link' ? 'ลิงก์' : 'ไฟล์'}</p>
-    <p class="muted small">เป็นสำเนา ณ เวลาที่แชร์ ไม่ใช่การซิงก์สด${m.warnings.length ? ` · คำเตือน: ${esc(m.warnings.join(', '))}` : ''}</p>
-    <ul>${p.days.map((d, i) => `<li>วัน ${i + 1}: ${d.stops.map((s) => esc(app.getPlace(s.placeId)?.nameTh ?? s.title ?? s.kind)).join(' → ') || '—'}</li>`).join('')}</ul>
-    <div class="modal-actions"><button class="btn" data-act="modal-close">ยกเลิก</button><button class="btn" data-act="import-replace">แทนที่แผนปัจจุบัน</button><button class="btn primary" data-act="import-copy">เปิดเป็นสำเนา (เก็บแผนเดิมไว้)</button></div>`;
+  const same = app.store.plans.some((x) => x.id === p.id);
+  return `<p>พบแผน <b>${esc(p.name)}</b> (${p.days.length} วัน${p.days[0]?.date ? `, เริ่ม ${esc(fmtDateTh(p.days[0].date))}` : ''}) จาก${m.source === 'link' ? 'ลิงก์' : 'ไฟล์'}${same ? ' · <b>ฉบับใหม่ของแผนที่มีในเครื่องนี้</b>' : ''}</p>
+    <ul class="import-days">${p.days.map((d, i) => `<li><b>วัน ${i + 1}${d.date ? ` · ${esc(fmtDateTh(d.date).replace(/ \d{4}$/, ''))}` : ''}</b> ${d.stops.map((s) => esc(app.getPlace(s.placeId)?.nameTh ?? s.title ?? s.kind)).join(' → ') || '—'}</li>`).join('')}</ul>
+    <p class="muted small">ใช้แผนนี้ = แทนที่แผนในเครื่องนี้ (เวลาที่เช็กอินไว้ในเครื่องนี้ยังอยู่ · กดเลิกทำได้)${m.warnings.length ? ` · คำเตือน: ${esc(m.warnings.join(', '))}` : ''}</p>
+    <div class="modal-actions sticky"><button class="btn" data-act="modal-close">ยกเลิก</button><button class="btn" data-act="import-copy">เก็บเป็นแผนแยก</button><button class="btn primary" data-act="import-replace">✓ ใช้แผนนี้ในเครื่องนี้</button></div>`;
 }
 
 /* ---------- เพิ่มสถานที่เอง ---------- */

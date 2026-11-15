@@ -9,6 +9,7 @@ import { ensureWeather, getWeather } from '../services/weather';
 import { fmtHM } from '../core/time';
 import { liveEstimateMin, straightLineM } from '../core/geo';
 import type { SearchResult } from '../services/placeSearch';
+import { keepLocalCheckins } from '../storage/share';
 
 export type Tab = 'today' | 'map' | 'places' | 'plan' | 'fx';
 
@@ -255,6 +256,28 @@ class AppState {
     this.persist();
     this.fitNext = true;
     this.requestRender();
+  }
+
+  /** ใช้แผนที่ได้รับจากเครื่องอื่น: แผนเดียวกัน (id ตรง) → แทนที่ฉบับนั้น · ไม่งั้นแทนที่แผนที่เปิดอยู่ · เก็บเช็กอินในเครื่องไว้ */
+  receivePlan(incoming: Plan): () => void {
+    const target = this.store.plans.find((x) => x.id === incoming.id) ?? this.plan;
+    const before = { plans: this.store.plans.map((x) => x), activeId: this.store.activeId, dayId: this.activeDayId };
+    // ใช้ id ของแผนที่ส่งมา → ส่งครั้งต่อไปจะรู้ว่าเป็นแผนเดียวกัน
+    const next = keepLocalCheckins({ ...incoming, roomId: target.roomId ?? null }, target);
+    this.store.plans = this.store.plans.map((x) => (x.id === target.id ? next : x));
+    this.store.activeId = next.id;
+    this.activeDayId = next.days[0].id;
+    this.todayDayId = null;
+    this.persist();
+    this.fitNext = true;
+    this.requestRender();
+    return () => {
+      this.store.plans = before.plans;
+      this.store.activeId = before.activeId;
+      this.activeDayId = before.dayId;
+      this.persist();
+      this.requestRender();
+    };
   }
 
   replaceActivePlan(plan: Plan) {

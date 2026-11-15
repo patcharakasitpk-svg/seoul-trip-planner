@@ -1,7 +1,7 @@
 import type { Day, Place, Stop } from '../../core/types';
 import type { DaySchedule, StopTiming } from '../../core/schedule';
 import { app } from '../app';
-import { dayColor, esc, gmapsPlaceUrl, photosUrl, naverBtn, naverPlaceUrl } from '../util';
+import { dayColor, esc, gmapsPlaceUrl, photosUrl, naverBtn, naverPlaceUrl, naverLabel, googleLabel } from '../util';
 import { MEALS, mealIcon, mealName, mealOf, type Meal } from '../../core/meals';
 import { fmtDateTh, fmtDur, fmtHM } from '../../core/time';
 import { legRow } from './leg';
@@ -161,7 +161,7 @@ export function stopInfoBody(day: Day, t: StopTiming, i: number, total: number):
       <button class="btn sm primary">บันทึกโน้ต</button>
     </form>
     ${s.kind === 'break' || s.kind === 'buffer' ? `<label class="block small">ชื่อรายการ <input class="inp" value="${esc(s.title ?? '')}" maxlength="80" data-act-change="stop-field" data-field="title" data-day="${day.id}" data-stop="${s.uid}"></label>` : ''}
-    ${p ? `<div class="nav-row">${naverBtn(naverPlaceUrl(p), '🟢 Naver', 'btn')}<a class="btn" target="_blank" rel="noopener" href="${esc(gmapsPlaceUrl(p))}">🧭 Google</a><a class="btn" target="_blank" rel="noopener" href="${esc(photosUrl(p))}" aria-label="ดูรูป">📷</a></div>` : ''}
+    ${p ? `<div class="nav-row">${naverBtn(naverPlaceUrl(p), naverLabel('Naver'), 'btn')}<a class="btn app-btn google" target="_blank" rel="noopener" href="${esc(gmapsPlaceUrl(p))}">${googleLabel('Google')}</a><a class="btn" target="_blank" rel="noopener" href="${esc(photosUrl(p))}" aria-label="ดูรูป">📷</a></div>` : ''}
     <div class="row-btns">
       <button class="btn sm" data-act="stop-up" data-day="${day.id}" data-stop="${s.uid}" ${i === 0 ? 'disabled' : ''}>↑ ขึ้น</button>
       <button class="btn sm" data-act="stop-down" data-day="${day.id}" data-stop="${s.uid}" ${i === total - 1 ? 'disabled' : ''}>↓ ลง</button>

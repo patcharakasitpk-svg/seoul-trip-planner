@@ -1,7 +1,7 @@
 import type { LegInfo } from '../../core/schedule';
 import type { RouteResult, TransitStep, TravelMode } from '../../core/types';
 import { app } from '../app';
-import { esc, gmapsDirUrl, kakaoToUrl, MODE_ICON, MODE_LABEL, naverBtn, naverRouteUrl } from '../util';
+import { esc, gmapsDirUrl, kakaoToUrl, MODE_ICON, MODE_LABEL, naverBtn, naverRouteUrl, naverLabel, googleLabel } from '../util';
 import { fmtDur } from '../../core/time';
 import { effectiveMode, fmtDist, roughEstimateMin, straightLineM } from '../../core/geo';
 import { legTransitHint, lineChip } from './transit';
@@ -111,8 +111,8 @@ export function legInfoBody(dayId: string, leg: LegInfo, target: string): string
     ${r ? `<p class="small">${routeSummary(r)}</p>${r.steps.some((x) => x.kind === 'transit') ? stepsText(r.steps) : ''}` : ''}
     ${leg.mode === 'DRIVING' ? '<p class="muted small">รถยนต์: ไม่รวมเวลารอเรียกรถ และไม่ใช่ราคาแท็กซี่ที่ยืนยันแล้ว</p>' : ''}
     <div class="nav-row">
-      ${naverBtn(naverRouteUrl(from, to), '🟢 Naver Map', 'btn')}
-      <a class="btn" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(from, to, leg.mode))}">🧭 Google</a>
+      ${naverBtn(naverRouteUrl(from, to), naverLabel(), 'btn')}
+      <a class="btn app-btn google" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(from, to, leg.mode))}">${googleLabel('Google')}</a>
       ${kakaoToUrl(to) ? `<a class="btn" target="_blank" rel="noopener" href="${esc(kakaoToUrl(to)!)}">Kakao</a>` : ''}
     </div>
     <p class="muted small">Naver Map แม่นที่สุดในเกาหลี: สายรถเมล์ เวลารถมา ทางออกสถานี</p>

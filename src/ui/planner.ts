@@ -866,7 +866,7 @@ function onClick(e: Event) {
       const before = clone(app.findDay(dayId)!);
       app.setDay(dayId, st.draft);
       clearDraft(dayId);
-      app.showToast('บันทึกแผนวันนี้แล้ว', () => app.setDay(dayId, before, 'เลิกทำแล้ว'));
+      app.showToast('บันทึกแผนวันนี้แล้ว · ส่งไปมือถือ: กด “แชร์”', () => app.setDay(dayId, before, 'เลิกทำแล้ว'));
       close();
       onDone(dayId);
       return;

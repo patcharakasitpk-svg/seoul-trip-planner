@@ -1,7 +1,7 @@
 import type { Place } from '../../core/types';
 import { app } from '../app';
 import { CATEGORY_ICON, CATEGORY_LABEL, DINING_ZONE_LABEL } from '../../data/places';
-import { esc, gmapsPlaceUrl, photosUrl, naverBtn, naverPlaceUrl } from '../util';
+import { esc, gmapsPlaceUrl, photosUrl, naverBtn, naverPlaceUrl, googleLabel } from '../util';
 import { closedOn, shortHours, weekdayTh } from '../../core/hours';
 import { stationBlock } from './transit';
 import { fmtDateTh } from '../../core/time';
@@ -208,7 +208,7 @@ function placeDetails(p: Place): string {
       ${p.lat == null ? coordFixForm(p) : p.coordStatus === 'area-center' ? '<p class="small muted">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อ</p>' : p.coordStatus === 'approx' ? `<p class="small muted">หมุดเส้นประ = พิกัดจากแหล่งเดียว${p.coordSource ? ` (${esc(p.coordSource)})` : ''} — เช็กใน Google Maps ก่อนไป</p>` : ''}
       <div class="row-btns">
         <a class="btn sm" href="${esc(photosUrl(p))}" target="_blank" rel="noopener">📷 ดูรูป</a>
-        <a class="btn sm" href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">Google Maps ↗</a>
+        <a class="btn sm app-btn google" href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">${googleLabel()}</a>
         ${naverBtn(naverPlaceUrl(p))}
         ${p.lat != null ? `<button class="btn sm" data-act="focus-place" data-place="${esc(p.id)}">ดูบนแผนที่</button>` : ''}
       </div>

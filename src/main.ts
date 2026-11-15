@@ -44,7 +44,7 @@ document.querySelector('#app')!.innerHTML = `
   <nav class="top-actions">
     <div class="seg desk-only"><button data-act="tab" data-tab="today">วันนี้</button><button data-act="tab" data-tab="plan">แผน</button><button data-act="tab" data-tab="fx">₩→฿</button></div>
     <button class="btn ghost sm" data-act="open-templates" title="แม่แบบ">แม่แบบ</button>
-    <button class="btn ghost sm" data-act="open-share" title="แชร์และบันทึก">แชร์</button>
+    <button class="btn ghost sm" data-act="open-share" title="ส่งแผนไปมือถือ · แชร์ · สำรอง">📱 แชร์</button>
     <button class="icon-btn" data-act="open-settings" aria-label="ตั้งค่า" title="ตั้งค่า">⚙︎</button>
   </nav>
 </header>
@@ -524,7 +524,7 @@ function drawQr() {
   const c = document.getElementById('qr') as HTMLCanvasElement | null;
   if (!c) return;
   const r = buildShareUrl(app.plan, location.href);
-  if (r.ok) QRCode.toCanvas(c, r.url, { width: 232, margin: 1, errorCorrectionLevel: 'L' }).catch(() => {});
+  if (r.ok && r.qr) QRCode.toCanvas(c, r.url, { width: 260, margin: 1, errorCorrectionLevel: 'L' }).catch(() => {});
 }
 
 /* ---------------- การเปรียบเทียบก่อนยืนยัน ---------------- */
@@ -1091,7 +1091,15 @@ document.addEventListener('click', (ev) => {
     }
     case 'copy-link': {
       const r = buildShareUrl(app.plan, location.href);
-      if (r.ok) copy(r.url, 'คัดลอกลิงก์แล้ว (สำเนาแผน ณ ตอนนี้)');
+      if (r.ok) copy(r.url, 'คัดลอกลิงก์แล้ว — ส่งให้มือถือแล้วเปิดลิงก์');
+      return;
+    }
+    case 'share-native': {
+      const r = buildShareUrl(app.plan, location.href);
+      if (!r.ok) return;
+      navigator.share?.({ title: app.plan.name, text: `แผนเที่ยว: ${app.plan.name}`, url: r.url }).catch((e: unknown) => {
+        if ((e as DOMException)?.name !== 'AbortError') copy(r.url, 'ส่งไม่ได้ — คัดลอกลิงก์ให้แล้ว');
+      });
       return;
     }
     case 'copy-text':
@@ -1120,9 +1128,12 @@ document.addEventListener('click', (ev) => {
     case 'import-replace': {
       const m = app.modal;
       if (m?.type !== 'import') return;
-      confirmThen('แทนที่แผนปัจจุบันด้วยแผนที่นำเข้า? แผนเดิมจะหายไป', 'แทนที่', () => {
-        app.replaceActivePlan(m.plan);
-        app.showToast('แทนที่แผนแล้ว');
+      app.modal = null;
+      app.tab = 'today';
+      const undo = app.receivePlan(m.plan);
+      app.showToast('ใช้แผนใหม่ในเครื่องนี้แล้ว', () => {
+        undo();
+        app.showToast('กลับเป็นแผนเดิมแล้ว');
       });
       return;
     }
@@ -1481,7 +1492,7 @@ function handleHash() {
     return;
   }
   if (!hadSavedPlans) {
-    app.replaceActivePlan(r.plan);
+    app.receivePlan(r.plan);
     app.showToast('เปิดแผนจากลิงก์แล้ว (สำเนา ณ เวลาที่แชร์)');
   } else {
     app.modal = { type: 'import', plan: r.plan, warnings: r.warnings, source: 'link' };

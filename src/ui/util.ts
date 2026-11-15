@@ -1,4 +1,11 @@
 import type { Place, TravelMode } from '../core/types';
+import naverIcon from '../assets/naver-map.png';
+import gmapsIcon from '../assets/google-maps.png';
+
+/** โลโก้แอปแผนที่ (ไฟล์ในเว็บเอง ไม่โหลดจากภายนอก) */
+const logo = (src: string) => `<img class="app-logo" src="${src}" alt="" width="18" height="18">`;
+export const naverLabel = (text = 'Naver Map') => `${logo(naverIcon)}<span>${text}</span>`;
+export const googleLabel = (text = 'Google Maps') => `${logo(gmapsIcon)}<span>${text}</span>`;
 
 export function esc(s: unknown): string {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -79,8 +86,8 @@ function naverName(p: Place): string {
 }
 
 /** ปุ่มเปิด Naver Map (จัดการกรณีไม่มีแอป/เปิดจากในแอป LINE ใน main.ts: data-act="naver") */
-export function naverBtn(url: string | null, label = '🟢 Naver Map', cls = 'btn sm'): string {
-  return url ? `<button class="${cls}" data-act="naver" data-href="${esc(url)}">${label}</button>` : '';
+export function naverBtn(url: string | null, label = naverLabel(), cls = 'btn sm'): string {
+  return url ? `<button class="${cls} app-btn naver" data-act="naver" data-href="${esc(url)}">${label}</button>` : '';
 }
 
 /** KakaoMap (ใช้งานได้ดีในเกาหลีสำหรับเดิน/รถ) — ต้องมีพิกัด */

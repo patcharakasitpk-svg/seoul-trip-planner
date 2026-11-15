@@ -136,9 +136,17 @@ test('บันทึก โหลดกลับ และส่งแผนผ
   // เครื่องที่มีแผนเดิม → ถามเปิดเป็นสำเนา/แทนที่
   await p2.goto('/');
   await p2.goto(url);
-  await expect(p2.locator('.modal')).toContainText('เปิดเป็นสำเนา');
+  await expect(p2.locator('.modal')).toContainText('ฉบับใหม่ของแผนที่มีในเครื่องนี้');
   await p2.locator('[data-act="import-copy"]').click();
   await expect(p2.locator('#plan-name')).toContainText('(สำเนา)');
+  // ส่งแผนที่แก้แล้วมาอีกครั้ง → ใช้แผนนี้ในเครื่องนี้ (แทนที่) แล้วไปหน้า วันนี้
+  await p2.goto('/');
+  await p2.goto(url);
+  await p2.locator('[data-act="import-replace"]').click();
+  await expect(p2.locator('.modal')).toHaveCount(0);
+  await expect(p2.locator('.toast')).toContainText('ใช้แผนใหม่ในเครื่องนี้แล้ว');
+  await p2.locator('.bottom-nav [data-tab="plan"]').click();
+  await expect(p2.locator('.day-summary')).toContainText('09:30');
   await ctx.close();
 });
 
