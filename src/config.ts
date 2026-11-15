@@ -21,3 +21,19 @@ export const TRIP_FLIGHTS = {
 };
 
 export const TRIP_STAYS: { date: string; hotelId: string }[] = [{ date: '2026-12-05', hotelId: 'novotel-suwon' }];
+
+/**
+ * Firebase (บัญชีผู้ใช้ + ทริปที่แชร์) — ค่าเหล่านี้ไม่ใช่ความลับ (สิทธิ์คุมด้วย Security Rules)
+ * ไม่ตั้ง = ไม่มีปุ่มเข้าสู่ระบบ แอปทำงานแบบเก็บในเครื่องเหมือนเดิม
+ */
+const env = ((import.meta as any).env ?? {}) as Record<string, string | undefined>;
+export const FIREBASE_CONFIG = env.VITE_FIREBASE_API_KEY
+  ? {
+      apiKey: env.VITE_FIREBASE_API_KEY,
+      authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+      projectId: env.VITE_FIREBASE_PROJECT_ID,
+      appId: env.VITE_FIREBASE_APP_ID,
+    }
+  : null;
+/** ทดสอบในเครื่อง: http://127.0.0.1:9099 (Firebase Auth Emulator) */
+export const FIREBASE_AUTH_EMULATOR = env.VITE_FIREBASE_AUTH_EMULATOR || '';

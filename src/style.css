@@ -894,3 +894,41 @@ body[data-tab="packing"] .pk-page { display: block; padding: 1rem 1rem 96px; }
 .pk-foot { text-align: center; }
 .bottom-nav button { line-height: 1.15; text-align: center; white-space: nowrap; padding: 0 2px; min-width: 0; overflow: hidden; }
 @media (max-width: 599px) { .bottom-nav button { font-size: .66rem; letter-spacing: -.01em; } }
+
+/* ---------- เข้าสู่ระบบ ---------- */
+.lg-page { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 1rem; background: radial-gradient(1200px 600px at 50% -10%, #e8f0ff 0%, var(--bg, #f5f6f8) 60%); overflow-y: auto; }
+.lg-page[hidden] { display: none; }
+body.login-open { overflow: hidden; }
+.lg-card { width: min(400px, 100%); background: var(--surface, #fff); border: 1px solid var(--line); border-radius: 20px; padding: 1.75rem 1.5rem 1.4rem; box-shadow: 0 20px 60px rgba(15, 23, 42, .10); display: grid; gap: .85rem; }
+.lg-brand { display: grid; gap: .15rem; text-align: center; margin-bottom: .2rem; }
+.lg-brand b { font-size: 1.6rem; color: var(--accent); letter-spacing: -.01em; }
+.lg-brand .muted { font-size: .9rem; }
+.lg-lead { margin: 0; text-align: center; color: var(--text); }
+.lg-h { margin: 0; font-size: 1.15rem; }
+.lg-btn { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--surface, #fff); font: inherit; font-weight: 600; color: var(--text); cursor: pointer; }
+.lg-btn:hover:not(:disabled) { background: #f8f9fa; }
+.lg-btn:disabled { opacity: .6; cursor: progress; }
+.lg-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.lg-btn.google { border-color: #dadce0; }
+.lg-or { display: flex; align-items: center; gap: .7rem; color: var(--muted); font-size: .85rem; }
+.lg-or::before, .lg-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.lg-form { display: grid; gap: .5rem; }
+.lg-form label { font-size: .88rem; color: var(--muted); }
+.lg-form .inp { min-height: 46px; font-size: 1rem; }
+.lg-link { border: 0; background: none; font: inherit; font-size: .9rem; color: var(--accent); cursor: pointer; padding: .4rem; }
+.lg-link .muted { font-size: .82rem; }
+.lg-error { margin: 0; padding: .6rem .75rem; border-radius: 10px; background: #fdecec; color: #a61e1e; font-size: .9rem; }
+.lg-warn { margin: 0; padding: .6rem .75rem; border-radius: 10px; background: #fff7e6; color: #8a4b08; font-size: .88rem; }
+.lg-note { margin: 0; color: var(--muted); font-size: .9rem; }
+.lg-sent { text-align: center; display: grid; gap: .4rem; }
+.lg-sent h2 { margin: 0; font-size: 1.2rem; }
+.lg-sent p { margin: 0; }
+.lg-mail { font-size: 2.2rem; color: var(--accent); }
+.lg-account { display: flex; align-items: center; gap: .8rem; }
+.lg-account > div { display: grid; min-width: 0; }
+.lg-account b, .lg-account .muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avatar { display: inline-grid; place-items: center; border-radius: 50%; background: #dbe7ff; color: #1d4ed8; font-weight: 700; object-fit: cover; flex: none; }
+.account-btn { border: 0; background: none; padding: 2px; border-radius: 50%; cursor: pointer; display: grid; }
+.account-btn:hover { box-shadow: 0 0 0 3px #e7efff; }
+.lg-account .avatar { font-size: 1.4rem; }
+#account-slot { display: contents; }

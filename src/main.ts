@@ -5,6 +5,8 @@ import { renderPlanOverview } from './ui/views/overview';
 import { initMyPlaces, renderMyPlaces } from './ui/myPlaces';
 import { startPlacesShare, syncPlacesShare, joinPlacesRoom, placesRoomFromHash } from './ui/placesShare';
 import { initPacking, renderPacking } from './ui/packing';
+import { initLogin, openLogin, accountButtonHtml } from './ui/login';
+import { initAuth } from './services/auth';
 import { hydratePlacePhotos } from './ui/views/placeInfo';
 import { renderToday, todayDay } from './ui/views/today';
 import { openPlanner, refreshPlanner, closePlanner, plannerOpen } from './ui/planner';
@@ -53,6 +55,7 @@ document.querySelector('#app')!.innerHTML = `
     <button data-act="tab" data-tab="fx">แปลงเงิน</button>
   </nav>
   <div class="top-actions">
+    <span id="account-slot"></span>
     <button class="top-link" data-act="open-share" title="ส่งแผนไปมือถือ · แชร์ · สำรอง">แชร์</button>
     <button class="icon-btn" data-act="open-settings" aria-label="ตั้งค่า" title="ตั้งค่า">${ICON.gear}</button>
   </div>
@@ -71,6 +74,7 @@ document.querySelector('#app')!.innerHTML = `
 <section id="fx" class="fx" aria-label="แปลงสกุลเงิน"></section>
 <section id="places-page" class="pp-page" aria-label="เพิ่มสถานที่"></section>
 <section id="packing-page" class="pk-page" aria-label="สิ่งของที่ต้องใช้"></section>
+<section id="login-page" class="lg-page" hidden></section>
 <nav class="bottom-nav" aria-label="เมนูหลัก">
   <button data-act="tab" data-tab="today">${ICON.today}วันนี้</button>
   <button data-act="tab" data-tab="map">${ICON.map}แผนที่</button>
@@ -87,6 +91,8 @@ document.querySelector('#app')!.innerHTML = `
 initMyPlaces($('#places-page'));
 startPlacesShare();
 initPacking($('#packing-page'));
+initLogin($('#login-page'), () => app.requestRender());
+void initAuth();
 
 // ความสูงแถบเมนูบน/ล่าง → ตัวจัดแผนวางระหว่างสองแถบ (เมนูเห็นตลอด)
 const barSizes = () => {
@@ -101,6 +107,7 @@ window.addEventListener('resize', barSizes);
 
 function render() {
   $('#plan-name').textContent = app.plan.name;
+  $('#account-slot').innerHTML = accountButtonHtml();
   document.body.dataset.tab = app.tab;
   document.querySelectorAll('[data-act="tab"]').forEach((b) => b.classList.toggle('on', (b as HTMLElement).dataset.tab === app.tab));
   // status
@@ -1211,6 +1218,9 @@ document.addEventListener('click', (ev) => {
     case 'place-modal':
       app.modal = { type: 'place', placeId: d.place! };
       break;
+    case 'open-login':
+      openLogin();
+      return;
     case 'map-day':
       app.activeDayId = d.day!;
       app.mapFilter = 'day';
