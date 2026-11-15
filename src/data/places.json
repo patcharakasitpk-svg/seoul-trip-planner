@@ -4841,5 +4841,435 @@
    }
   ],
   "notes": "No MUSINSA store found on Garosu-gil/Sinsa proper; this Apgujeong Rodeo store (legally Sinsa-dong) is the closest match. A third EMPTY opened 26 Feb 2026 inside Galleria Luxury Hall WEST 3F (343 Apgujeong-ro, 10:30–20:30) – not added. Station walk is a straight-line estimate (~380 m to Apgujeong Rodeo); exit not sourced. ~300 m north of Random Walk."
+ },
+ {
+  "id": "milestone-coffee-hannam",
+  "nameTh": "มายล์สโตน คอฟฟี่ สาขาฮันนัม",
+  "nameEn": "Milestone Coffee Hannam",
+  "nameKo": "마일스톤 커피 한남점",
+  "branch": "Hannam",
+  "category": "food",
+  "area": "Hannam-dong / Yongsan",
+  "address": "1F, 26 Hannam-daero 27ga-gil, Yongsan-gu, Seoul (서울 용산구 한남대로27가길 26 1층)",
+  "lat": 37.5379272,
+  "lng": 127.0026816,
+  "coordStatus": "unverified",
+  "coordSource": "OpenStreetMap node 11123092910 '마일스톤 커피 한남 Milestone Coffee Hannam' (addr 한남대로27가길 26), found via Nominatim + Overpass (same OSM source). No second independent coordinate source found.",
+  "reasonTh": "คาเฟ่ดังเรื่องลาเต้และเวียนนาคอฟฟี่ (กาแฟท็อปวิปครีม) กับวานิลลาบีนลาเต้ไซรัปทำเอง และทีรามิสุมาสคาร์โปเนทำเองที่มักหมดเร็ว คิวยาวช่วงสุดสัปดาห์",
+  "suggestedStayMin": 45,
+  "budget": {
+   "textTh": "เครื่องดื่ม 5,500–7,000 วอน ขนม 5,500–8,500 วอน (เมนูใน Polle)",
+   "krwMin": 5500,
+   "krwMax": 8500,
+   "status": "source"
+  },
+  "hours": {
+   "text": "Daily 10:00–21:00, last order 20:30",
+   "closedDays": "Seollal and Chuseok days only",
+   "lastOrder": "20:30",
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "21:00",
+  "indoor": true,
+  "food": {
+   "type": "cafe",
+   "menu": [
+    "비엔나커피 ₩6,800",
+    "바닐라빈라떼 ₩6,800",
+    "수제 마스카포네 티라미수 ₩8,500"
+   ],
+   "mealMin": 30,
+   "minOrder": null,
+   "diningZone": "other"
+  },
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Hangangjin",
+     "nameKo": "한강진",
+     "lines": [
+      "6"
+     ],
+     "exit": "3",
+     "walkMin": 4
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "Funliday – Hannam-dong cafes (Hangangjin stn exit 3, ~4 min walk)",
+     "url": "https://www.funliday.com/posts/hannam-dong-cafe/"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Harper's Bazaar Korea – Milestone Coffee 2nd space in Hannam (address, daily 10:00–21:00)",
+    "url": "https://www.harpersbazaar.co.kr/article/73843"
+   },
+   {
+    "label": "Funliday – Hannam-dong cafes (10:00–21:00, LO 20:30, closed Seollal/Chuseok day)",
+    "url": "https://www.funliday.com/posts/hannam-dong-cafe/"
+   },
+   {
+    "label": "Polle – 마일스톤 커피 한남점 (menu prices)",
+    "url": "https://polle.com/place/3aQB70/%EB%A7%88%EC%9D%BC%EC%8A%A4%ED%86%A4%20%EC%BB%A4%ED%94%BC"
+   },
+   {
+    "label": "OpenStreetMap node 11123092910",
+    "url": "https://www.openstreetmap.org/node/11123092910"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "User's branch (Hannam-dong) is correct. Hours 10:00–21:00 daily agree across Harper's Bazaar (Dec 2022) and Funliday; only closed on Seollal and Chuseok days, so no closures expected 30 Nov–6 Dec 2026. Reviews report long waits (up to 1h+ on weekends); tiramisu can sell out. Hannam is the brand's 2nd store; other Seoul stores: Seongsu (서울숲4길 15, OSM) and Sinsa (per a Yahoo HK article). Nearest station is Hangangjin (Line 6), not Hannam station (Gyeongui-Jungang, ~1 km away). OSM node is ~350 m straight-line from Hangangjin station."
+ },
+ {
+  "id": "h-coffee-roasters-seongsu",
+  "nameTh": "เอช คอฟฟี่ โรสเตอร์ส โชว์รูมซองซู",
+  "nameEn": "H Coffee Roasters Seongsu",
+  "nameKo": "에이치커피로스터스 성수 쇼룸",
+  "branch": "Seongsu Showroom",
+  "category": "food",
+  "area": "Seongsu",
+  "address": "1F, 10 Seongsuil-ro 11-gil, Seongdong-gu, Seoul (서울 성동구 성수일로11길 10 1층, 성수동1가)",
+  "lat": null,
+  "lng": null,
+  "coordStatus": "unverified",
+  "coordSource": "No coordinates found: no OSM node for the shop or for 성수일로11길 10 (nearest OSM address nodes are 성수일로11길 8 at 37.54922,127.05079 and 11 at 37.54923,127.05023); Kakao/Naver not accessible. Left null rather than guessed.",
+  "reasonTh": "โชว์รูมของโรงคั่วสเปเชียลตี้ที่มีร้านหลักอยู่ที่อันซอง คั่วเมล็ดเอง มีเมล็ดให้เลือกหลายตัวทั้งเอสเปรสโซและฟิลเตอร์ ร้านเล็กเงียบสไตล์มินิมอล",
+  "suggestedStayMin": 30,
+  "budget": {
+   "textTh": "กาแฟ 4,000–4,800 วอน ขนม/เครื่องดื่มอื่น 6,000–7,000 วอน (เมนูใน Polle)",
+   "krwMin": 4000,
+   "krwMax": 7000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "Mon–Fri 08:30–18:00; Sat–Sun 10:00–18:00; open year-round",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": []
+  },
+  "openTime": "08:30",
+  "closeTime": "18:00",
+  "indoor": true,
+  "food": {
+   "type": "cafe",
+   "menu": [
+    "에스프레소 ₩4,000",
+    "에스프레소 크림 ₩4,300",
+    "바나나 푸딩 ₩6,000"
+   ],
+   "mealMin": 30,
+   "minOrder": null,
+   "diningZone": "other"
+  },
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Ttukseom",
+     "nameKo": "뚝섬",
+     "lines": [
+      "2"
+     ],
+     "exit": "4",
+     "walkMin": 6
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "KTripTips (Ttukseom stn exit 4, ~400 m)",
+     "url": "https://www.ktriptips.com/kor/food/2894749"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "KTripTips – 에이치커피로스터스 (hours, address; updated 2026-11-03)",
+    "url": "https://www.ktriptips.com/kor/food/2894749"
+   },
+   {
+    "label": "Polle – 에이치 커피 로스터스 성수 쇼룸 (menu, Apr 2026 review: closes 18:00)",
+    "url": "https://polle.com/place/3qud3y/%EC%97%90%EC%9D%B4%EC%B9%98%20%EC%BB%A4%ED%94%BC%20%EB%A1%9C%EC%8A%A4%ED%84%B0%EC%8A%A4"
+   },
+   {
+    "label": "Polle – 에이치 커피 로스터스 서촌 (other Seoul branch)",
+    "url": "https://polle.com/place/2BGv2d/%EC%97%90%EC%9D%B4%EC%B9%98%20%EC%BB%A4%ED%94%BC%20%EB%A1%9C%EC%8A%A4%ED%84%B0%EC%8A%A4"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Real name is 에이치커피로스터스 / H COFFEE ROASTERS; the Seongsu shop is officially a 'showroom' (성수 쇼룸) — a reviewer says the main store is in Anseong (a Daangn 'H COFFEE' profile exists in 안성 석정동). Specialty, in-house roasting with several bean choices (blends such as Winter/Olive and decaf mentioned in reviews); a 'single origin' focus was not explicitly confirmed. Hours: KTripTips (updated 2026-11-03) says weekdays 08:30–18:00, weekends 10:00–18:00, no holidays; one search snippet of the same page earlier showed weekends 11:00–19:00, so weekend hours unverified. Closes early (18:00) — plan as a daytime stop. No closures expected 30 Nov–6 Dec 2026. Second Seoul branch in Seochon (누하동, hanok) exists. Coordinates missing — please geocode from Kakao/Naver before mapping."
+ },
+ {
+  "id": "camel-coffee-seochon",
+  "nameTh": "คาเมล คอฟฟี่ สาขาซอชน",
+  "nameEn": "Camel Coffee Seochon",
+  "nameKo": "카멜커피 서촌점",
+  "branch": "Seochon",
+  "category": "food",
+  "area": "Seochon / Jongno",
+  "address": "1–2F, 31 Hyoja-ro, Jongno-gu, Seoul (서울 종로구 효자로 31 1~2층; former Tongui-dong post office building)",
+  "lat": 37.5787669,
+  "lng": 126.9736944,
+  "coordStatus": "unverified",
+  "coordSource": "OpenStreetMap node 13955799576 '카멜커피' (no address tags; Nominatim attaches it to 효자로7길, 적선동). Position ~90 m north of OSM-tagged 효자로 23 on the same side of Hyoja-ro, consistent with 효자로 31 opposite Yeongchumun gate. Single source.",
+  "reasonTh": "สาขาในอาคารที่ทำการไปรษณีย์เก่า ชั้น 2 มองเห็นประตูยองชูมุนของพระราชวังเคียงบกกุง มีเฮอริเทจลาเต้นมมะพร้าวที่มีเฉพาะสาขานี้ และกาแฟซิกเนเจอร์ครีมหวานของแบรนด์",
+  "suggestedStayMin": 45,
+  "budget": {
+   "textTh": "เครื่องดื่ม 4,500–7,500 วอน ขนม 5,800–6,500 วอน (เมนูใน Polle)",
+   "krwMin": 4500,
+   "krwMax": 7500,
+   "status": "source"
+  },
+  "hours": {
+   "text": "Opens 08:00 (Heypop, Mar 2025); closing time not confirmed by any source",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": []
+  },
+  "openTime": "08:00",
+  "closeTime": null,
+  "indoor": true,
+  "food": {
+   "type": "cafe",
+   "menu": [
+    "카멜커피 ₩6,500",
+    "헤리티지라떼 (coconut milk, Seochon only) ₩6,500",
+    "CCC 카멜클래식크림 ₩6,500"
+   ],
+   "mealMin": 30,
+   "minOrder": null,
+   "diningZone": "other"
+  },
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Gyeongbokgung",
+     "nameKo": "경복궁",
+     "lines": [
+      "3"
+     ],
+     "exit": null,
+     "walkMin": 6
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "Vogue Korea – near Gyeongbokgung Yeongchumun gate (no exit given; walk time estimated from ~300–400 m OSM straight-line distance)",
+     "url": "https://www.vogue.co.kr/2025/04/10/%ec%9d%b4-%eb%b4%84-%ed%8f%89%ed%99%94%eb%a1%ad%ea%b2%8c-%ec%bb%a4%ed%94%bc-%ed%95%9c%ec%9e%94%ed%95%98%ea%b3%a0-%ec%8b%b6%ec%9d%80-%ea%b3%a0%ea%b6%81-%ec%b9%b4%ed%8e%98-4/"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Heypop (12 Mar 2025) – Seochon store opened 4 Mar 2025, opens 08:00, Seochon-only heritage latte",
+    "url": "https://heypop.kr/n/119917/"
+   },
+   {
+    "label": "Vogue Korea (Apr 2025) – palace-view cafes",
+    "url": "https://www.vogue.co.kr/2025/04/10/%ec%9d%b4-%eb%b4%84-%ed%8f%89%ed%99%94%eb%a1%ad%ea%b2%8c-%ec%bb%a4%ed%94%bc-%ed%95%9c%ec%9e%94%ed%95%98%ea%b3%a0-%ec%8b%b6%ec%9d%80-%ea%b3%a0%ea%b6%81-%ec%b9%b4%ed%8e%98-4/"
+   },
+   {
+    "label": "Polle – 카멜 커피 서촌점 (menu prices)",
+    "url": "https://polle.com/place/10S4Ix/%EC%B9%B4%EB%A9%9C%20%EC%BB%A4%ED%94%BC"
+   },
+   {
+    "label": "GQ Korea (Nov 2025) – Seochon autumn cafes",
+    "url": "https://www.gqkorea.co.kr/?p=346253"
+   },
+   {
+    "label": "OpenStreetMap node 13955799576",
+    "url": "https://www.openstreetmap.org/node/13955799576"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "A Seochon branch DOES exist (opened 4 Mar 2025 at 효자로 31), so the user's branch is correct. Closing time and regular closed days not found in any source (a review implies it stays open later than most Seochon cafes) — check @camelcoffee_kor before visiting; no closures known for 30 Nov–6 Dec 2026. Seating limited; a review noted Yeongchumun gate was closed for works. Other branches: Dosan Park (original; 도산대로45길 16-8 per OSM), Seongsu (성덕정19길 6), Yongsan (한강대로23길 55, OSM), Yeonnam, Shinsegae Gangnam, Hyundai Pangyo, Jeju. Gyeongbokgung station exit not sourced (exit null)."
+ },
+ {
+  "id": "deep-blue-lake-mangwon",
+  "nameTh": "ดีพ บลู เลค (คาเฟ่ใกล้ตลาดมังวอน)",
+  "nameEn": "Deep Blue Lake Mangwon",
+  "nameKo": "딥블루레이크",
+  "branch": "Mangwon",
+  "category": "food",
+  "area": "Mangwon-dong / Mapo",
+  "address": "11 Poeun-ro 6-gil, Mapo-gu, Seoul (서울 마포구 포은로6길 11; lot 망원동 411-12)",
+  "lat": 37.555751,
+  "lng": 126.90555,
+  "coordStatus": "unverified",
+  "coordSource": "spinach.guide venue page for Deep Blue Lake (Google-derived; lists address as 9 Poeun-ro 6-gil). No OSM node for the cafe; consistent with OSM address node 포은로6길 11-3 (37.5558786,126.9056326) ~15 m away.",
+  "reasonTh": "โรงคั่วสเปเชียลตี้สไตล์นอร์ดิก (คั่วอ่อนเน้นกลิ่น) ในอาคารสีน้ำเงินเข้มข้างลานจอดรถตลาดมังวอน ขึ้นชื่อเรื่องลาเต้นมโอ๊ต (Oatly) และดริปแบ็กคั่วเอง",
+  "suggestedStayMin": 40,
+  "budget": {
+   "textTh": "กาแฟ 5,500–6,500 วอน เครื่องดื่มอื่น/เค้ก 7,000–9,000 วอน (เมนูใน Polle)",
+   "krwMin": 5500,
+   "krwMax": 9000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "Daily 10:00–21:30 (some guides say 11:00–21:30 or 11:00–22:00)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "21:30",
+  "indoor": true,
+  "food": {
+   "type": "cafe",
+   "menu": [
+    "딥블렌딩 에스프레소 ₩5,500",
+    "오틀리 라떼 ₩5,500",
+    "라즈베리 초콜릿 파운드 케이크 ₩9,000"
+   ],
+   "mealMin": 30,
+   "minOrder": null,
+   "diningZone": "other"
+  },
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Mangwon",
+     "nameKo": "망원",
+     "lines": [
+      "6"
+     ],
+     "exit": "2",
+     "walkMin": 10
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "Travel guides (Mangwon stn exit 2, ~10 min walk)",
+     "url": "https://zuzu-travel.pages.dev/food/mangwon-dong-cafe-guide/"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Daum/Esquire – Mangwon specialty cafes (address, 10:00–21:30, Nordic roast)",
+    "url": "https://v.daum.net/v/yOV4jkKwf9?f=p"
+   },
+   {
+    "label": "spinach.guide – Deep Blue Lake (daily 10:00–21:30, coords)",
+    "url": "https://spinach.guide/venues/deep-blue-lake-215844/"
+   },
+   {
+    "label": "Polle – 딥 블루 레이크 (menu prices)",
+    "url": "https://polle.com/place/538NDT/%EB%94%A5%20%EB%B8%94%EB%A3%A8%20%EB%A0%88%EC%9D%B4%ED%81%AC"
+   },
+   {
+    "label": "Creatrip (older; 11:00–21:30)",
+    "url": "https://creatrip.com/blog/10395"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "User's area (Mangwon Market) is correct: the cafe is next to the Mangwon Market public car park. Hours conflict: Daum article (2023) and spinach.guide say daily 10:00–21:30; Creatrip (older) 11:00–21:30; one blog 11:00–22:00 — arrive after 11:00 to be safe. No regular closing day ('연중무휴' tag on Polle); no closures known 30 Nov–6 Dec 2026. Reviews note the coffee is quite acidic (light roast). Address variant: some directories give 9 Poeun-ro 6-gil / 망원동 411-12. A 2nd store (separate roasting workshop) and a Suwon store (marked closed) exist. Phone listed as 02-333-8532 (Polle) vs 02-323-8532 (10mag)."
+ },
+ {
+  "id": "hit-coffee-roasters-sinsa",
+  "nameTh": "ฮิตคอฟฟี่ โรสเตอร์ส สาขาชินซา (การอซูกิล)",
+  "nameEn": "HitCoffee Roasters Sinsa",
+  "nameKo": "히트커피 로스터스 신사",
+  "branch": "Sinsa (Garosu-gil)",
+  "category": "food",
+  "area": "Sinsa-dong / Garosu-gil, Gangnam",
+  "address": "1F, 34 Dosan-daero 17-gil, Gangnam-gu, Seoul (서울 강남구 도산대로17길 34 1층; lot 신사동 554-32 per RestaurantGuru)",
+  "lat": 37.5209707,
+  "lng": 127.0241125,
+  "coordStatus": "verified",
+  "coordSource": "OpenStreetMap node 12073281644 '히트커피 로스터스 신사' (addr 도산대로17길 34) and RestaurantGuru directions link (37.5208835,127.0241105, Google-derived) — ~10 m apart.",
+  "reasonTh": "โรงคั่วจากชอนันที่เน้นกาแฟคั่วอ่อนรสสะอาด ขึ้นชื่อเรื่องพุดดิ้งคัสตาร์ดวานิลลา และ 'ฮิตพาย' พายทำเองไส้แยมราสป์เบอร์รีกับแอปเปิล",
+  "suggestedStayMin": 40,
+  "budget": {
+   "textTh": "กาแฟ 4,800–6,500 วอน พาย/ขนม 2,700–8,500 วอน (เมนูสาขาซอกโยใน Polle)",
+   "krwMin": 2700,
+   "krwMax": 8500,
+   "status": "estimate"
+  },
+  "hours": {
+   "text": "Daily 10:00–20:30 (single directory source)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "20:30",
+  "indoor": true,
+  "food": {
+   "type": "cafe",
+   "menu": [
+    "커스터드 바닐라 푸딩 ₩7,000",
+    "힛파이 (apple / raspberry) ₩2,700",
+    "플랫화이트 ₩5,000"
+   ],
+   "mealMin": 30,
+   "minOrder": null,
+   "diningZone": "other"
+  },
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Sinsa",
+     "nameKo": "신사",
+     "lines": [
+      "3",
+      "SB"
+     ],
+     "exit": null,
+     "walkMin": 10
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "Walk time estimated from OSM straight-line distance (~700–950 m to Sinsa stn); Garosu-gil is ~5 min from exit 8 (VisitKorea-type guide); no exit for the shop sourced",
+     "url": "https://www.openstreetmap.org/node/12073281644"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Marie Claire Korea (Sep 2024) – 히트커피 로스터스 신사, 도산대로17길 34, signature pudding",
+    "url": "https://www.marieclairekorea.com/?p=393928"
+   },
+   {
+    "label": "RestaurantGuru – HitCoffee Roasters (daily 10:00–20:30, coords)",
+    "url": "https://restaurantguru.com/Hit-Coffee-Seoul"
+   },
+   {
+    "label": "Polle – 히트 커피 로스터스 서교 (menu incl. Hit pie apple/raspberry; light-roast review; branch list)",
+    "url": "https://polle.com/place/2UMkbM/%ED%9E%88%ED%8A%B8%20%EC%BB%A4%ED%94%BC%20%EB%A1%9C%EC%8A%A4%ED%84%B0%EC%8A%A4"
+   },
+   {
+    "label": "Esquire Korea – Sinsa 4th store opened late Sept (2023)",
+    "url": "https://www.esquirekorea.co.kr/article/81691"
+   },
+   {
+    "label": "OpenStreetMap node 12073281644",
+    "url": "https://www.openstreetmap.org/node/12073281644"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Exact name: 히트커피 로스터스 / HitCoffee Roasters (Korean '히트', not 'HitCoffee' as one word in Korean). User's area (Sinsa-dong, Gangnam) is correct — it is on Garosu-gil, not central Gangnam station. Raspberry: the in-house 'Hit pie' (raspberry jam + apple jam) is ₩2,700 on the Seogyo branch menu; not confirmed on a Sinsa-specific menu. Light roast: a Seogyo reviewer describes light, clean roasts; the Sinsa store is described more as a dessert spot (pudding) with signature-espresso lattes. Hours only from RestaurantGuru (Google-derived) — unverified; no closed day known, no closures known 30 Nov–6 Dec 2026. Other branches: Seogyo/Hongdae (동교로 146), Itaewon lounge, Jonggak; Hannam (이태원로 258) marked closed on Polle; origin store in Cheonan (2016)."
  }
 ]
