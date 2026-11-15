@@ -61,19 +61,23 @@ test('ไม่มี API key: แผนยังใช้ได้ เพิ่
   await page.locator('[data-place-card="library"] .add-btn').click();
   await gotoPlan(page);
   await expect(page.locator('.timeline')).toContainText('ห้องสมุดสตาร์ฟิลด์');
-  // ข้อมูลขาด: แสดง "อย่างเร็ว" และไม่สรุปว่าทัน
-  await expect(page.locator('.banner')).toContainText('ยังสรุปไม่ได้ว่าทัน');
+  // ข้อมูลขาด (มื้อที่ยังไม่เลือกร้าน): ไม่สรุปว่า "ทัน" — บอกว่ายังสรุปไม่ได้ หรือเกินแน่นอนแล้ว
+  await expect(page.locator('.banner')).toContainText(/ยังสรุปไม่ได้ว่าทัน|เกินเวลา/);
+  await expect(page.locator('.banner')).not.toContainText('ทันเวลา');
   // กรอกเวลาเดินทางเองทุกช่วงที่มีการเคลื่อนที่ (โรงแรม→ห้องสมุด, ห้องสมุด→มื้อเย็น(ยังไม่เลือก), →โรงแรม)
-  const manual = page.locator('[data-act-change="leg-manual"]').first();
+  await expect(page.locator('.leg .leg-time').first()).toContainText('≈'); // ยังไม่มีข้อมูล → เวลาประมาณจากระยะ
+  await page.locator('[data-act="leg-info"]').first().click();
+  const manual = page.locator('.modal [data-act-change="leg-manual"]');
   await manual.fill('40');
   await manual.dispatchEvent('change');
-  await expect(page.locator('.stop').first()).toContainText('ถึง 18:45'); // 40 นาที + เวลาเผื่อ 5 นาที (แยกบรรทัด)
+  await expect(page.locator('.modal .leg-now')).toContainText('กำหนดเอง');
+  await page.locator('.modal [data-act="modal-close"]').last().click();
+  await expect(page.locator('.stop').first()).toContainText('18:45'); // 40 นาที + เวลาเผื่อ 5 นาที (แยกบรรทัด)
   await expect(page.locator('.leg').first()).toContainText('+ เผื่อ 5 นาที');
-  await expect(page.locator('.leg .src.user').first()).toBeVisible();
   // เปลี่ยนเวลาเริ่ม → ตารางเลื่อนตาม
   await page.locator('[data-field="startTime"]').fill('19:00');
   await page.locator('[data-field="startTime"]').dispatchEvent('change');
-  await expect(page.locator('.stop').first()).toContainText('ถึง 19:45');
+  await expect(page.locator('.stop').first()).toContainText('19:45');
 });
 
 test('อากาศจับคู่วันที่เกาหลี เน้นช่วงเย็น และวันนอกช่วงไม่แสดงข้อมูลปลอม', async ({ page }) => {
@@ -151,7 +155,7 @@ test('หน้าจอไม่มีเนื้อหาล้นแนว�
     const heights = await page.locator('.bottom-nav button').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
     for (const h of heights) expect(h).toBeGreaterThanOrEqual(44);
     await page.locator('.bottom-nav [data-tab="plan"]').click();
-    const moveBtn = await page.locator('[data-act="toggle-expand"]').first().boundingBox();
+    const moveBtn = await page.locator('[data-act="stop-info"]').first().boundingBox();
     expect(moveBtn!.height).toBeGreaterThanOrEqual(40);
     // modal ไม่ล้น
     await page.locator('[data-act="open-templates"]').click();
@@ -192,12 +196,12 @@ test('ลบและย้ายจุดได้โดยไม่ต้อ�
   await expect(page.locator('.timeline')).toContainText('มยองดงเกียวจา');
   const first = page.locator('.stop .stop-title .t').first();
   const firstText = await first.textContent();
-  await page.locator('[data-act="toggle-expand"]').first().click();
-  await page.locator('[data-act="stop-down"]').first().click();
+  await page.locator('[data-act="stop-info"]').first().click();
+  await page.locator('.modal [data-act="stop-down"]').click();
   await expect(page.locator('.stop .stop-title .t').nth(1)).toHaveText(firstText!);
   const count = await page.locator('.stop').count();
-  // รายการที่ย้ายยังเปิดค้างอยู่ → กดลบได้เลย
-  await page.locator('[data-act="stop-remove"]').first().click();
+  // หน้าต่างยังเปิดค้างอยู่ → กดลบได้เลย
+  await page.locator('.modal [data-act="stop-remove"]').click();
   await expect(page.locator('.stop')).toHaveCount(count - 1);
 });
 
@@ -210,9 +214,9 @@ test('ย้ายจุดแวะไปวันอื่น และเล�
   await gotoPlan(page);
   await expect(page.locator('.timeline')).toContainText('มยองดงเกียวจา');
   const card = page.locator('.stop', { hasText: 'มยองดงเกียวจา' });
-  await card.locator('[data-act="toggle-expand"]').click();
-  const target = await page.locator('[data-act-change="stop-move-day"] option').nth(2).getAttribute('value'); // วัน 3
-  await card.locator('[data-act-change="stop-move-day"]').selectOption(target!);
+  await card.locator('[data-act="stop-info"]').click();
+  const target = await page.locator('.modal [data-act-change="stop-move-day"] option').nth(2).getAttribute('value'); // วัน 3
+  await page.locator('.modal [data-act-change="stop-move-day"]').selectOption(target!);
   await expect(page.locator('#toast')).toContainText('ไปวัน 3');
   await expect(page.locator('.timeline')).not.toContainText('มยองดงเกียวจา');
   await page.locator('[data-act="toast-undo"]').click();
@@ -360,7 +364,8 @@ test('Naver Map: ปุ่มเส้นทางรถเมล์/รถไ�
   await page.locator('[data-act="tpl-apply-all"]').click();
   await page.locator('[data-act="confirm-ok"]').click();
   await gotoPlan(page);
-  const btn = page.locator('.timeline [data-act="naver"]').first();
+  await page.locator('.timeline [data-act="leg-info"]').nth(1).click();
+  const btn = page.locator('.modal [data-act="naver"]').first();
   await expect(btn).toBeVisible();
   expect(await btn.getAttribute('data-href')).toMatch(/^nmap:\/\/route\/public\?.*dlat=/);
   await btn.click(); // ไม่มีแอป → ยังอยู่หน้าเดิม → แนะนำติดตั้ง
@@ -466,4 +471,28 @@ test('วันนี้ระหว่างเดินทาง: เริ่
   await expect(page.locator('.today-head')).toContainText('ดูล่วงหน้า');
   await expect(page.locator('[data-act^="live-"]')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+});
+
+test('มื้ออาหาร: เลือกเช้า/กลางวัน/เย็น/ระหว่างทาง และเปลี่ยนได้ใน ⓘ · แถวแผนแบบย่อ', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-act="open-templates"]').click();
+  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
+  await page.locator('[data-act="tpl-apply-all"]').click();
+  await page.locator('[data-act="confirm-ok"]').click();
+  await gotoPlan(page);
+  await page.locator('[data-act="add-item"][data-kind="dinner"]').click();
+  await expect(page.locator('.modal')).toContainText('มื้อกลางวัน');
+  await page.locator('.modal [data-act="meal-add"][data-v="lunch"]').click();
+  await expect(page.locator('#toast')).toContainText('เพิ่มมื้อกลางวัน');
+  const lunch = page.locator('.stop', { hasText: 'มื้อกลางวัน' });
+  await expect(lunch).toBeVisible();
+  // ⓘ → เปลี่ยนเป็นมื้อระหว่างทาง
+  await lunch.locator('[data-act="stop-info"]').click();
+  await page.locator('.modal [data-act="meal-set"][data-v="snack"]').click();
+  await expect(page.locator('.timeline')).toContainText('มื้อระหว่างทาง');
+  await page.locator('.modal [data-act="modal-close"]').last().click();
+  // แถวเดินทางแบบย่อ: ไม่มีช่องกรอก/ลิงก์ลอย ๆ — มีเวลา + วิธีไป + ⓘ
+  await expect(page.locator('.timeline [data-act-change="leg-manual"]')).toHaveCount(0);
+  await expect(page.locator('.timeline .leg.slim [data-act="leg-info"]').first()).toBeVisible();
+  await expect(page.locator('.timeline')).not.toContainText('≈ 0 ม.');
 });

@@ -1,7 +1,8 @@
-import type { Day, Place } from '../../core/types';
+import type { Day, Place, Stop } from '../../core/types';
 import type { DaySchedule, StopTiming } from '../../core/schedule';
 import { app } from '../app';
-import { dayColor, esc, gmapsPlaceUrl, photosUrl } from '../util';
+import { dayColor, esc, gmapsPlaceUrl, photosUrl, naverBtn, naverPlaceUrl } from '../util';
+import { MEALS, mealIcon, mealName, mealOf, type Meal } from '../../core/meals';
 import { fmtDateTh, fmtDur, fmtHM } from '../../core/time';
 import { legRow } from './leg';
 import { renderWeather } from './weather';
@@ -97,63 +98,74 @@ function settingsCard(day: Day, idx: number): string {
   </section>`;
 }
 
-function stopRow(day: Day, t: StopTiming, i: number, total: number, dayIdx: number): string {
+function stopName(s: Stop, p: Place | undefined): string {
+  if (s.kind === 'dinner') return p ? esc(p.nameTh) : `${mealName(s)} <span class="muted small">· ยังไม่เลือกร้าน</span>`;
+  if (s.kind === 'break') return esc(s.title || 'พัก');
+  if (s.kind === 'buffer') return esc(s.title || 'เวลาสำรอง');
+  return esc(p?.nameTh ?? 'สถานที่ไม่ทราบ');
+}
+
+function stopIcon(s: Stop, p: Place | undefined): string {
+  return s.kind === 'dinner' ? mealIcon(s) : s.kind === 'break' ? '☕' : s.kind === 'buffer' ? '⏳' : (CATEGORY_ICON[p?.category ?? 'base'] ?? '📍');
+}
+
+/** แถวจุดแวะแบบย่อ: ชื่อ · ช่วงเวลา · อยู่นานเท่าไร · คำเตือนสำคัญ — แก้ไขทั้งหมดใน ⓘ */
+function stopRow(day: Day, t: StopTiming, i: number, _total: number, dayIdx: number): string {
   const s = t.stop;
   const p = app.getPlace(s.placeId);
-  const open = app.expanded.has(s.uid);
-  const unselectedDinner = s.kind === 'dinner' && !p;
-  const name =
-    s.kind === 'dinner'
-      ? p ? `${esc(p.nameTh)}` : 'มื้อเย็น'
-      : s.kind === 'break'
-        ? esc(s.title || 'พัก')
-        : s.kind === 'buffer'
-          ? esc(s.title || 'เวลาสำรอง')
-          : esc(p?.nameTh ?? 'สถานที่ไม่ทราบ');
-  const icon = s.kind === 'dinner' ? '🍽️' : s.kind === 'break' ? '☕' : s.kind === 'buffer' ? '⏳' : (CATEGORY_ICON[p?.category ?? 'base'] ?? '📍');
+  const unselected = s.kind === 'dinner' && !p;
   const warns = t.warnings.filter((w) => w !== 'ยังไม่ได้เลือกร้าน' && !w.startsWith('หมุดกลางย่าน'));
-  const isShop = p && (p.category === 'fashion' || p.category === 'beauty' || p.category === 'market');
-  const isFood = p && (p.category === 'food' || s.kind === 'dinner');
-  const sub = s.skipped
+  const when = s.skipped
     ? 'ข้ามแล้ว'
-    : `ถึง ${timeCell(t.arrive, t.lowerBound)}${t.wait ? ` · รอ ${fmtDur(t.wait)}` : ''} · อยู่ ${fmtDur(s.stayMin)} ถึง ${timeCell(t.depart, t.lowerBound)}${s.lockedTime ? ` · 🔒 ${esc(s.lockedTime)}` : ''}`;
+    : t.start != null && t.depart != null
+      ? `${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive ?? t.start)}–${fmtHM(t.depart)} · อยู่ ${fmtDur(s.stayMin)}`
+      : `อยู่ ${fmtDur(s.stayMin)}`;
   return `
-  <div class="stop ${s.skipped ? 'skipped' : ''} ${t.lateMin ? 'late' : ''} ${unselectedDinner ? 'placeholder' : ''}" data-stop-card="${s.uid}">
+  <div class="stop ${s.skipped ? 'skipped' : ''} ${t.lateMin ? 'late' : ''} ${unselected ? 'placeholder' : ''}" data-stop-card="${s.uid}">
     <div class="stop-line">
       <span class="num"><i style="--c:${dayColor(dayIdx)}">${i + 1}</i></span>
       <div class="stop-title">
-        <div class="t">${icon} ${name}</div>
-        <div class="sub">${sub}</div>
-        ${warns.length ? `<div class="warn-line">⚠ ${esc(warns[0])}${warns.length > 1 ? ` (+${warns.length - 1})` : ''}</div>` : ''}
+        <div class="t">${stopIcon(s, p)} ${stopName(s, p)}</div>
+        <div class="sub">${when}${s.lockedTime ? ` · 🔒 ${esc(s.lockedTime)}` : ''}${t.wait ? ` · รอ ${fmtDur(t.wait)}` : ''}</div>
+        ${warns.length ? `<div class="warn-line">⚠ ${esc(warns[0])}</div>` : ''}
       </div>
-      ${unselectedDinner && !s.skipped ? `<button class="btn sm primary" data-act="dinner-options" data-day="${day.id}" data-stop="${s.uid}">เลือกร้าน</button>` : ''}
-      <button class="icon-btn" data-act="toggle-expand" data-stop="${s.uid}" aria-expanded="${open}" aria-label="แก้ไขรายการ">${open ? '▴' : '⋯'}</button>
+      ${unselected && !s.skipped ? `<button class="btn sm primary" data-act="dinner-options" data-day="${day.id}" data-stop="${s.uid}">เลือกร้าน</button>` : ''}
+      <button class="icon-btn info" data-act="stop-info" data-day="${day.id}" data-stop="${s.uid}" aria-label="รายละเอียด / แก้ไข ${stopName(s, p).replace(/<[^>]+>/g, '')}">ⓘ</button>
     </div>
+  </div>`;
+}
+
+/** หน้าต่าง ⓘ ของจุดแวะ: แก้เวลาอยู่ นัด มื้อ โน้ต ย้ายวัน ลำดับ ลบ และเปิดแผนที่ */
+export function stopInfoBody(day: Day, t: StopTiming, i: number, total: number): string {
+  const s = t.stop;
+  const p = app.getPlace(s.placeId);
+  const isShop = p && (p.category === 'fashion' || p.category === 'beauty' || p.category === 'market');
+  const isFood = p && (p.category === 'food' || s.kind === 'dinner');
+  return `
+    <p class="sub">${t.start != null && t.depart != null ? `${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive ?? t.start)} ถึง · ออก ${fmtHM(t.depart)}` : 'ยังไม่มีเวลา'}</p>
+    ${t.warnings.length ? `<ul class="warns">${t.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}
     ${
-      open
-        ? `<div class="stop-more">
-      <div class="field-row">
-        <label>อยู่ <input class="inp xs" type="number" min="0" step="5" value="${s.stayMin}" data-act-change="stop-field" data-field="stayMin" data-day="${day.id}" data-stop="${s.uid}" aria-label="ระยะเวลาแวะ (นาที)"> นาที</label>
-        <label>นัดเวลา 🔒 <input class="inp xs" type="time" value="${esc(s.lockedTime ?? '')}" data-act-change="stop-field" data-field="lockedTime" data-day="${day.id}" data-stop="${s.uid}" aria-label="เวลานัดที่ล็อก"></label>
-      </div>
-      ${warns.length > 1 ? `<ul class="warns">${warns.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}
-      ${p?.coordStatus === 'area-center' ? '<p class="muted small">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อถึงร้านจริง</p>' : p?.coordStatus === 'approx' ? '<p class="muted small">พิกัดจากแหล่งเดียว (หมุดเส้นประ) — เช็กใน Google Maps ก่อนไป</p>' : ''}
-      <label class="block small">หมายเหตุ <textarea class="inp" rows="2" maxlength="500" data-act-change="stop-field" data-field="note" data-day="${day.id}" data-stop="${s.uid}">${esc(s.note)}</textarea></label>
-      ${s.kind === 'break' || s.kind === 'buffer' ? `<label class="block small">ชื่อรายการ <input class="inp" value="${esc(s.title ?? '')}" maxlength="80" data-act-change="stop-field" data-field="title" data-day="${day.id}" data-stop="${s.uid}"></label>` : ''}
-      <div class="row-btns">
-        <button class="btn sm" data-act="stop-up" data-day="${day.id}" data-stop="${s.uid}" ${i === 0 ? 'disabled' : ''} aria-label="เลื่อนขึ้น">↑ ขึ้น</button>
-        <button class="btn sm" data-act="stop-down" data-day="${day.id}" data-stop="${s.uid}" ${i === total - 1 ? 'disabled' : ''} aria-label="เลื่อนลง">↓ ลง</button>
-        ${s.kind === 'dinner' ? `<button class="btn sm" data-act="dinner-options" data-day="${day.id}" data-stop="${s.uid}">${p ? 'เปลี่ยนร้าน' : 'เลือกร้าน'}</button><button class="btn sm" data-act="stop-skip" data-day="${day.id}" data-stop="${s.uid}">${s.skipped ? 'ไม่ข้าม' : 'ข้ามมื้อนี้'}</button>` : ''}
-        ${isFood && p ? `<button class="btn sm" data-act="nearby" data-want="shop" data-day="${day.id}" data-stop="${s.uid}">ช็อปใกล้ร้านนี้</button>` : ''}
-        ${isShop ? `<button class="btn sm" data-act="nearby" data-want="eat" data-day="${day.id}" data-stop="${s.uid}">กินใกล้จุดนี้</button>` : ''}
-        ${p ? `<button class="btn sm" data-act="focus-place" data-place="${esc(p.id)}">แผนที่</button><a class="btn sm" target="_blank" rel="noopener" href="${esc(photosUrl(p))}">📷 ดูรูป</a><a class="btn sm" target="_blank" rel="noopener" href="${esc(gmapsPlaceUrl(p))}">Google Maps ↗</a>` : ''}
-        <select class="inp sm" data-act-change="stop-move-day" data-day="${day.id}" data-stop="${s.uid}" aria-label="ย้ายไปวันอื่น"><option value="">ย้ายไปวัน…</option>${app.plan.days.map((dd, k) => (dd.id === day.id ? '' : `<option value="${dd.id}">วัน ${k + 1}${dd.date ? ` · ${esc(fmtDateTh(dd.date))}` : ''}</option>`)).join('')}</select>
-        <button class="btn sm danger" data-act="stop-remove" data-day="${day.id}" data-stop="${s.uid}">ลบ</button>
-      </div>
-    </div>`
+      s.kind === 'dinner'
+        ? `<div class="seg meal-seg" role="radiogroup" aria-label="มื้อ">${(Object.keys(MEALS) as Meal[]).map((m) => `<button class="${mealOf(s) === m ? 'on' : ''}" data-act="meal-set" data-day="${day.id}" data-stop="${s.uid}" data-v="${m}" role="radio" aria-checked="${mealOf(s) === m}">${MEALS[m].icon} ${MEALS[m].th.replace('มื้อ', '')}</button>`).join('')}</div>
+           <div class="row-btns"><button class="btn sm primary" data-act="dinner-options" data-day="${day.id}" data-stop="${s.uid}">${p ? 'เปลี่ยนร้าน' : 'เลือกร้าน'}</button><button class="btn sm" data-act="stop-skip" data-day="${day.id}" data-stop="${s.uid}">${s.skipped ? 'ไม่ข้าม' : 'ข้ามมื้อนี้'}</button></div>`
         : ''
     }
-  </div>`;
+    <div class="field-row">
+      <label>อยู่ <input class="inp xs" type="number" min="0" step="5" value="${s.stayMin}" data-act-change="stop-field" data-field="stayMin" data-day="${day.id}" data-stop="${s.uid}" aria-label="ระยะเวลาแวะ (นาที)"> นาที</label>
+      <label>นัดเวลา 🔒 <input class="inp xs" type="time" value="${esc(s.lockedTime ?? '')}" data-act-change="stop-field" data-field="lockedTime" data-day="${day.id}" data-stop="${s.uid}" aria-label="เวลานัดที่ล็อก"></label>
+    </div>
+    ${p?.coordStatus === 'area-center' ? '<p class="muted small">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อถึงร้านจริง</p>' : p?.coordStatus === 'approx' ? '<p class="muted small">พิกัดจากแหล่งเดียว (หมุดเส้นประ) — เช็กใน Google Maps ก่อนไป</p>' : ''}
+    <label class="block small">โน้ต <textarea class="inp" rows="2" maxlength="500" data-act-change="stop-field" data-field="note" data-day="${day.id}" data-stop="${s.uid}">${esc(s.note)}</textarea></label>
+    ${s.kind === 'break' || s.kind === 'buffer' ? `<label class="block small">ชื่อรายการ <input class="inp" value="${esc(s.title ?? '')}" maxlength="80" data-act-change="stop-field" data-field="title" data-day="${day.id}" data-stop="${s.uid}"></label>` : ''}
+    ${p ? `<div class="nav-row">${naverBtn(naverPlaceUrl(p), '🟢 Naver', 'btn')}<a class="btn" target="_blank" rel="noopener" href="${esc(gmapsPlaceUrl(p))}">🧭 Google</a><a class="btn" target="_blank" rel="noopener" href="${esc(photosUrl(p))}" aria-label="ดูรูป">📷</a></div>` : ''}
+    <div class="row-btns">
+      <button class="btn sm" data-act="stop-up" data-day="${day.id}" data-stop="${s.uid}" ${i === 0 ? 'disabled' : ''}>↑ ขึ้น</button>
+      <button class="btn sm" data-act="stop-down" data-day="${day.id}" data-stop="${s.uid}" ${i === total - 1 ? 'disabled' : ''}>↓ ลง</button>
+      <select class="inp sm" data-act-change="stop-move-day" data-day="${day.id}" data-stop="${s.uid}" aria-label="ย้ายไปวันอื่น"><option value="">ย้ายไปวัน…</option>${app.plan.days.map((dd, k) => (dd.id === day.id ? '' : `<option value="${dd.id}">วัน ${k + 1}${dd.date ? ` · ${esc(fmtDateTh(dd.date))}` : ''}</option>`)).join('')}</select>
+      ${isFood && p ? `<button class="btn sm" data-act="nearby" data-want="shop" data-day="${day.id}" data-stop="${s.uid}">ช็อปใกล้ ๆ</button>` : ''}
+      ${isShop ? `<button class="btn sm" data-act="nearby" data-want="eat" data-day="${day.id}" data-stop="${s.uid}">กินใกล้ ๆ</button>` : ''}
+    </div>
+    <div class="modal-actions"><button class="btn danger" data-act="stop-remove" data-day="${day.id}" data-stop="${s.uid}">ลบออกจากวันนี้</button><button class="btn primary" data-act="modal-close">เสร็จ</button></div>`;
 }
 
 export function renderDayPanel(day: Day): string {

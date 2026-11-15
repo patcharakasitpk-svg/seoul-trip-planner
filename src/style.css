@@ -482,3 +482,23 @@ button.link { border: 0; background: none; padding: 0; font: inherit; cursor: po
 .tl-n small { display: block; color: var(--muted); font-size: .8rem; font-weight: 400; }
 .tl-leg { padding: 0 0 0 4.9rem; font-size: .8rem; color: var(--faint); }
 .today-foot { justify-content: space-between; margin-top: .4rem; }
+
+/* แถวแผนแบบย่อ + ⓘ */
+.leg.slim { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; column-gap: .45rem; min-height: 34px; padding: .15rem 0 .15rem .2rem; font-size: .9rem; }
+.leg.slim .leg-time { white-space: nowrap; }
+.leg.slim > .muted.small { white-space: nowrap; }
+.leg.slim .icon-btn.info { grid-column: 4; grid-row: 1; }
+.leg.slim .leg-how { grid-column: 2 / 4; grid-row: 2; min-width: 0; color: var(--muted); font-size: .82rem; line-height: 1.6; }
+.leg.slim .leg-how .line-chip { vertical-align: 0; }
+.leg.slim.missing .leg-time { color: var(--warn); }
+.leg.slim.pending { min-height: 26px; }
+.icon-btn.info { color: var(--accent); font-size: 1.05rem; }
+.leg-route { margin: 0 0 .6rem; }
+.leg-modes, .meal-seg { display: flex; width: 100%; margin: .2rem 0 .6rem; }
+.leg-modes button, .meal-seg button { flex: 1; min-height: 42px; }
+.leg-now { margin: .3rem 0; }
+.leg-own { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; margin: .3rem 0 .6rem; }
+.meal-pick { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.meal-btn { flex-direction: column; min-height: 84px; font-size: 1rem; gap: .1rem; }
+.meal-btn span { font-size: 1.6rem; }
+.meal-btn small { color: var(--muted); font-size: .75rem; font-weight: 400; }

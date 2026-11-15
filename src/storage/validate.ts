@@ -30,6 +30,7 @@ export function validatePlan(input: unknown): { ok: true; plan: Plan; warnings: 
         note: str(s.note, 500),
         legIn: leg(s.legIn),
         skipped: s.skipped === true || undefined,
+        meal: kind === 'dinner' && (['breakfast', 'lunch', 'dinner', 'snack'] as const).includes(s.meal) ? s.meal : undefined,
       });
     }
     days.push({

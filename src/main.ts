@@ -11,7 +11,7 @@ import { startOsm, switchToGoogle, onMapMarkerClick, mapViewReady, syncMapView, 
 import { buildMapSpecs } from './ui/mapSpecs';
 import { onRoutesChange } from './services/routes';
 import { onWeatherChange, ensureWeather } from './services/weather';
-import { moveStopToDay, insertStop, moveStop, newDay, newStop, dinnerSlot, removeStop, updateStop, reorderStops, newPlan, clone, defaultInsertIndex, applyTripDates , uid } from './core/planOps';
+import { moveStopToDay, insertStop, moveStop, newDay, newStop, removeStop, updateStop, reorderStops, newPlan, clone, defaultInsertIndex, applyTripDates , uid } from './core/planOps';
 import type { Day, Place, Plan, Stop, TravelMode } from './core/types';
 import { suggestOrder } from './core/compare';
 import { decodeFragment, parseJsonPlan, buildShareUrl, exportablePlan } from './storage/share';
@@ -20,6 +20,7 @@ import { TEMPLATES, templateDayStops, applyDatedTemplate, mergeDayStops } from '
 import { tplTargetDay } from './ui/views/modals';
 import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
 import { stopLocationId } from './core/schedule';
+import { MEALS, mealName, newMeal, mealInsertIndex, type Meal } from './core/meals';
 import { searchPlaces, placeFromResult, findExisting } from './services/placeSearch';
 import { SEARCH_PREFIX } from './ui/mapSpecs';
 import { RoomSync, inviteUrl, newRoomId, roomFromHash, toRoomDoc, fromRoomDoc, shouldApplyRemote, type RoomDoc, type SyncState } from './services/sync';
@@ -557,7 +558,7 @@ function quickToggle(placeId: string) {
     ? updateStop(day, emptyDinner.uid, { placeId, stayMin: app.stayFor(placeId) })
     : insertStop(day, defaultInsertIndex(day), stopForPlace(placeId));
   app.focusPlaceId = placeId;
-  applyWithUndo(day.id, nd, emptyDinner ? `ตั้ง ${p.nameTh} เป็นมื้อเย็นวัน ${n}` : `เพิ่ม ${p.nameTh} เข้าวัน ${n}`);
+  applyWithUndo(day.id, nd, emptyDinner ? `ตั้ง ${p.nameTh} เป็น${mealName(emptyDinner)}วัน ${n}` : `เพิ่ม ${p.nameTh} เข้าวัน ${n}`);
 }
 
 function stopForPlace(placeId: string, kind: Stop['kind'] = 'place'): Stop {
@@ -573,7 +574,7 @@ function planAsText(plan: Plan): string {
     lines.push(`  ออกจาก ${app.getPlace(d.startPlaceId)?.nameTh ?? '?'} ${d.startTime ?? '(ยังไม่กำหนดเวลา)'}`);
     s.stops.forEach((t, j) => {
       const p = app.getPlace(t.stop.placeId);
-      const name = p?.nameTh ?? t.stop.title ?? (t.stop.kind === 'dinner' ? 'มื้อเย็น (ยังไม่เลือกร้าน)' : t.stop.kind);
+      const name = p?.nameTh ?? t.stop.title ?? (t.stop.kind === 'dinner' ? `${mealName(t.stop)} (ยังไม่เลือกร้าน)` : t.stop.kind);
       const tm = t.start != null ? `${t.lowerBound ? '≥' : ''}${fmtHM(t.start)}–${fmtHM(t.depart)}` : '--:--';
       const leg = t.leg.source === 'same' ? '' : ` [${MODE_LABEL[t.leg.mode]} ${t.leg.travelMin != null ? fmtDur(t.leg.travelMin) : 'ไม่ทราบ'}]`;
       lines.push(`  ${j + 1}. ${tm} ${name}${t.stop.skipped ? ' (ข้าม)' : ''}${leg}${t.stop.lockedTime ? ` 🔒${t.stop.lockedTime}` : ''}${t.stop.note ? ` — ${t.stop.note}` : ''}`);
@@ -686,7 +687,11 @@ document.addEventListener('click', (ev) => {
     case 'add-item': {
       if (!day) return;
       const kind = d.kind as Stop['kind'];
-      const st = kind === 'dinner' ? dinnerSlot() : newStop(kind, null, kind === 'break' ? 30 : 15, { title: kind === 'break' ? 'พัก' : 'เวลาสำรอง' });
+      if (kind === 'dinner') {
+        app.modal = { type: 'meal', dayId };
+        break;
+      }
+      const st = newStop(kind, null, kind === 'break' ? 30 : 15, { title: kind === 'break' ? 'พัก' : 'เวลาสำรอง' });
       app.updateDay(dayId, (x) => insertStop(x, x.stops.length, st), 'เพิ่มรายการแล้ว');
       return;
     }
@@ -810,7 +815,7 @@ document.addEventListener('click', (ev) => {
         const idx = nd.stops.findIndex((s) => s.uid === m.stopUid);
         nd = insertStop(nd, idx + 1, stopForPlace(d.shop));
       }
-      applyWithUndo(m.dayId, nd, `เลือก ${app.getPlace(d.place)?.nameTh ?? ''} เป็นมื้อเย็นแล้ว${d.shop ? ' + ช็อปอีกหนึ่งจุด' : ''}`);
+      applyWithUndo(m.dayId, nd, `เลือก ${app.getPlace(d.place)?.nameTh ?? ''} เป็น${(() => { const st = app.findDay(m.dayId)?.stops.find((x) => x.uid === m.stopUid); return st ? mealName(st) : 'มื้ออาหาร'; })()}แล้ว${d.shop ? ' + ช็อปอีกหนึ่งจุด' : ''}`);
       return;
     }
     case 'nearby':
@@ -916,6 +921,29 @@ document.addEventListener('click', (ev) => {
     case 'open-share':
       app.modal = { type: 'share' };
       break;
+    case 'leg-info':
+      app.modal = { type: 'leg', dayId, target: d.stop! };
+      break;
+    case 'leg-mode-set':
+      setLeg(dayId, d.stop!, { mode: d.v as TravelMode });
+      return;
+    case 'stop-info':
+      app.modal = { type: 'stop', dayId, stopUid: d.stop! };
+      break;
+    case 'meal-add': {
+      const target = app.findDay(dayId);
+      if (!target) return;
+      const meal = d.v as Meal;
+      const st = newMeal(meal);
+      app.modal = null;
+      applyWithUndo(dayId, insertStop(target, mealInsertIndex(target, app.schedule(target), meal), st), `เพิ่ม${MEALS[meal].th}แล้ว — กด “เลือกร้าน”`);
+      return;
+    }
+    case 'meal-set': {
+      const meal = d.v as Meal;
+      app.updateDay(dayId, (x) => updateStop(x, d.stop!, { meal, title: MEALS[meal].th }));
+      return;
+    }
     case 'live-start':
     case 'live-arrive':
     case 'live-depart':

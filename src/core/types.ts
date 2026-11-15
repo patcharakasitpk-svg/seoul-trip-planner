@@ -74,6 +74,8 @@ export interface Stop {
   note: string;
   legIn: Leg;
   skipped?: boolean;
+  /** ชนิดมื้อ (เฉพาะ kind 'dinner' = ช่องมื้ออาหาร) · ไม่มี = มื้อเย็น */
+  meal?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
 }
 
 export interface DayPrefs {

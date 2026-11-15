@@ -56,6 +56,8 @@ export interface ScheduleCtx {
    * estimate = เวลาเดินทางโดยประมาณจากระยะ เมื่อไม่มีข้อมูล (แสดงเป็น "≈")
    */
   live?: { now: number | null; estimate: (fromId: string, toId: string, mode: Leg['mode']) => number | null };
+  /** เวลาเดินทางโดยประมาณจากระยะ เมื่อไม่มีข้อมูล (หน้าแผน) — แสดงเป็น "≈" */
+  estimate?: (fromId: string, toId: string, mode: Leg['mode']) => number | null;
 }
 
 /** ตอนนี้อยู่ขั้นไหนของวัน (จากเวลาจริงที่เช็กอิน) */
@@ -76,8 +78,9 @@ export function livePhase(day: Day): LivePhase {
 
 /** เติมเวลาเดินทางโดยประมาณ (เฉพาะโหมดเดินทางจริง) เมื่อไม่มีข้อมูล */
 function withEstimate(leg: LegInfo, ctx: ScheduleCtx): LegInfo {
-  if (leg.source !== 'none' || !ctx.live || !leg.fromId || !leg.toId || leg.reason?.startsWith('ยังไม่ได้เลือกร้าน')) return leg;
-  const est = ctx.live.estimate(leg.fromId, leg.toId, leg.mode);
+  const fn = ctx.estimate ?? ctx.live?.estimate;
+  if (leg.source !== 'none' || !fn || !leg.fromId || !leg.toId || leg.reason?.startsWith('ยังไม่ได้เลือกร้าน')) return leg;
+  const est = fn(leg.fromId, leg.toId, leg.mode);
   return est == null ? leg : { ...leg, travelMin: est, source: 'auto', reason: 'ประมาณจากระยะทาง' };
 }
 
@@ -255,6 +258,8 @@ export function computeSchedule(day: Day, ctx: ScheduleCtx): DaySchedule {
   }
 
   if (missing) messages.push(`มี ${missing} ช่วงที่ยังไม่มีข้อมูลเวลาเดินทาง — เวลาหลังจากนั้นเป็น "อย่างเร็ว" ยังสรุปไม่ได้ว่าทัน`);
+  const auto = stops.filter((t) => t.leg.source === 'auto').length + (end?.leg.source === 'auto' ? 1 : 0);
+  if (auto) messages.push(`${auto} ช่วงใช้เวลาเดินทางโดยประมาณจากระยะ (≈) — กด ⓘ ที่ช่วงนั้นเพื่อกำหนดเอง`);
   let status: DaySchedule['status'];
   if (!hasTime) status = 'no-time';
   else if (anyLate) status = 'late';

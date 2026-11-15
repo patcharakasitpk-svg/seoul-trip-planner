@@ -24,6 +24,9 @@ export type Modal =
   | { type: 'route'; fromId: string; toId: string; date: string | null; departMins: number | null; dayId: string; stopUid: string | null }
   | { type: 'reorder'; dayId: string }
   | { type: 'custom' }
+  | { type: 'leg'; dayId: string; target: string }
+  | { type: 'stop'; dayId: string; stopUid: string }
+  | { type: 'meal'; dayId: string }
   | { type: 'settings' }
   | { type: 'place'; placeId: string }
   | { type: 'indoor'; dayId: string };
@@ -132,9 +135,18 @@ class AppState {
   }
 
   /** ctx สำหรับคำนวณตาราง — เก็บรายการเส้นทางที่ยังไม่มีเพื่อขอภายหลัง */
+  /** เวลาเดินทางโดยประมาณจากระยะเส้นตรง (ใช้เมื่อไม่มีข้อมูลจากบริการ/ผู้ใช้) */
+  estimateMin = (fromId: string, toId: string, mode: Stop['legIn']['mode']): number | null => {
+    const a = this.getPlace(fromId);
+    const b = this.getPlace(toId);
+    if (a?.lat == null || a.lng == null || b?.lat == null || b.lng == null) return null;
+    return liveEstimateMin(straightLineM({ lat: a.lat, lng: a.lng }, { lat: b.lat, lng: b.lng }), mode);
+  };
+
   ctxFor(day: Day): ScheduleCtx {
     return {
       getPlace: this.getPlace,
+      estimate: this.estimateMin,
       getRoute: (fromId, toId, mode, date, dep) => {
         const key = routeKey(fromId, toId, mode, date, dep, day.prefs);
         const r = peekRoute(key, fromId, toId, mode);
@@ -158,19 +170,9 @@ class AppState {
 
   /** ตารางแบบเดินทางจริง: ใช้เวลาที่เช็กอิน + เวลาประมาณจากระยะเมื่อไม่มีข้อมูล · now = null เมื่อดูวันอื่น */
   liveSchedule(day: Day, now: number | null): DaySchedule {
-    return computeSchedule(day, {
-      ...this.ctxFor(day),
-      live: {
-        now,
-        estimate: (fromId, toId, mode) => {
-          const a = this.getPlace(fromId);
-          const b = this.getPlace(toId);
-          if (a?.lat == null || a.lng == null || b?.lat == null || b.lng == null) return null;
-          return liveEstimateMin(straightLineM({ lat: a.lat, lng: a.lng }, { lat: b.lat, lng: b.lng }), mode);
-        },
-      },
-    });
+    return computeSchedule(day, { ...this.ctxFor(day), live: { now, estimate: this.estimateMin } });
   }
+
 
   /** ขอข้อมูลเส้นทางสำหรับช่วงที่ยังไม่มี (เรียกหลัง render, หน่วงเวลาเพื่อลดคำขอเมื่อแก้เร็ว ๆ) */
   flushRouteNeeds() {

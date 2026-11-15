@@ -5,6 +5,7 @@ import { renderWeather } from './weather';
 import { livePhase, type DaySchedule, type LegInfo, type StopTiming } from '../../core/schedule';
 import { legTransitHint } from './transit';
 import type { Day, Place } from '../../core/types';
+import { mealName } from '../../core/meals';
 
 /**
  * หน้า "วันนี้" สำหรับระหว่างเดินทาง: ตอนนี้อยู่ไหน → ไปไหนต่อ ไปยังไง ใช้เวลาเท่าไร อยู่ได้อีกนานแค่ไหน
@@ -16,7 +17,7 @@ const travelText = (leg: LegInfo) =>
 
 const stopName = (t: StopTiming) => {
   const p = app.getPlace(t.stop.placeId);
-  return p?.nameTh ?? t.stop.title ?? (t.stop.kind === 'dinner' ? 'มื้อเย็น (ยังไม่เลือกร้าน)' : 'รายการ');
+  return p?.nameTh ?? (t.stop.kind === 'dinner' ? `${mealName(t.stop)} (ยังไม่เลือกร้าน)` : t.stop.title ?? 'รายการ');
 };
 
 const shortName = (p: Place | undefined) => (p ? (p.id === 'hotel' ? 'โรงแรม' : p.nameTh) : '?');

@@ -9,6 +9,9 @@ import { nearby } from '../../core/compare';
 import { stopLocationId, type LegInfo } from '../../core/schedule';
 import { DINING_ZONE_LABEL, FOOD_TYPE_LABEL, CATEGORY_ICON } from '../../data/places';
 import { TEMPLATES, nearbyForTemplateDay, type Template } from '../../data/templates';
+import { legInfoBody } from './leg';
+import { stopInfoBody } from './day';
+import { MEALS, mealName, type Meal } from '../../core/meals';
 import { placeCard } from './library';
 import { buildShareUrl, MAX_FRAGMENT } from '../../storage/share';
 import { googleStatus } from '../../services/google';
@@ -40,9 +43,11 @@ export function renderModal(): string {
     case 'confirm':
       [title, body] = ['ยืนยัน', `<p>${esc(m.message)}</p><div class="modal-actions"><button class="btn" data-act="modal-close">ยกเลิก</button><button class="btn primary" data-act="confirm-ok">${esc(m.okLabel)}</button></div>`];
       break;
-    case 'dinner':
-      [title, body] = ['เลือกร้านมื้อเย็น', dinnerBody(m)];
+    case 'dinner': {
+      const st = app.findDay(m.dayId)?.stops.find((x) => x.uid === m.stopUid);
+      [title, body] = [`เลือกร้าน${st ? mealName(st) : 'อาหาร'}`, dinnerBody(m)];
       break;
+    }
     case 'nearby':
       [title, body] = [m.want === 'shop' ? 'ช็อปใกล้ร้านนี้' : 'กินใกล้จุดนี้', nearbyBody(m)];
       break;
@@ -51,6 +56,29 @@ export function renderModal(): string {
       break;
     case 'custom':
       [title, body] = ['เพิ่มสถานที่เอง', customBody()];
+      break;
+    case 'leg': {
+      const d = app.findDay(m.dayId);
+      const s = d ? app.schedule(d) : null;
+      const leg = m.target === '__end' ? s?.end?.leg : s?.stops.find((t) => t.uid === m.target)?.leg;
+      [title, body] = ['การเดินทาง', d && leg ? legInfoBody(d.id, leg, m.target) : '<p>ไม่พบข้อมูล</p>'];
+      break;
+    }
+    case 'stop': {
+      const d = app.findDay(m.dayId);
+      const s = d ? app.schedule(d) : null;
+      const i = s ? s.stops.findIndex((t) => t.uid === m.stopUid) : -1;
+      const t = i >= 0 ? s!.stops[i] : null;
+      const p = t ? app.getPlace(t.stop.placeId) : undefined;
+      const name = t ? (t.stop.kind === 'dinner' ? (p ? `${mealName(t.stop)} · ${p.nameTh}` : mealName(t.stop)) : (p?.nameTh ?? t.stop.title ?? 'รายการ')) : 'รายการ';
+      [title, body] = [name, d && t ? stopInfoBody(d, t, i, s!.stops.length) : '<p>ไม่พบรายการ</p>'];
+      break;
+    }
+    case 'meal':
+      [title, body] = [
+        'เพิ่มมื้ออาหาร',
+        `<div class="meal-pick">${(Object.keys(MEALS) as Meal[]).map((k) => `<button class="btn meal-btn" data-act="meal-add" data-day="${m.dayId}" data-v="${k}"><span>${MEALS[k].icon}</span>${MEALS[k].th}<small>~${MEALS[k].stay} นาที${MEALS[k].at ? ` · ราว ${MEALS[k].at}` : ' · แทรกระหว่างทาง'}</small></button>`).join('')}</div><p class="muted small">วางในวันให้อัตโนมัติตามเวลามื้อ ย้าย/เปลี่ยนมื้อได้ภายหลังใน ⓘ</p>`,
+      ];
       break;
     case 'settings':
       [title, body] = ['ตั้งค่าบริการแผนที่', settingsBody()];
@@ -148,7 +176,7 @@ function addBody(m: Extract<Modal, { type: 'add' }>): string {
     <p class="small muted">เลือกตำแหน่งที่จะแทรก แล้วดูผลต่อเวลาก่อนยืนยัน</p>
     <div class="pos-list">
       ${positions.map((x) => `<button class="btn block-btn" data-act="add-at" data-i="${x.i}">${esc(x.label)}</button>`).join('')}
-      ${p.category === 'food' && dinnerFree ? `<button class="btn primary block-btn" data-act="add-as-dinner" data-stop="${dinnerFree.uid}">ใช้เป็นร้านมื้อเย็นของวันนี้</button>` : ''}
+      ${p.category === 'food' && dinnerFree ? `<button class="btn primary block-btn" data-act="add-as-dinner" data-stop="${dinnerFree.uid}">ใช้เป็นร้าน${mealName(dinnerFree)}ของวันนี้</button>` : ''}
     </div>`;
 }
 
