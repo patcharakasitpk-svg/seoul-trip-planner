@@ -519,7 +519,13 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await expect(pl.locator('.pl-group').first()).toContainText('สถานที่หลัก');
   await pl.locator('[data-pl="add"][data-place="hotel"]').click();
   await pl.locator('[data-pl-input="q"]').fill('กวางจัง');
+  // แตะชื่อ = ดูหมุดแดงก่อน (ยังไม่ใส่) พร้อมระยะจากจุดก่อนหน้า
+  await pl.locator('[data-pl="preview"][data-place="gwangjang"]').click();
+  await expect(pl.locator('.pl-pin.preview')).toContainText('ตลาดกวางจัง');
+  await expect(pl.locator('.pl-item.preview .pl-preview-info')).toContainText('ห่างจาก');
+  await expect(pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' })).toHaveCount(0);
   await pl.locator('[data-pl="add"][data-place="gwangjang"]').click();
+  await expect(pl.locator('.pl-pin.preview')).toHaveCount(0);
   const row = pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' });
   await expect(row).toBeVisible();
   await row.locator('[data-pl-change="stay"]').selectOption('120');

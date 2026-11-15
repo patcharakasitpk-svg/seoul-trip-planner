@@ -16,7 +16,7 @@ import { mealName, mealOf, newMeal, MEALS, type Meal } from '../core/meals';
 import { systemDayDefaults, recommendedStops } from '../core/dayDefaults';
 import type { Day, Place, Stop, TravelMode } from '../core/types';
 import type { DaySchedule } from '../core/schedule';
-import { straightLineM } from '../core/geo';
+import { fmtDist, straightLineM } from '../core/geo';
 
 type Step = 1 | 2 | 3 | 4;
 interface PState {
@@ -31,6 +31,8 @@ interface PState {
   backToSummary: boolean;
   /** วันตามที่อยู่ในแผนตอนเปิด (ใช้กับ "คืนค่าก่อนแก้") */
   orig: Day;
+  /** สถานที่ที่กำลังดูหมุดแดงก่อนใส่ */
+  preview: string | null;
 }
 
 let st: PState | null = null;
@@ -51,7 +53,7 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
   const day = app.findDay(dayId);
   if (!day) return;
   onDone = done;
-  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day) };
+  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null };
   if (!root) {
     root = document.createElement('div');
     root.id = 'planner';
@@ -202,9 +204,29 @@ function step1(): string {
 }
 
 /* ---------- ขั้น 2: เลือกสถานที่ (2 เลน) ---------- */
+/** จุดที่จะต่อจากช่องที่เลือก (หรือจุดสุดท้ายของวัน) — ใช้วัดระยะตอนดูหมุดแดง */
+function anchorPlace(): Place | undefined {
+  const d = st!.draft;
+  const upto = st!.slot ?? d.stops.length;
+  for (let i = upto - 1; i >= 0; i--) {
+    const p = placeOf(d.stops[i]);
+    if (p?.lat != null) return p;
+  }
+  return app.getPlace(d.startPlaceId);
+}
+
+function previewInfo(p: Place): string {
+  const a = anchorPlace();
+  if (!a || a.lat == null || p.lat == null || a.id === p.id) return '';
+  const m = straightLineM({ lat: a.lat, lng: a.lng! }, { lat: p.lat, lng: p.lng! });
+  const est = app.estimateMin(a.id, p.id, 'TRANSIT');
+  return `<span class="pl-preview-info">ห่างจาก${esc(a.id === 'hotel' ? 'โรงแรม' : a.nameTh)} ${fmtDist(m)}${est != null ? ` · เดินทาง ≈ ${fmtDur(est)}` : ''}</span>`;
+}
+
 function laneItem(p: Place, inDay: boolean): string {
-  return `<div class="pl-item ${inDay ? 'in' : ''}" draggable="${inDay ? 'false' : 'true'}" data-drag-place="${esc(p.id)}">
-    <div class="pl-item-text"><b>${esc(p.nameTh)}</b><span class="muted small">${esc(CATEGORY_LABEL[p.category] ?? '')} · ${esc(p.area)}${p.suggestedStayMin ? ` · ราว ${fmtDur(p.suggestedStayMin)}` : ''}</span></div>
+  const on = st!.preview === p.id;
+  return `<div class="pl-item ${inDay ? 'in' : ''} ${on ? 'preview' : ''}" draggable="${inDay ? 'false' : 'true'}" data-drag-place="${esc(p.id)}">
+    <button class="pl-item-text" data-pl="preview" data-place="${esc(p.id)}" aria-pressed="${on}" title="แตะเพื่อดูหมุดบนแผนที่"><b>${esc(p.nameTh)}</b><span class="muted small">${esc(CATEGORY_LABEL[p.category] ?? '')} · ${esc(p.area)}${p.suggestedStayMin ? ` · ราว ${fmtDur(p.suggestedStayMin)}` : ''}</span>${on ? previewInfo(p) : ''}</button>
     ${inDay ? '<span class="muted small">อยู่ในแผนแล้ว</span>' : `<button class="btn sm" data-pl="add" data-place="${esc(p.id)}" aria-label="ใส่ ${esc(p.nameTh)} ในช่องที่เลือก">＋</button>`}
   </div>`;
 }
@@ -377,10 +399,22 @@ function drawMap(s: DaySchedule) {
     if (i > 0 && x.p.id === pts[i - 1].p.id) return;
     L.marker([x.p.lat!, x.p.lng!], { icon: L.divIcon({ className: 'pl-pin', html: `<span style="--c:${color}">${esc(x.label)}</span>`, iconSize: [0, 0] }), title: x.p.nameTh }).addTo(layer!);
   });
+  // หมุดแดง: สถานที่ที่กำลังดูก่อนใส่ + เส้นจากจุดที่จะต่อ
+  const pv = st!.step === 2 && st!.preview ? app.getPlace(st!.preview) : undefined;
+  let focus = path;
+  if (pv?.lat != null) {
+    const a = anchorPlace();
+    const pp: [number, number] = [pv.lat, pv.lng!];
+    if (a?.lat != null) {
+      L.polyline([[a.lat, a.lng!], pp], { color: '#e03131', weight: 4, opacity: 0.85, dashArray: '8 8' }).addTo(layer!);
+      focus = [[a.lat, a.lng!], pp];
+    } else focus = [pp];
+    L.marker(pp, { icon: L.divIcon({ className: 'pl-pin preview', html: `<span>${esc(pv.nameTh)}</span>`, iconSize: [0, 0] }), zIndexOffset: 1000 }).addTo(layer!);
+  }
   const fit = () => {
     if (!map) return;
     map.invalidateSize(); // กล่องแผนที่ขยายหลังสร้าง → คำนวณขนาดใหม่ ไม่ให้แผนที่โหลดแค่บางส่วน
-    if (path.length) map.fitBounds(L.latLngBounds(path), { padding: [28, 28], maxZoom: 15 });
+    if (focus.length) map.fitBounds(L.latLngBounds(focus), { padding: [48, 48], maxZoom: 15 });
     else map.setView([37.5665, 126.978], 12);
   };
   fit();
@@ -404,6 +438,7 @@ function addPlace(placeId: string, at: number | null) {
   if (emptyMeal && at == null) edit((x) => updateStop(x, emptyMeal.uid, { placeId }));
   else edit((x) => insertStop(x, i, newStop('place', placeId, p.suggestedStayMin || 60)));
   st!.slot = null;
+  st!.preview = null;
   render();
 }
 
@@ -458,6 +493,9 @@ function onClick(e: Event) {
       st.draft = v === '__end' ? { ...st.draft, endLeg: { ...st.draft.endLeg, ...clear } } : updateStop(st.draft, v!, { legIn: { ...st.draft.stops.find((y) => y.uid === v)!.legIn, ...clear } });
       break;
     }
+    case 'preview':
+      st.preview = st.preview === el.dataset.place ? null : el.dataset.place!;
+      break;
     case 'lane':
       st.lane = v === 'search' ? 'search' : 'cards';
       break;
