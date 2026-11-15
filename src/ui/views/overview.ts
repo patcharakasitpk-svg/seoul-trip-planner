@@ -25,7 +25,7 @@ function stopLine(t: StopTiming): string {
   const warn = t.lateMin ? `สาย ${fmtDur(t.lateMin)}` : t.warnings.find((w) => w.startsWith('ปิด')) ?? '';
   return `<li class="${s.kind === 'dinner' && !p ? 'ov-empty' : ''}">
     <span class="ov-t">${t.arrive != null ? `${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive)}` : ''}</span>
-    <span class="ov-n">${meal}${esc(name)}${s.lockedTime ? ` <span class="ov-lock">นัด ${esc(s.lockedTime)}</span>` : ''}${s.note ? `<small>${esc(s.note)}</small>` : ''}${warn ? `<small class="bad-text">${esc(warn)}</small>` : ''}</span>
+    <span class="ov-n">${meal}${p && p.kind !== 'hotel' ? `<button class="ov-place" data-act="place-modal" data-place="${esc(p.id)}">${esc(name)}${p.custom && p.photos?.length ? ' <span aria-hidden="true">📷</span>' : ''}</button>` : esc(name)}${s.lockedTime ? ` <span class="ov-lock">นัด ${esc(s.lockedTime)}</span>` : ''}${s.note ? `<small>${esc(s.note)}</small>` : ''}${warn ? `<small class="bad-text">${esc(warn)}</small>` : ''}</span>
   </li>`;
 }
 
@@ -44,7 +44,7 @@ function dayCard(d: Day, i: number): string {
   return `<article class="ov-day ${sel ? 'sel' : ''}" style="--c:${c}" data-day-card="${d.id}">
     <header class="ov-head">
       <button class="ov-date" data-act="map-day" data-day="${d.id}" aria-label="ดู ${esc(dayDate(d))} บนแผนที่">
-        <b>${esc(dayDate(d))}</b>${today ? '<span class="ov-today">วันนี้</span>' : ''}
+        <b>${esc(dayDate(d))}</b>${d.title ? `<span class="ov-title">${esc(d.title)}</span>` : ''}${today ? '<span class="ov-today">วันนี้</span>' : ''}
         <span class="muted">วัน ${i + 1}${d.startTime ? ` · ${esc(d.startTime)}–${esc(d.endTime ?? '')}` : ''}</span>
       </button>
       <button class="btn sm" data-act="edit-day" data-day="${d.id}">แก้</button>

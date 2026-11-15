@@ -20,6 +20,7 @@ import type { Day, Place, Stop, TravelMode } from '../core/types';
 import type { DaySchedule } from '../core/schedule';
 import { fmtDist, straightLineM } from '../core/geo';
 import { ZONES, zoneOf, type Zone } from '../core/zones';
+import { hasOwnInfo, placeInfoHtml, hydratePlacePhotos } from './views/placeInfo';
 import { searchPlaces, placeFromResult, findExisting, resultMapsUrl, type SearchResult } from '../services/placeSearch';
 import { uid } from '../core/planOps';
 import { safeGet, safeSet } from '../storage/storage';
@@ -52,6 +53,8 @@ interface PState {
   zone: string;
   /** ค้นหาบนแผนที่ (นอกรายการที่เตรียมไว้) */
   web: { q: string; status: 'loading' | 'done' | 'error'; results: SearchResult[]; note?: string } | null;
+  /** กำลังดูรูป/ลิงก์ของสถานที่ที่เพิ่มเอง */
+  info?: string | null;
 }
 
 let st: PState | null = null;
@@ -244,7 +247,7 @@ function render(resetMap = false) {
   const $ = (sel: string) => root!.querySelector(sel) as HTMLElement;
   $('.pl-head').innerHTML = `
       <button class="pl-btn ghost sm pl-home" data-pl="cancel" title="ร่างที่ยังไม่ยืนยันเก็บไว้ในเครื่อง เปิดใหม่แล้วใช้ต่อได้">← หน้าหลัก</button>
-      <div class="pl-title"><b style="color:${dayColor(idx)}">${d.date ? esc(fmtDateTh(d.date)) : `วัน ${idx + 1}`}</b> <span class="muted small">${d.date ? `วัน ${idx + 1}` : ''}${hasUnsaved() ? ' · ร่างยังไม่ยืนยัน' : ''}</span></div>
+      <div class="pl-title"><b style="color:${dayColor(idx)}">${d.date ? esc(fmtDateTh(d.date)) : `วัน ${idx + 1}`}</b><span class="pl-daytitle">${esc(d.title ?? '')}</span> <span class="muted small">${d.date ? `วัน ${idx + 1}` : ''}${hasUnsaved() ? ' · ร่างยังไม่ยืนยัน' : ''}</span></div>
       <ol class="pl-steps" aria-label="ขั้นตอน — กดเพื่อไปขั้นนั้น">${STEPS.map(([n, t]) => `<li class="${st!.step === n ? 'on' : n < st!.step ? 'done' : ''}"><button data-pl="goto" data-v="${n}" ${st!.step === n ? 'aria-current="step"' : ''}><span>${n}</span>${t}</button></li>`).join('')}</ol>
       <div class="pl-head-act">${headAction()}</div>`;
   $('.pl-budget-wrap').innerHTML = st.step === 2 || st.step === 3 ? budgetBar(s) : '';
@@ -257,7 +260,8 @@ function render(resetMap = false) {
   const banner = st.restore
     ? `<div class="pl-restore" role="alert"><b>มีร่างที่ยังไม่ยืนยันของวันนี้</b> (แก้ล่าสุด ${esc(st.restore.savedAt ? new Date(st.restore.savedAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '-')}) <button class="pl-btn primary sm" data-pl="draft-restore">ใช้ร่างนี้ต่อ</button><button class="pl-btn ghost sm" data-pl="draft-discard">ทิ้งร่าง</button></div>`
     : '';
-  main.innerHTML = banner + (st.step === 1 ? step1() : st.step === 2 ? step2(s) : st.step === 3 ? step3(s) : step4(s));
+  main.innerHTML = banner + (st.step === 1 ? step1() : st.step === 2 ? step2(s) : st.step === 3 ? step3(s) : step4(s)) + infoPop();
+  hydratePlacePhotos(main);
   main.dataset.step = String(st.step);
   if (sameStep)
     SCROLLERS.forEach((sel, i) => {
@@ -287,6 +291,8 @@ function step1(): string {
   const changed = (Object.keys(def) as (keyof typeof def)[]).some((k) => d[k] !== def[k]) || d.date !== st!.orig.date;
   return `<section class="pl-card">
     <div class="pl-card-head"><h2>วันนี้เริ่มกี่โมง จบกี่โมง</h2>${changed ? '<button class="pl-btn ghost sm" data-pl="reset-step" data-v="1">↺ คืนค่าเริ่มต้นทั้งหมด</button>' : ''}</div>
+    <label class="pl-titlefield">ชื่อวัน <span class="muted small">— ไว้ดูง่าย ๆ ว่าวันนี้ไปย่านไหน</span>
+      <span class="pl-field"><input class="inp" maxlength="60" value="${esc(d.title ?? '')}" placeholder="${esc(suggestTitle(d) || 'เช่น เมียงดง · นัมแดมุน')}" data-pl-change="title" enterkeyhint="done">${!d.title && suggestTitle(d) ? `<button class="pl-btn ghost sm" data-pl="title-suggest" title="ใช้ชื่อจากย่านของสถานที่ในวันนี้">ใช้ “${esc(suggestTitle(d))}”</button>` : ''}</span></label>
     <div class="pl-grid2">
       <label>วัน<select class="inp" data-pl-change="day">${app.plan.days.map((x, k) => `<option value="${x.id}" ${x.id === st!.dayId ? 'selected' : ''}>${x.date ? `${esc(fmtDateTh(x.date))} (วัน ${k + 1})` : `วัน ${k + 1}`}</option>`).join('')}</select></label>
       <label>วันที่<span class="pl-field"><input class="inp" type="date" value="${esc(d.date ?? '')}" data-pl-change="date">${d.date !== st!.orig.date ? resetBtn('reset-field', 'date') : ''}</span></label>
@@ -305,6 +311,20 @@ function step1(): string {
   </section>`;
 }
 
+/** ชื่อวันแนะนำจากย่านของสถานที่ในวัน เช่น "เมียงดง · COEX" (ไม่นับโรงแรม/สนามบิน) */
+function suggestTitle(d: Day): string {
+  const names: string[] = [];
+  for (const x of d.stops) {
+    const p = app.getPlace(x.placeId);
+    if (!p || p.kind === 'hotel' || p.id === 'icn') continue;
+    const z = zoneOf(p.area);
+    if (z === 'other' || z === 'airport') continue;
+    const n = ZONES[z].th.split(' · ')[0];
+    if (!names.includes(n)) names.push(n);
+  }
+  return names.slice(0, 3).join(' · ');
+}
+
 /* ---------- ขั้น 2: เลือกสถานที่ (2 เลน) ---------- */
 /** เลขลำดับของแต่ละจุด (นับเฉพาะที่ไม่ข้าม) — ตรงกับตัวเลขบนหมุดแผนที่ */
 function stopNumbers(d: Day): Map<string, number> {
@@ -318,11 +338,21 @@ const numBadge = (n: number | undefined, label?: string) => `<span class="pl-num
 /** ชื่อสถานที่ = ลิงก์ดูรูปจริง (แท็บใหม่) · พัก/มื้อที่ยังไม่เลือกร้าน = ข้อความธรรมดา */
 function nameLink(x: Stop): string {
   const p = placeOf(x);
+  if (hasOwnInfo(p)) return ownInfoBtn(p!, nameOf(x));
   return p ? `<a class="pl-name" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" title="ดูรูป ${esc(p.nameTh)}">${esc(nameOf(x))}<span class="pl-name-ico" aria-hidden="true">↗</span></a>` : `<b>${esc(nameOf(x))}</b>`;
 }
 
 /** ลิงก์ดูรูปสถานที่ (เปิดแท็บใหม่) — ชื่อแปลก ๆ จะได้นึกออกว่าหน้าตาเป็นยังไง */
-const photoLink = (p: Place | undefined) => (p && p.category !== 'base' ? `<a class="pl-photo" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" title="ดูรูป ${esc(p.nameTh)}">ดูรูป ↗</a>` : '');
+/** สถานที่ที่เพิ่มเองและมีรูป/ลิงก์: แตะชื่อ = ดูรูปที่อัปโหลดไว้ในหน้านี้ */
+const ownInfoBtn = (p: Place, label: string) => `<button class="pl-name own" data-pl="place-info" data-v="${esc(p.id)}" title="ดูรูป/ลิงก์ที่ใส่ไว้">${esc(label)}${p.photos?.length ? ' <span class="pl-name-ico" aria-hidden="true">📷</span>' : ''}</button>`;
+
+function infoPop(): string {
+  const p = st?.info ? app.getPlace(st.info) : undefined;
+  if (!p) return '';
+  return `<div class="pl-info-pop" role="dialog" aria-label="${esc(p.nameTh)}"><div class="pl-info-card"><div class="pl-info-head"><b>${esc(p.nameTh)}</b><button class="pl-btn ghost sm" data-pl="info-close" aria-label="ปิด">✕</button></div>${placeInfoHtml(p)}</div></div>`;
+}
+
+const photoLink = (p: Place | undefined) => (hasOwnInfo(p) ? ownInfoBtn(p!, 'ดูรูป') : p && p.category !== 'base' ? `<a class="pl-photo" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" title="ดูรูป ${esc(p.nameTh)}">ดูรูป ↗</a>` : '');
 
 const CATS: [string, string][] = [
   ['', 'ทั้งหมด'],
@@ -743,6 +773,15 @@ function onClick(e: Event) {
     case 'cancel':
       close(); // ร่างยังเก็บไว้ — เปิดใหม่จะถามว่าจะใช้ต่อไหม
       return;
+    case 'place-info':
+      st.info = el.dataset.v ?? null;
+      break;
+    case 'info-close':
+      st.info = null;
+      break;
+    case 'title-suggest':
+      st.draft = { ...st.draft, title: suggestTitle(st.draft) || undefined };
+      break;
     case 'draft-restore':
       if (st.restore) st.draft = st.restore.draft;
       st.restore = null;
@@ -958,6 +997,8 @@ function onChange(e: Event) {
       render(true);
       return;
     }
+    case 'title':
+      return; // เก็บไว้แล้วตอนพิมพ์ (onInput)
     case 'date':
     case 'startTime':
     case 'endTime':
@@ -999,6 +1040,14 @@ function onChange(e: Event) {
 
 function onInput(e: Event) {
   const el = e.target as HTMLInputElement;
+  // ชื่อวัน: เก็บทุกตัวอักษรที่พิมพ์ (ไม่วาดหน้าใหม่ — เคอร์เซอร์ไม่หลุด) · หัวหน้าอัปเดตตาม
+  if (el.dataset.plChange === 'title' && st) {
+    st.draft = { ...st.draft, title: el.value.trim().slice(0, 60) || undefined };
+    autosaveDraft();
+    const t = root?.querySelector('.pl-daytitle');
+    if (t) t.textContent = st.draft.title ?? '';
+    return;
+  }
   if (el.dataset.plInput === 'note' && st) {
     st.noteDraft = el.value;
     return;

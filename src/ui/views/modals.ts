@@ -14,6 +14,7 @@ import { stopInfoBody } from './day';
 import { MEALS, mealName, type Meal } from '../../core/meals';
 import { OWN_CATEGORY_LABEL, type OwnCategory } from '../../core/ownPlace';
 import { placeCard } from './library';
+import { placeInfoHtml } from './placeInfo';
 import { buildShareUrl } from '../../storage/share';
 import { googleStatus } from '../../services/google';
 import { inviteUrl } from '../../services/sync';
@@ -86,7 +87,7 @@ export function renderModal(): string {
       break;
     case 'place': {
       const p = app.getPlace(m.placeId);
-      [title, body] = [p?.nameTh ?? 'สถานที่', p ? `<div class="place-list">${placeCard(p, { open: true })}</div>` : 'ไม่พบสถานที่'];
+      [title, body] = [p?.nameTh ?? 'สถานที่', !p ? 'ไม่พบสถานที่' : p.custom ? `${placeInfoHtml(p)}<p class="muted small">แก้รูป/ลิงก์ได้ที่แท็บ “สถานที่”</p>` : `<div class="place-list">${placeCard(p, { open: true })}</div>`];
       break;
     }
     case 'indoor':

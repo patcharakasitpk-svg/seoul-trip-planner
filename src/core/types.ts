@@ -51,6 +51,10 @@ export interface Place {
   checkedAt?: string | null;
   notes?: string | null;
   custom?: boolean;
+  /** ลิงก์ที่ผู้ใช้แนบ (เฉพาะสถานที่ที่เพิ่มเอง) — เช่น Google Maps / IG / รีวิว */
+  links?: string[] | null;
+  /** รูปที่ผู้ใช้อัปโหลด (id ใน IndexedDB ของเครื่องนี้) */
+  photos?: string[] | null;
 }
 
 export type TravelMode = 'TRANSIT' | 'WALKING' | 'DRIVING';
@@ -89,6 +93,8 @@ export interface DayPrefs {
 export interface Day {
   id: string;
   date: string | null; // YYYY-MM-DD (Asia/Seoul)
+  /** ชื่อวันที่ผู้ใช้ตั้ง เช่น "เมียงดง · นัมแดมุน" */
+  title?: string;
   startPlaceId: string | null;
   startTime: string | null; // HH:MM
   endPlaceId: string | null;

@@ -2,77 +2,79 @@
  * รูปของที่จะซื้อ — เก็บใน IndexedDB ของเครื่องนี้ (localStorage เล็กเกินสำหรับรูป)
  * ย่อรูปก่อนเก็บ: ด้านยาวไม่เกิน 640px, JPEG ~0.78 → ราว 40–80KB ต่อรูป
  */
-const DB = 'stp-shop';
-const STORE = 'photos';
 export const PHOTO_MAX_PX = 640;
 
-let dbp: Promise<IDBDatabase> | null = null;
-function db(): Promise<IDBDatabase> {
-  if (!dbp)
-    dbp = new Promise((resolve, reject) => {
-      const r = indexedDB.open(DB, 1);
-      r.onupgradeneeded = () => r.result.createObjectStore(STORE);
-      r.onsuccess = () => resolve(r.result);
-      r.onerror = () => reject(r.error);
-    });
-  return dbp;
+/** คลังรูปหนึ่งชุดใน IndexedDB (แยกฐานข้อมูลกัน: ของที่จะซื้อ / สถานที่ของฉัน — ล้างรูปของชุดหนึ่งไม่กระทบอีกชุด) */
+export function createPhotoStore(dbName: string) {
+  const STORE = 'photos';
+  let dbp: Promise<IDBDatabase> | null = null;
+  const db = (): Promise<IDBDatabase> => {
+    if (!dbp)
+      dbp = new Promise((resolve, reject) => {
+        const r = indexedDB.open(dbName, 1);
+        r.onupgradeneeded = () => r.result.createObjectStore(STORE);
+        r.onsuccess = () => resolve(r.result);
+        r.onerror = () => reject(r.error);
+      });
+    return dbp;
+  };
+  const tx = <T,>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRequest<T>): Promise<T> =>
+    db().then(
+      (d) =>
+        new Promise<T>((resolve, reject) => {
+          const req = fn(d.transaction(STORE, mode).objectStore(STORE));
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        }),
+    );
+  const urls = new Map<string, string>();
+  return {
+    async putPhoto(id: string, blob: Blob): Promise<void> {
+      await tx('readwrite', (s) => s.put(blob, id));
+      const old = urls.get(id);
+      if (old) URL.revokeObjectURL(old);
+      urls.delete(id);
+    },
+    /** object URL ของรูป (แคชไว้ ไม่สร้างใหม่ทุกครั้งที่เรนเดอร์) */
+    async photoUrl(id: string): Promise<string | null> {
+      const c = urls.get(id);
+      if (c) return c;
+      try {
+        const b = await tx<Blob | undefined>('readonly', (s) => s.get(id) as IDBRequest<Blob | undefined>);
+        if (!b) return null;
+        const u = URL.createObjectURL(b);
+        urls.set(id, u);
+        return u;
+      } catch {
+        return null;
+      }
+    },
+    async photoIds(): Promise<string[]> {
+      try {
+        return (await tx('readonly', (s) => s.getAllKeys())).map(String);
+      } catch {
+        return [];
+      }
+    },
+    async deletePhotos(ids: string[]): Promise<void> {
+      for (const id of ids) {
+        try {
+          await tx('readwrite', (s) => s.delete(id));
+        } catch {
+          /* ข้าม */
+        }
+        const u = urls.get(id);
+        if (u) URL.revokeObjectURL(u);
+        urls.delete(id);
+      }
+    },
+  };
 }
 
-function tx<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRequest<T>): Promise<T> {
-  return db().then(
-    (d) =>
-      new Promise<T>((resolve, reject) => {
-        const req = fn(d.transaction(STORE, mode).objectStore(STORE));
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      }),
-  );
-}
-
-const urls = new Map<string, string>();
-
-export async function putPhoto(id: string, blob: Blob): Promise<void> {
-  await tx('readwrite', (s) => s.put(blob, id));
-  const old = urls.get(id);
-  if (old) URL.revokeObjectURL(old);
-  urls.delete(id);
-}
-
-/** object URL ของรูป (แคชไว้ ไม่สร้างใหม่ทุกครั้งที่เรนเดอร์) */
-export async function photoUrl(id: string): Promise<string | null> {
-  const c = urls.get(id);
-  if (c) return c;
-  try {
-    const b = await tx<Blob | undefined>('readonly', (s) => s.get(id) as IDBRequest<Blob | undefined>);
-    if (!b) return null;
-    const u = URL.createObjectURL(b);
-    urls.set(id, u);
-    return u;
-  } catch {
-    return null;
-  }
-}
-
-export async function photoIds(): Promise<string[]> {
-  try {
-    return (await tx('readonly', (s) => s.getAllKeys())).map(String);
-  } catch {
-    return [];
-  }
-}
-
-export async function deletePhotos(ids: string[]): Promise<void> {
-  for (const id of ids) {
-    try {
-      await tx('readwrite', (s) => s.delete(id));
-    } catch {
-      /* ข้าม */
-    }
-    const u = urls.get(id);
-    if (u) URL.revokeObjectURL(u);
-    urls.delete(id);
-  }
-}
+const shopStore = createPhotoStore('stp-shop');
+export const { putPhoto, photoUrl, photoIds, deletePhotos } = shopStore;
+/** รูปของสถานที่ที่เพิ่มเอง */
+export const placePhotos = createPhotoStore('stp-places');
 
 /** ขนาดใหม่ที่คงสัดส่วน ด้านยาวไม่เกิน max (ไม่ขยายรูปเล็ก) */
 export function fitSize(w: number, h: number, max = PHOTO_MAX_PX): { w: number; h: number } {
@@ -81,7 +83,7 @@ export function fitSize(w: number, h: number, max = PHOTO_MAX_PX): { w: number; 
 }
 
 /** ย่อรูปเป็น JPEG (หมุนตาม EXIF โดย createImageBitmap/เบราว์เซอร์) */
-export async function resizeImage(file: Blob): Promise<Blob> {
+export async function resizeImage(file: Blob, maxPx = PHOTO_MAX_PX): Promise<Blob> {
   let src: ImageBitmap | HTMLImageElement;
   try {
     src = await createImageBitmap(file, { imageOrientation: 'from-image' } as ImageBitmapOptions);
@@ -93,7 +95,7 @@ export async function resizeImage(file: Blob): Promise<Blob> {
       img.src = URL.createObjectURL(file);
     });
   }
-  const { w, h } = fitSize(src.width, src.height);
+  const { w, h } = fitSize(src.width, src.height, maxPx);
   const c = document.createElement('canvas');
   c.width = w;
   c.height = h;

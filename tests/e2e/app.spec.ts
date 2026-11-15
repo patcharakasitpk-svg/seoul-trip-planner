@@ -178,7 +178,7 @@ test('หน้าจอไม่มีเนื้อหาล้นแนว�
   if (isMobile(page)) {
     // ปุ่ม "จัดแผน" ซ่อนบนมือถือ (ใช้บนคอม/iPad) · ไม่มีแท็บค้นหาสถานที่แล้ว
     await expect(page.locator('.bottom-nav .nav-planner')).toBeHidden();
-    await expect(page.locator('.bottom-nav [data-tab="places"]')).toHaveCount(0);
+    await expect(page.locator('.bottom-nav [data-tab="places"]')).toHaveCount(1); // แท็บ สถานที่ของฉัน (ไม่ใช่หน้าค้นหาเดิม)
     const heights = await page.locator('.bottom-nav button:visible').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
     for (const h of heights) expect(h).toBeGreaterThanOrEqual(44);
     await page.locator('[data-act="open-templates"]').click();
@@ -760,4 +760,98 @@ test('แถบเมนูเห็นทุกหน้า รวมในต�
   await expect(pl.locator('.pl-restore')).toBeVisible();
   await pl.locator('[data-pl="cancel"]').click();
   await expect(pl).toBeHidden();
+});
+
+test('ชื่อวัน: ตั้งในตัวจัดแผน (มีชื่อแนะนำจากย่าน) → แสดงข้างวันที่ในหน้าแผนของฉันและหน้า วันนี้', async ({ page }) => {
+  test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
+  await page.goto('/');
+  await applyTripTemplate(page);
+  await openPlanner(page);
+  const pl = page.locator('#planner');
+  // แผนแนะนำวันแรกอยู่เมียงดง → มีปุ่มใช้ชื่อแนะนำ
+  await expect(pl.locator('[data-pl="title-suggest"]')).toContainText('เมียงดง');
+  await pl.locator('[data-pl-change="title"]').fill('เมียงดง · นัมแดมุน');
+  await expect(pl.locator('.pl-daytitle')).toHaveText('เมียงดง · นัมแดมุน');
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="4"]').click();
+  await pl.locator('[data-pl="confirm"]').click();
+  await expect(page.locator('.ov-day').first().locator('.ov-title')).toHaveText('เมียงดง · นัมแดมุน');
+  await gotoToday(page);
+  await page.locator('[data-act-change="today-day"]').selectOption({ index: 0 });
+  await expect(page.locator('.today-title')).toHaveText('เมียงดง · นัมแดมุน');
+});
+
+test('แท็บสถานที่: เพิ่มชื่อ + ตำแหน่ง (หมุดแดง) + โน้ต + ลิงก์ · เพิ่มรูป · เช็กหมุดใน Google Maps · ใช้ในแผนแล้วลบไม่ได้', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-act="tab"][data-tab="places"]').filter({ visible: true }).first().click();
+  const pp = page.locator('#places-page');
+  await expect(pp.locator('#pp-map .leaflet-container, #pp-map.leaflet-container')).toBeVisible();
+  await pp.locator('[data-pp="add"]').click();
+  await pp.locator('[data-pp-field="name"]').fill('Onion Anguk');
+  await pp.locator('[data-pp-field="category"]').selectOption('cafe');
+  await pp.locator('[data-pp-field="coord"]').fill('HX7M+HQ8');
+  await expect(pp.locator('.pp-coord-msg')).toContainText('ได้ตำแหน่งแล้ว');
+  await expect(pp.locator('.pp-pin.preview span')).toBeVisible();
+  await pp.locator('[data-pp-field="coord"]').fill('37.5776, 126.9869');
+  await pp.locator('[data-pp-field="note"]').fill('คาเฟ่บ้านเก่า');
+  await pp.locator('[data-pp-field="links"]').fill('https://www.instagram.com/onion.kr/\njavascript:alert(1)');
+  await pp.locator('.pp-form button.primary').click();
+  await expect(page.locator('#toast')).toContainText('ข้ามลิงก์ที่ไม่ใช่ http(s) 1');
+  const card = pp.locator('.pp-card', { hasText: 'Onion Anguk' });
+  await expect(card).toContainText('คาเฟ่บ้านเก่า');
+  await expect(card.locator('.pinfo-links a')).toHaveCount(1);
+  await expect(card.locator('.pinfo-links a')).toHaveAttribute('href', 'https://www.instagram.com/onion.kr/');
+  await expect(card.locator('a', { hasText: 'ดูหมุดนี้ใน Google Maps' })).toHaveAttribute('href', 'https://www.google.com/maps/search/?api=1&query=37.5776,126.9869');
+  await expect(pp.locator('.pp-pin span', { hasText: 'Onion Anguk' })).toBeVisible();
+  // เพิ่มรูป → เห็นรูปย่อ · กดดูรูปใหญ่ · เก็บหลังรีโหลด
+  await card.locator('[data-pp-photo]').setInputFiles('tests/e2e/fixture-photo.jpg');
+  await expect(card.locator('.pinfo-ph img')).toHaveCount(1);
+  await expect(card.locator('.pinfo-ph img')).toHaveAttribute('src', /^blob:/);
+  await card.locator('.pinfo-ph').click();
+  await expect(pp.locator('.pp-viewer img')).toHaveAttribute('src', /^blob:/);
+  await pp.locator('[data-pp="viewer-close"]').click();
+  await page.reload();
+  await page.locator('[data-act="tab"][data-tab="places"]').filter({ visible: true }).first().click();
+  await expect(pp.locator('.pp-card .pinfo-ph img')).toHaveAttribute('src', /^blob:/);
+  // แก้ชื่อ
+  await pp.locator('[data-pp="edit"]').click();
+  await pp.locator('[data-pp-field="name"]').fill('Onion Anguk (คาเฟ่)');
+  await pp.locator('.pp-form button.primary').click();
+  await expect(pp.locator('.pp-card')).toContainText('Onion Anguk (คาเฟ่)');
+  await expect(pp.locator('.pp-card .pinfo-ph img')).toHaveCount(1); // รูปเดิมยังอยู่
+});
+
+test('สถานที่ที่เพิ่มเองในตัวจัดแผน: แตะชื่อ = ดูรูป/ลิงก์ที่ใส่ไว้ · หน้าแผนของฉันแตะชื่อก็ดูได้ · อยู่ในแผนแล้วลบไม่ได้', async ({ page }) => {
+  test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
+  await page.goto('/');
+  await page.locator('.main-menu [data-tab="places"]').click();
+  const pp = page.locator('#places-page');
+  await pp.locator('[data-pp="add"]').click();
+  await pp.locator('[data-pp-field="name"]').fill('Onion Anguk');
+  await pp.locator('[data-pp-field="coord"]').fill('37.5776, 126.9869');
+  await pp.locator('[data-pp-field="links"]').fill('https://www.instagram.com/onion.kr/');
+  await pp.locator('.pp-form button.primary').click();
+  await pp.locator('[data-pp-photo]').setInputFiles('tests/e2e/fixture-photo.jpg');
+  await expect(pp.locator('.pinfo-ph img')).toHaveAttribute('src', /^blob:/);
+  // ใส่ลงวันแรกในตัวจัดแผน
+  await openPlanner(page);
+  const pl = page.locator('#planner');
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('[data-pl="lane"][data-v="search"]').click();
+  await pl.locator('[data-pl-input="q"]').fill('Onion');
+  await pl.locator('.pl-item', { hasText: 'Onion Anguk' }).locator('[data-pl="add"]').click();
+  await pl.locator('.pl-row.stop', { hasText: 'Onion Anguk' }).locator('[data-pl="place-info"]').click();
+  await expect(pl.locator('.pl-info-pop img')).toHaveAttribute('src', /^blob:/);
+  await expect(pl.locator('.pl-info-pop')).toContainText('Instagram');
+  await pl.locator('[data-pl="info-close"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="4"]').click();
+  await pl.locator('[data-pl="confirm"]').click();
+  // หน้าแผนของฉัน: แตะชื่อ → หน้าต่างสถานที่มีรูป
+  await page.locator('.ov-day').first().locator('[data-act="place-modal"]', { hasText: 'Onion Anguk' }).click();
+  await expect(page.locator('.modal img')).toHaveAttribute('src', /^blob:/);
+  await page.locator('.modal [data-act="modal-close"]').first().click();
+  // ลบไม่ได้เพราะอยู่ในแผน
+  await page.locator('.main-menu [data-tab="places"]').click();
+  await pp.locator('[data-pp="delete"]').click();
+  await expect(page.locator('#toast')).toContainText('ลบไม่ได้');
+  await expect(pp.locator('.pp-card')).toHaveCount(1);
 });

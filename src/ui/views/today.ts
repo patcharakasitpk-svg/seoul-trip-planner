@@ -202,11 +202,11 @@ export function renderToday(): string {
   return `
     <div class="today-head">
       <div>
-        <h2>${esc(fmtDateTh(day.date ?? now.date))}</h2>
+        <h2>${esc(fmtDateTh(day.date ?? now.date))}</h2>${day.title ? `<p class="today-title">${esc(day.title)}</p>` : ''}
         <p class="muted small">${isToday ? `ตอนนี้ ${fmtHM(now.mins)} (เวลาโซล)` : 'ดูล่วงหน้า — ปุ่มเช็กอินใช้ได้ในวันเดินทางจริง'}</p>
       </div>
       <select class="inp sm day-pick" data-act-change="today-day" aria-label="เลือกวัน" style="--c:${dayColor(idx)}">
-        ${app.plan.days.map((d, k) => `<option value="${d.id}" ${d.id === day.id ? 'selected' : ''}>${esc(dayDate(d, k))}${d.date === now.date ? ' · วันนี้' : ` (วัน ${k + 1})`}</option>`).join('')}
+        ${app.plan.days.map((d, k) => `<option value="${d.id}" ${d.id === day.id ? 'selected' : ''}>${esc(dayDate(d, k))}${d.date === now.date ? ' · วันนี้' : ''}${d.title ? ` · ${esc(d.title)}` : ''}</option>`).join('')}
       </select>
     </div>
     ${!app.online ? '<p class="notice warn">ออฟไลน์ — แสดงแผนที่บันทึกไว้ ปุ่มเช็กอินยังใช้ได้</p>' : ''}

@@ -36,6 +36,7 @@ export function validatePlan(input: unknown): { ok: true; plan: Plan; warnings: 
     days.push({
       id: str(d.id, 40) || uid('d'),
       date: isValidDate(d.date) ? d.date : null,
+      ...(str(d.title, 60).trim() ? { title: str(d.title, 60).trim() } : {}),
       startPlaceId: str(d.startPlaceId, 80) || null,
       startTime: hm(d.startTime),
       endPlaceId: str(d.endPlaceId, 80) || null,
@@ -112,8 +113,28 @@ function customPlace(p: unknown): Place | null {
       .map((x: any) => ({ label: str(x.label, 40) || 'แหล่งข้อมูล', url: str(x.url, 500) })),
     // ประเภทร้านอาหาร (เช่น คาเฟ่) ที่ผู้ใช้เลือก — เก็บเฉพาะชนิด
     food: isObj(p.food) && (['one-dish', 'noodle', 'bbq', 'market', 'cafe'] as const).includes(p.food.type) ? { type: p.food.type, menu: [], mealMin: 30, minOrder: null, diningZone: 'other' } : null,
+    notes: str(p.notes, 500) || null,
+    links: cleanLinks(p.links),
+    photos: Array.isArray(p.photos) ? p.photos.slice(0, 12).map((x: unknown) => str(x, 40)).filter((x: string) => /^[A-Za-z0-9_-]+$/.test(x)) : null,
     custom: true,
   };
+}
+
+/** ลิงก์ที่ผู้ใช้แนบ: เฉพาะ http(s) สูงสุด 8 ลิงก์ */
+export function cleanLinks(x: unknown): string[] | null {
+  if (!Array.isArray(x)) return null;
+  const out = x
+    .map((u) => (typeof u === 'string' ? u.trim().slice(0, 600) : ''))
+    .filter((u) => {
+      try {
+        const p = new URL(u);
+        return p.protocol === 'https:' || p.protocol === 'http:';
+      } catch {
+        return false;
+      }
+    })
+    .slice(0, 8);
+  return out.length ? out : null;
 }
 
 function leg(l: unknown): Leg {

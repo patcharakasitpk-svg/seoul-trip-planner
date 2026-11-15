@@ -118,3 +118,21 @@ d2('รับแผนใหม่ในมือถือ', () => {
     e2(out.days[1].actual).toEqual({ __start: { d: '09:30' } });
   });
 });
+
+import { cleanLinks } from '../../src/storage/validate';
+d2('สถานที่ของฉัน: ลิงก์ รูป และชื่อวัน', () => {
+  i2('เก็บเฉพาะลิงก์ http(s) · id รูปที่ปลอดภัย · ชื่อวันไม่เกิน 60 ตัว · ส่งผ่านลิงก์แผนได้', () => {
+    expect(cleanLinks(['https://a.com/x', 'javascript:alert(1)', 'ftp://x', ' http://b.com '])).toEqual(['https://a.com/x', 'http://b.com']);
+    expect(cleanLinks([])).toBeNull();
+    const p = np2();
+    p.days[0].title = 'เมียงดง · นัมแดมุน';
+    p.customPlaces = [{ id: 'custom-a', nameTh: 'Onion', nameEn: 'Onion', category: 'food', area: 'x', lat: 37.5, lng: 127, coordStatus: 'user', reasonTh: '', suggestedStayMin: 45, indoor: true, sources: [], custom: true, notes: 'โน้ต', links: ['https://ig.com/a', 'javascript:x'], photos: ['ph-abc', '<bad>'] } as any];
+    const back = decodeFragment('#' + encodePlan(p))!;
+    e2(back.ok).toBe(true);
+    if (!back.ok) return;
+    e2(back.plan.days[0].title).toBe('เมียงดง · นัมแดมุน');
+    e2(back.plan.customPlaces[0]).toMatchObject({ notes: 'โน้ต', links: ['https://ig.com/a'], photos: ['ph-abc'] });
+    const long = validatePlan({ version: 1, days: [{ title: 'ก'.repeat(100), stops: [] }] });
+    e2(long.ok && long.plan.days[0].title!.length).toBe(60);
+  });
+});
