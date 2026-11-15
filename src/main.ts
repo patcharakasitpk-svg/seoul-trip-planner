@@ -44,12 +44,12 @@ document.querySelector('#app')!.innerHTML = `
 <header class="topbar">
   <div class="brand"><b>Travel planner</b><span class="plan-name" id="plan-name"></span></div>
   <nav class="main-menu desk-only" aria-label="เมนูหลัก">
-    <button data-act="tab" data-tab="today">วันนี้</button>
-    <button data-act="tab" data-tab="plan">แผนของฉัน</button>
-    <button data-act="nav-planner">จัดแผน</button>
-    <button data-act="tab" data-tab="places">เพิ่มสถานที่</button>
-    <button data-act="tab" data-tab="packing">สิ่งของที่ต้องใช้</button>
-    <button data-act="tab" data-tab="fx">แปลงเงิน</button>
+    <button data-act="tab" data-tab="today">${ICON.today}<span>วันนี้</span></button>
+    <button data-act="tab" data-tab="plan">${ICON.plan}<span>แผนของฉัน</span></button>
+    <button data-act="nav-planner">${ICON.planner}<span>จัดแผน</span></button>
+    <button data-act="tab" data-tab="places">${ICON.places}<span>เพิ่มสถานที่</span></button>
+    <button data-act="tab" data-tab="packing">${ICON.packing}<span>สิ่งของที่ต้องใช้</span></button>
+    <button data-act="tab" data-tab="fx">${ICON.fx}<span>แปลงเงิน</span></button>
   </nav>
   <div class="top-actions">
     <span id="account-slot"></span>

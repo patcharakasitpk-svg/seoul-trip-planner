@@ -249,7 +249,7 @@ function render(resetMap = false) {
   $('.pl-head').innerHTML = `
       <button class="pl-btn ghost sm pl-home" data-pl="cancel" title="ร่างที่ยังไม่ยืนยันเก็บไว้ในเครื่อง เปิดใหม่แล้วใช้ต่อได้">← หน้าหลัก</button>
       <div class="pl-title"><b style="color:${dayColor(idx)}">${d.date ? esc(fmtDateTh(d.date)) : `วัน ${idx + 1}`}</b><span class="pl-daytitle">${esc(d.title ?? '')}</span> <span class="muted small">${d.date ? `วัน ${idx + 1}` : ''}${hasUnsaved() ? ' · ร่างยังไม่ยืนยัน' : ''}</span></div>
-      <ol class="pl-steps" aria-label="ขั้นตอน — กดเพื่อไปขั้นนั้น">${STEPS.map(([n, t]) => `<li class="${st!.step === n ? 'on' : n < st!.step ? 'done' : ''}"><button data-pl="goto" data-v="${n}" ${st!.step === n ? 'aria-current="step"' : ''}><span>${n}</span>${t}</button></li>`).join('')}</ol>
+      ${stepper(s)}
       <div class="pl-head-act">${headAction()}</div>`;
   $('.pl-budget-wrap').innerHTML = st.step === 2 || st.step === 3 ? budgetBar(s) : '';
   $('.pl-body').className = `pl-body step-${st.step}`;
@@ -278,7 +278,30 @@ function render(resetMap = false) {
 function headAction(): string {
   if (st!.step === 4) return '<button class="pl-btn primary confirm" data-pl="confirm">✓ ยืนยันแผนวันนี้</button>';
   if (st!.backToSummary) return '<button class="pl-btn primary" data-pl="goto" data-v="4">กลับไปหน้าสรุป</button>';
-  return '';
+  const next = STEPS[st!.step];
+  return next ? `<button class="pl-btn primary pl-next" data-pl="goto" data-v="${next[0]}">ถัดไป: ${esc(next[1])} <span aria-hidden="true">→</span></button>` : '';
+}
+
+const CHECK = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+/** แถบขั้นตอน: วงกลมเชื่อมด้วยเส้นความคืบหน้า · ขั้นที่ผ่านแล้วมี ✓ · ใต้ชื่อมีสรุปสั้น ๆ ของขั้นนั้น · กดไปขั้นไหนก็ได้ */
+function stepper(s: DaySchedule): string {
+  const d = st!.draft;
+  const n = d.stops.filter((x) => !x.skipped).length;
+  const b = budget(s);
+  const sub: Record<Step, string> = {
+    1: d.startTime ? `${d.startTime}–${d.endTime ?? '…'}` : 'ยังไม่ตั้งเวลา',
+    2: n ? `${n} จุด` : 'ยังไม่มีจุด',
+    3: b.travel ? `เดินทาง ${fmtDur(b.travel)}` : 'ดูวิธีไป',
+    4: hasUnsaved() ? 'ยังไม่ยืนยัน' : 'บันทึกแล้ว',
+  };
+  return `<ol class="pl-steps" aria-label="ขั้นตอน — กดเพื่อไปขั้นนั้น">${STEPS.map(([k, t]) => {
+    const state = st!.step === k ? 'on' : k < st!.step ? 'done' : 'todo';
+    return `<li class="${state}"><button data-pl="goto" data-v="${k}" ${state === 'on' ? 'aria-current="step"' : ''} title="${state === 'on' ? 'ขั้นที่ทำอยู่' : state === 'done' ? 'กดเพื่อกลับไปแก้' : 'กดเพื่อไปขั้นนี้'}">
+      <span class="st-dot">${state === 'done' ? CHECK : k}</span>
+      <span class="st-text"><b>${t}</b><small>${esc(sub[k])}</small></span>
+    </button></li>`;
+  }).join('')}</ol>`;
 }
 
 /* ---------- ขั้น 1: ตั้งวัน ---------- */

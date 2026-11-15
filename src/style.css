@@ -510,11 +510,6 @@ body.planner-open { overflow: hidden; }
 .planner[hidden] { display: none; }
 .pl-head { display: flex; align-items: center; gap: 1rem; padding: .6rem 1rem; background: var(--surface); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .pl-title { font-size: 1.05rem; }
-.pl-steps { display: flex; gap: .3rem; list-style: none; margin: 0 auto; padding: 0; }
-.pl-steps button { display: flex; align-items: center; gap: .4rem; border: 0; background: none; font: inherit; padding: .4rem .7rem; border-radius: 999px; color: var(--muted); cursor: pointer; }
-.pl-steps button span { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid currentColor; font-size: .75rem; }
-.pl-steps li.on button { background: var(--accent); color: #fff; }
-.pl-steps li.done button { color: var(--accent); }
 .pl-budget-wrap:empty { display: none; }
 .pl-budget { padding: .5rem 1rem; background: var(--surface); border-bottom: 1px solid var(--line); }
 
@@ -720,8 +715,6 @@ body.planner-open .toast { bottom: calc(var(--bnav-h, 0px) + 76px); }
 /* ไม่มีแถบล่างในตัวจัดแผน — เปลี่ยนขั้นที่แถบขั้นตอนด้านบน */
 .pl-head-act { min-width: 0; display: flex; justify-content: flex-end; }
 .pl-head-act:empty { display: none; }
-.pl-steps li:not(.on) button:hover { background: #eef3ff; color: var(--accent); }
-.pl-steps li.done button span { background: #e7efff; }
 @media (min-width: 900px) {
   .pl-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); }
   .pl-head .pl-steps { margin: 0; }
@@ -986,3 +979,43 @@ body.login-open { overflow: hidden; }
 .settings-adv { margin-top: .8rem; border: 1px solid var(--line); border-radius: 12px; padding: .5rem .8rem; }
 .settings-adv summary { cursor: pointer; font-weight: 600; padding: .3rem 0; }
 .settings-adv[open] summary { margin-bottom: .5rem; }
+
+/* ---------- แถบขั้นตอนในตัวจัดแผน ---------- */
+.pl-head { padding: .55rem 1rem; }
+.pl-steps { display: flex; align-items: flex-start; gap: 0; list-style: none; margin: 0 auto; padding: 0; counter-reset: none; }
+.pl-steps li { position: relative; display: flex; align-items: flex-start; }
+.pl-steps li:not(:last-child)::after { content: ""; display: block; width: clamp(18px, 3vw, 44px); height: 2px; margin: 17px 2px 0; border-radius: 2px; background: var(--line-2, #d0d5dd); }
+.pl-steps li.done:not(:last-child)::after { background: var(--accent); }
+.pl-steps button { display: flex; align-items: center; gap: .55rem; border: 0; background: none; font: inherit; padding: .3rem .55rem .3rem .3rem; border-radius: 14px; color: var(--muted); cursor: pointer; text-align: left; transition: background .15s; }
+.pl-steps button:hover { background: #f1f5ff; }
+.pl-steps li.on button { background: #eaf1ff; color: var(--text); box-shadow: inset 0 0 0 1.5px #c9d9ff; }
+.pl-steps .st-dot { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; font-size: .85rem; font-weight: 700; border: 2px solid var(--line-2, #d0d5dd); background: var(--surface, #fff); color: var(--muted); transition: transform .15s; }
+.pl-steps li.on .st-dot { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 0 4px rgba(37, 99, 235, .18); }
+.pl-steps li.done .st-dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pl-steps button:hover .st-dot { transform: scale(1.06); }
+.pl-steps .st-text { display: grid; line-height: 1.2; }
+.pl-steps .st-text b { font-weight: 600; font-size: .92rem; white-space: nowrap; }
+.pl-steps li.on .st-text b { color: var(--accent); }
+.pl-steps li.done .st-text b { color: var(--text); }
+.pl-steps .st-text small { font-size: .75rem; color: var(--muted); white-space: nowrap; }
+.pl-next { white-space: nowrap; }
+.pl-next span { display: inline-block; transition: transform .15s; }
+.pl-next:hover span { transform: translateX(3px); }
+@media (max-width: 1250px) { .pl-steps .st-text small { display: none; } .pl-steps li:not(:last-child)::after { margin-top: 15px; } }
+@media (max-width: 899px) {
+  .pl-steps { width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .pl-steps .st-text b { font-size: .82rem; }
+  .pl-steps .st-dot { width: 26px; height: 26px; }
+}
+
+/* ---------- เมนูบน: ไอคอน + แคปซูล ---------- */
+.main-menu { align-self: center; gap: .2rem; padding: 4px; border-radius: 999px; background: #f4f6f9; }
+.main-menu button { display: inline-flex; align-items: center; gap: .4rem; height: 36px; padding: 0 .85rem; border-radius: 999px; font-size: .9rem; color: var(--muted); transition: background .15s, color .15s; }
+.main-menu button .ico { width: 17px; height: 17px; opacity: .85; }
+.main-menu button:hover { background: rgba(255, 255, 255, .8); color: var(--text); }
+.main-menu button.on, body.planner-open .main-menu [data-act="nav-planner"] { background: var(--surface, #fff); color: var(--accent); font-weight: 600; box-shadow: 0 1px 3px rgba(15, 23, 42, .12); }
+.main-menu button.on .ico, body.planner-open .main-menu [data-act="nav-planner"] .ico { opacity: 1; }
+.main-menu button.on::after, body.planner-open .main-menu [data-act="nav-planner"]::after { display: none !important; }
+body.planner-open .main-menu [data-act="tab"].on { background: none; box-shadow: none; color: var(--muted); font-weight: 400; }
+@media (max-width: 1280px) { .main-menu button { padding: 0 .6rem; } .main-menu button .ico { display: none; } }
+@media (max-width: 899px) { .pl-head-act { width: 100%; justify-content: flex-end; } }
