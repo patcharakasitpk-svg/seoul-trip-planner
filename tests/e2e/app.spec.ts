@@ -726,3 +726,34 @@ test('เพิ่มสถานที่เอง: ลิงก์ย่อ �
   await f.locator('button[value="add"]').click();
   await expect(pl.locator('.pl-row.stop', { hasText: 'My Cafe 2' })).toBeVisible();
 });
+
+test('ตัวจัดแผน: แก้แล้วรายการไม่เด้งกลับบนสุด · โน้ตที่กำลังพิมพ์ไม่หายเมื่อแก้เวลา · หน้าสรุปแผนที่ใหญ่', async ({ page }) => {
+  test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
+  await page.route('https://tile.openstreetmap.org/**', (r) => r.fulfill({ status: 204, body: '' }));
+  await page.goto('/');
+  await page.locator('[data-act="open-templates"]').click();
+  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
+  await page.locator('[data-act="tpl-apply-all"]').click();
+  await page.locator('[data-act="confirm-ok"]').click();
+  await page.locator('[data-act="open-planner"]').click();
+  const pl = page.locator('#planner');
+  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await page.evaluate(() => (document.querySelector('.pl-day')!.scrollTop = 400));
+  const last = () => pl.locator('.pl-row.stop').last();
+  await last().locator('[data-pl-change="stay"]').selectOption('120');
+  expect(await page.evaluate(() => document.querySelector('.pl-day')!.scrollTop)).toBeGreaterThan(300);
+  // โน้ตที่ยังไม่บันทึก + แก้เวลา → ข้อความยังอยู่
+  await last().locator('[data-pl="note-edit"]').click();
+  await last().locator('textarea').fill('เช็คอิน นอนพัก');
+  await last().locator('[data-pl-change="stay"]').selectOption('90');
+  await expect(last().locator('textarea')).toHaveValue('เช็คอิน นอนพัก');
+  await last().locator('[data-pl="note-save"]').click();
+  await expect(last().locator('.pl-note')).toContainText('เช็คอิน นอนพัก');
+  // หมุดที่มีหลายลำดับ: ป้ายกว้างพอให้เห็นทุกตัวเลข
+  const wide = await page.evaluate(() => Math.max(...[...document.querySelectorAll('#pl-map .pl-pin span')].map((s) => s.scrollWidth - s.clientWidth)));
+  expect(wide).toBeLessThanOrEqual(0);
+  // หน้าสรุป: แผนที่กว้างอย่างน้อยครึ่งจอ
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="4"]').click();
+  const w = await pl.locator('#pl-map').evaluate((e) => e.getBoundingClientRect().width / window.innerWidth);
+  expect(w).toBeGreaterThanOrEqual(0.45);
+});

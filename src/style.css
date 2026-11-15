@@ -598,7 +598,7 @@ body.planner-open .toast { bottom: 76px; z-index: 90; }
 .pl-sum .t { font-weight: 600; font-variant-numeric: tabular-nums; }
 .pl-sum .sum-leg { color: var(--muted); font-size: .85rem; padding: .1rem 0; }
 .pl-sum .sum-stop { border-top: 1px solid var(--line); }
-.pl-pin span { display: grid; place-items: center; min-width: 24px; height: 24px; padding: 0 4px; transform: translate(-50%, -50%); border-radius: 999px; background: var(--c); color: #fff; font: 600 12px/1 system-ui, sans-serif; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); white-space: nowrap; }
+.pl-pin span { display: grid; place-items: center; width: max-content; min-width: 24px; height: 24px; padding: 0 7px; transform: translate(-50%, -50%); border-radius: 999px; background: var(--c); color: #fff; font: 600 12px/1 system-ui, sans-serif; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); white-space: nowrap; }
 @media (max-width: 899px) {
   .pl-body { grid-template-columns: 1fr; }
   .pl-mapcol { padding: 0 1rem 1rem; height: 260px; }
@@ -659,3 +659,6 @@ body.planner-open .toast { bottom: 76px; z-index: 90; }
 .planner.picking #pl-map { cursor: crosshair; outline: 3px solid #e03131; }
 .pl-pick-hint { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 600; display: flex; align-items: center; gap: .5rem; padding: .4rem .5rem .4rem .8rem; border-radius: 999px; background: #e03131; color: #fff; font-weight: 600; font-size: .9rem; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
 .pl-pick-hint .pl-btn { color: #fff; }
+
+.pl-body.step-4 { grid-template-columns: minmax(340px, 38%) minmax(0, 1fr); }
+.pl-body.step-4 .pl-mapcol { padding-left: 0; }

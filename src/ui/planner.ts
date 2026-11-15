@@ -40,8 +40,9 @@ interface PState {
   preview: string | null;
   /** เปิดฟอร์มเพิ่มสถานที่เอง */
   ownOpen: boolean;
-  /** จุดที่กำลังเขียนโน้ต */
+  /** จุดที่กำลังเขียนโน้ต และข้อความที่พิมพ์อยู่ (ยังไม่บันทึก — ไม่หายเมื่อแก้อย่างอื่น) */
   noteEdit: string | null;
+  noteDraft: string;
   /** ตัวกรองในแท็บค้นหา: หมวด และย่าน */
   cat: string;
   zone: string;
@@ -67,7 +68,7 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
   const day = app.findDay(dayId);
   if (!day) return;
   onDone = done;
-  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null, web: null, cat: '', zone: '', noteEdit: null, ownOpen: false };
+  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null, web: null, cat: '', zone: '', noteEdit: null, noteDraft: '', ownOpen: false };
   if (!root) {
     root = document.createElement('div');
     root.id = 'planner';
@@ -177,12 +178,17 @@ function render(resetMap = false) {
   $('.pl-budget-wrap').innerHTML = st.step === 2 || st.step === 3 ? budgetBar(s) : '';
   $('.pl-body').className = `pl-body step-${st.step}`;
   const main = $('.pl-main');
-  const scroll = main.scrollTop;
-  const laneScroll = (root.querySelector('.pl-lane-list') as HTMLElement | null)?.scrollTop ?? 0;
+  // คงตำแหน่งเลื่อนของทุกกล่อง (รายการแนะนำ + ช่องเวลาของวัน) — แก้แล้วไม่เด้งกลับไปจุดที่ 1
+  const SCROLLERS = ['.pl-main', '.pl-lane-list', '.pl-day', '.pl-card'];
+  const keep = SCROLLERS.map((sel) => (root!.querySelector(sel) as HTMLElement | null)?.scrollTop ?? 0);
+  const sameStep = main.dataset.step === String(st.step);
   main.innerHTML = st.step === 1 ? step1() : st.step === 2 ? step2(s) : st.step === 3 ? step3(s) : step4(s);
-  main.scrollTop = scroll;
-  const lane = root.querySelector('.pl-lane-list') as HTMLElement | null;
-  if (lane) lane.scrollTop = laneScroll;
+  main.dataset.step = String(st.step);
+  if (sameStep)
+    SCROLLERS.forEach((sel, i) => {
+      const el = root!.querySelector(sel) as HTMLElement | null;
+      if (el) el.scrollTop = keep[i];
+    });
   $('.pl-foot').innerHTML = footer();
   drawMap(s);
   (root.querySelector('[data-autofocus]') as HTMLInputElement | null)?.focus();
@@ -456,7 +462,7 @@ function mealSelect(x: Stop): string {
 /** โน้ต "จะไปทำอะไรที่นี่": แสดง / แก้ไข (กดบันทึก) */
 function noteBlock(x: Stop): string {
   if (st!.noteEdit === x.uid)
-    return `<div class="pl-note-edit"><textarea class="inp" rows="2" maxlength="500" placeholder="จะไปทำอะไรที่นี่ เช่น ซื้อ… / กินเมนู… / ถ่ายรูปที่…" data-autofocus>${esc(x.note)}</textarea>
+    return `<div class="pl-note-edit"><textarea class="inp" rows="2" maxlength="500" placeholder="จะไปทำอะไรที่นี่ เช่น ซื้อ… / กินเมนู… / ถ่ายรูปที่…" data-pl-input="note" data-autofocus>${esc(st!.noteDraft)}</textarea>
       <div class="pl-note-actions"><button class="pl-btn primary sm" data-pl="note-save" data-uid="${x.uid}">บันทึก</button><button class="pl-btn ghost sm" data-pl="note-cancel">ยกเลิก</button></div></div>`;
   return x.note
     ? `<div class="pl-note"><span>${esc(x.note)}</span><button class="link small" data-pl="note-edit" data-uid="${x.uid}">แก้</button></div>`
@@ -719,6 +725,7 @@ function onClick(e: Event) {
       break;
     case 'note-edit':
       st.noteEdit = el.dataset.uid ?? null;
+      st.noteDraft = st.draft.stops.find((y) => y.uid === st!.noteEdit)?.note ?? '';
       break;
     case 'note-cancel':
       st.noteEdit = null;
@@ -905,6 +912,10 @@ function onChange(e: Event) {
 
 function onInput(e: Event) {
   const el = e.target as HTMLInputElement;
+  if (el.dataset.plInput === 'note' && st) {
+    st.noteDraft = el.value;
+    return;
+  }
   if (el.dataset.plInput !== 'q' || !st) return;
   st.q = el.value;
   // อัปเดตเฉพาะรายการในเลนซ้าย (ช่องค้นหาไม่เสียโฟกัส แผนที่ไม่ขยับ)
