@@ -1,5 +1,6 @@
 import { esc } from './util';
 import loginBg from '../assets/login-bg.jpg';
+import logoUrl from '../assets/logo.png';
 import { safeGet, safeSet } from '../storage/storage';
 import { authAvailable, authState, onAuth, signInWithGoogle, sendEmailLink, isEmailLinkReturn, rememberedEmail, finishEmailLink, signOutUser, inAppBrowser, type AuthUser } from '../services/auth';
 import { TRIP_DATES } from '../config';
@@ -194,7 +195,7 @@ function render() {
   const refocusInvite = document.activeElement?.id === 'lg-inv';
   root.innerHTML = `
     <div class="lg-card" role="dialog" aria-modal="true" aria-label="เข้าสู่ระบบ">
-      <header class="lg-brand"><b>Travel planner</b><span class="muted">ทริปโซล ${esc(trip)}</span></header>
+      <header class="lg-brand"><img class="lg-logo" src="${logoUrl}" alt="" width="64" height="64"><b>Travel planner</b><span class="muted">ทริปโซล ${esc(trip)}</span></header>
       ${body}
       ${error ? `<p class="lg-error" role="alert">${esc(error)}</p>` : ''}
     </div>`;

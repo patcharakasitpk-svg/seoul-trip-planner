@@ -5,7 +5,7 @@
  */
 import L from 'leaflet';
 import { app } from './app';
-import { esc, dayColor, photosUrl } from './util';
+import { esc, dayColor, photosUrl, IC, iconBtn } from './util';
 import { clone, insertStop, newStop, removeStop, updateStop, moveStop } from '../core/planOps';
 import { fmtDateTh, fmtDur, fmtHM, parseHM } from '../core/time';
 import { TEMPLATES } from '../data/templates';
@@ -368,7 +368,7 @@ function nameLink(x: Stop): string {
 
 /** ลิงก์ดูรูปสถานที่ (เปิดแท็บใหม่) — ชื่อแปลก ๆ จะได้นึกออกว่าหน้าตาเป็นยังไง */
 /** สถานที่ที่เพิ่มเองและมีรูป/ลิงก์: แตะชื่อ = ดูรูปที่อัปโหลดไว้ในหน้านี้ */
-const ownInfoBtn = (p: Place, label: string) => `<button class="pl-name own" data-pl="place-info" data-v="${esc(p.id)}" title="ดูรูป/ลิงก์ที่ใส่ไว้">${esc(label)}${p.photos?.length ? ' <span class="pl-name-ico" aria-hidden="true">📷</span>' : ''}</button>`;
+const ownInfoBtn = (p: Place, label: string) => `<button class="pl-name own" data-pl="place-info" data-v="${esc(p.id)}" title="ดูรูป/ลิงก์ที่ใส่ไว้">${esc(label)}${p.photos?.length ? ` <span class="pl-name-ico ico-inline" aria-hidden="true">${IC.camera}</span>` : ''}</button>`;
 
 function infoPop(): string {
   const p = st?.info ? app.getPlace(st.info) : undefined;
@@ -585,7 +585,7 @@ function noteBlock(x: Stop): string {
     return `<div class="pl-note-edit"><textarea class="inp" rows="2" maxlength="500" placeholder="จะไปทำอะไรที่นี่ เช่น ซื้อ… / กินเมนู… / ถ่ายรูปที่…" data-pl-input="note" data-autofocus>${esc(st!.noteDraft)}</textarea>
       <div class="pl-note-actions"><button class="pl-btn primary sm" data-pl="note-save" data-uid="${x.uid}">บันทึก</button><button class="pl-btn ghost sm" data-pl="note-cancel">ยกเลิก</button></div></div>`;
   return x.note
-    ? `<div class="pl-note"><span>${esc(x.note)}</span><button class="link small" data-pl="note-edit" data-uid="${x.uid}">แก้</button></div>`
+    ? `<div class="pl-note"><span>${esc(x.note)}</span>${iconBtn(IC.pencil, 'แก้โน้ต', `data-pl="note-edit" data-uid="${x.uid}"`, 'ibtn sm')}</div>`
     : `<button class="link small pl-note-add" data-pl="note-edit" data-uid="${x.uid}">＋ โน้ต (จะไปทำอะไร)</button>`;
 }
 
@@ -662,7 +662,7 @@ function step3(s: DaySchedule): string {
 function step4(s: DaySchedule): string {
   const d = st!.draft;
   const b = budget(s);
-  const edit = (step: Step) => `<button class="link small" data-pl="edit" data-v="${step}">แก้</button>`;
+  const edit = (step: Step) => iconBtn(IC.pencil, `แก้ (ขั้นที่ ${step})`, `data-pl="edit" data-v="${step}"`, 'ibtn sm');
   const rows: string[] = [];
   const nums = stopNumbers(d);
   rows.push(`<li class="sum-edge"><span class="t">${esc(d.startTime ?? '--:--')}</span><span>${numBadge(undefined, 'เริ่ม')} ออกจาก <b>${esc(shortName(app.getPlace(d.startPlaceId)))}</b></span>${edit(1)}</li>`);

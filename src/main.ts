@@ -12,6 +12,7 @@ import { renderToday, todayDay } from './ui/views/today';
 import { openPlanner, refreshPlanner, closePlanner, plannerOpen } from './ui/planner';
 import { renderModal } from './ui/views/modals';
 import { esc, MODE_LABEL, dayColor, dayDate, ICON } from './ui/util';
+import logoUrl from './assets/logo.png';
 import { loadGoogle, googleStatus, onGoogleStatus } from './services/google';
 import { startOsm, switchToGoogle, onMapMarkerClick, mapViewReady, syncMapView, focusMapView, refreshMapSize } from './services/mapView';
 import { buildMapSpecs } from './ui/mapSpecs';
@@ -42,7 +43,7 @@ const $ = (sel: string) => document.querySelector(sel) as HTMLElement;
 
 document.querySelector('#app')!.innerHTML = `
 <header class="topbar">
-  <div class="brand"><b>Travel planner</b><span class="plan-name" id="plan-name"></span></div>
+  <div class="brand"><img class="brand-logo" src="${logoUrl}" alt="" width="30" height="30"><b>Travel planner</b><span class="plan-name" id="plan-name"></span></div>
   <nav class="main-menu desk-only" aria-label="เมนูหลัก">
     <button data-act="tab" data-tab="today">${ICON.today}<span>วันนี้</span></button>
     <button data-act="tab" data-tab="plan">${ICON.plan}<span>แผนของฉัน</span></button>

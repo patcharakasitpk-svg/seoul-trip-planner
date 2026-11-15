@@ -1,7 +1,7 @@
 import L from 'leaflet';
 import type { Place } from '../core/types';
 import { app } from './app';
-import { esc, dayDate } from './util';
+import { esc, dayDate, IC, iconBtn } from './util';
 import { uid } from '../core/planOps';
 import { buildOwnPlace, OWN_CATEGORY_LABEL, type OwnCategory } from '../core/ownPlace';
 import { coordError, parseLatLng } from '../core/coords';
@@ -139,9 +139,9 @@ function card(p: Place): string {
     ${used.length ? `<p class="small pp-used">อยู่ในแผน: <b>${used.map(esc).join(', ')}</b></p>` : ''}
     ${placeInfoHtml(p, { photoAct: 'view' })}
     <div class="row-btns pp-actions">
-      ${busy === p.id ? '<span class="muted small">กำลังเพิ่มรูป…</span>' : n < MAX_PHOTOS ? `<label class="btn sm">📷 เพิ่มรูป<input type="file" accept="image/*" multiple hidden data-pp-photo="${esc(p.id)}"></label>` : ''}
-      <button class="btn sm" data-pp="edit" data-place="${esc(p.id)}">แก้</button>
-      <button class="btn sm ghost danger" data-pp="delete" data-place="${esc(p.id)}">ลบ</button>
+      ${busy === p.id ? '<span class="muted small">กำลังเพิ่มรูป…</span>' : n < MAX_PHOTOS ? `<label class="btn sm btn-ico">${IC.camera}<span>เพิ่มรูป</span><input type="file" accept="image/*" multiple hidden data-pp-photo="${esc(p.id)}"></label>` : ''}
+      ${iconBtn(IC.pencil, `แก้ ${p.nameTh}`, `data-pp="edit" data-place="${esc(p.id)}"`)}
+      ${iconBtn(IC.trash, `ลบ ${p.nameTh}`, `data-pp="delete" data-place="${esc(p.id)}"`, 'ibtn danger')}
     </div>
   </article>`;
 }

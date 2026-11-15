@@ -1,5 +1,5 @@
 import { app } from '../app';
-import { esc, gmapsDirUrl, MODE_ICON, photosUrl, naverBtn, naverRouteUrl, dayColor, naverLabel, googleLabel, dayDate } from '../util';
+import { esc, gmapsDirUrl, MODE_ICON, photosUrl, naverBtn, naverRouteUrl, dayColor, naverLabel, googleLabel, dayDate, IC } from '../util';
 import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from '../../core/time';
 import { renderWeather } from './weather';
 import { livePhase, type DaySchedule, type LegInfo, type StopTiming } from '../../core/schedule';
@@ -36,7 +36,7 @@ function navRow(from: Place | undefined, to: Place | undefined, mode: LegInfo['m
   return `<div class="nav-row">
     ${naverBtn(naverRouteUrl(null, to), naverLabel(), 'btn')}
     <a class="btn app-btn google" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(null, to, mode))}">${googleLabel('Google')}</a>
-    ${to.category !== 'base' ? `<a class="btn" target="_blank" rel="noopener" href="${esc(photosUrl(to))}" aria-label="ดูรูป ${esc(to.nameTh)}">📷</a>` : ''}
+    ${to.category !== 'base' ? `<a class="btn" target="_blank" rel="noopener" href="${esc(photosUrl(to))}" aria-label="ดูรูป ${esc(to.nameTh)}" title="ดูรูป">${IC.camera}</a>` : ''}
   </div>${from && mode === 'TRANSIT' ? legTransitHint(from, to) : ''}`;
 }
 

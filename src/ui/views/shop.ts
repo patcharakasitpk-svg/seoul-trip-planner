@@ -1,4 +1,4 @@
-import { esc } from '../util';
+import { esc, IC } from '../util';
 import { cheapest, sortItems, summary, verdict, type ShopItem, type ShopStore } from '../../services/shop';
 import { fmtKrw, fmtThb } from '../../services/fx';
 
@@ -32,7 +32,7 @@ function photoField(key: string, current: string | null | undefined, ui: ShopUi)
   return `<div class="photo-preview ${shown ? '' : 'empty'}">
     ${shown ? `<img data-photo="${esc(shown)}" alt="ตัวอย่างรูป">` : '<span class="muted small">ไม่มีรูป</span>'}
     <div class="photo-preview-side">${tag}
-      <label class="btn sm">📷 ${shown ? 'เปลี่ยนรูป' : 'เพิ่มรูป'}${photoInput(key)}</label>
+      <label class="btn sm btn-ico">${IC.camera}<span>${shown ? 'เปลี่ยนรูป' : 'เพิ่มรูป'}</span>${photoInput(key)}</label>
       ${shown ? `<button type="button" class="btn sm" data-act="shop-draft-clear" data-for="${esc(key)}">เอารูปออก</button>` : ''}
     </div>
   </div>`;
@@ -58,7 +58,7 @@ function priceForm(it: ShopItem, ui: ShopUi, lastStore: string): string {
       <input class="inp" name="store" list="shop-stores" placeholder="ร้าน" maxlength="60" required value="${esc(p?.store ?? lastStore)}" aria-label="ชื่อร้าน" enterkeyhint="next" ${p || !lastStore ? 'data-autofocus' : ''}>
       <label class="krw">₩<input class="inp" name="krw" inputmode="decimal" placeholder="ราคา" required value="${p ? esc(p.krw.toLocaleString('en-US')) : ''}" aria-label="ราคา (วอน)" enterkeyhint="done" ${!p && lastStore ? 'data-autofocus' : ''}></label>
     </div>
-    <div class="row-btns"><button class="btn sm primary">${p ? 'บันทึก' : 'เพิ่มราคา'}</button><button type="button" class="btn sm" data-act="shop-form-cancel">ยกเลิก</button>${p ? `<button type="button" class="btn sm danger" data-act="shop-price-del" data-item="${esc(it.id)}" data-price="${esc(p.id)}" aria-label="ลบราคานี้">🗑 ลบราคา</button>` : ''}</div>
+    <div class="row-btns"><button class="btn sm primary">${p ? 'บันทึก' : 'เพิ่มราคา'}</button><button type="button" class="btn sm" data-act="shop-form-cancel">ยกเลิก</button>${p ? `<button type="button" class="btn sm danger" data-act="shop-price-del" data-item="${esc(it.id)}" data-price="${esc(p.id)}" aria-label="ลบราคานี้">${IC.trash}<span>ลบราคา</span></button>` : ''}</div>
   </form>`;
 }
 
@@ -81,11 +81,11 @@ function card(it: ShopItem, store: ShopStore, rate: number | null, ui: ShopUi): 
           ? '<span class="shop-thumb busy" aria-label="กำลังบันทึกรูป">…</span>'
           : it.photo
             ? `<button class="shop-thumb" data-act="shop-photo-view" data-item="${esc(it.id)}" aria-label="ดูรูป ${esc(it.name)}"><img data-photo="${esc(it.photo)}" alt=""></button>`
-            : `<label class="shop-thumb add" aria-label="เพิ่มรูป ${esc(it.name)}" title="ถ่ายรูป/เลือกรูป">📷${photoInput(it.id)}</label>`
+            : `<label class="shop-thumb add" aria-label="เพิ่มรูป ${esc(it.name)}" title="ถ่ายรูป/เลือกรูป">${IC.camera}${photoInput(it.id)}</label>`
       }
       <button class="shop-check ${it.bought ? 'on' : ''}" data-act="shop-bought" data-item="${esc(it.id)}" aria-pressed="${it.bought}" aria-label="${it.bought ? 'ยังไม่ได้ซื้อ' : 'ซื้อแล้ว'}">${it.bought ? '✓' : ''}</button>
       <button class="shop-name" data-act="shop-edit" data-item="${esc(it.id)}" aria-label="แก้ ${esc(it.name)}">${esc(it.name)}${it.qty > 1 ? ` <span class="muted">×${it.qty}</span>` : ''}</button>
-      <button class="icon-btn sm" data-act="shop-del" data-item="${esc(it.id)}" aria-label="ลบ ${esc(it.name)}">🗑</button>
+      <button class="icon-btn sm" data-act="shop-del" data-item="${esc(it.id)}" aria-label="ลบ ${esc(it.name)}" title="ลบ">${IC.trash}</button>
     </div>
     ${
       it.thb != null

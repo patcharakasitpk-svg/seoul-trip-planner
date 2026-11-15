@@ -1,5 +1,5 @@
 import type { Place } from '../../core/types';
-import { esc } from '../util';
+import { esc, IC } from '../util';
 import { placePhotos } from '../../services/shopPhotos';
 
 /** ลิงก์เปิดหมุดตามพิกัดใน Google Maps — ใช้เช็กว่าตำแหน่งที่วางไว้ตรงร้านจริงไหม */
@@ -42,8 +42,8 @@ export function placeInfoHtml(p: Place, opts: { photoAct?: string } = {}): strin
             .join('')}</div>`
         : ''
     }
-    ${p.links?.length ? `<div class="pinfo-links">${p.links.map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">🔗 ${esc(linkLabel(u))}</a>`).join('')}</div>` : ''}
-    <div class="pinfo-check">${pin ? `<a class="btn sm" href="${esc(pin)}" target="_blank" rel="noopener">📍 ดูหมุดนี้ใน Google Maps</a>` : '<span class="muted small">ยังไม่มีตำแหน่ง</span>'}<a class="btn sm ghost" href="${esc(gmapsNameUrl(p))}" target="_blank" rel="noopener">ค้นชื่อใน Google Maps</a></div>
+    ${p.links?.length ? `<div class="pinfo-links">${p.links.map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${IC.link}<span>${esc(linkLabel(u))}</span></a>`).join('')}</div>` : ''}
+    <div class="pinfo-check">${pin ? `<a class="btn sm btn-ico" href="${esc(pin)}" target="_blank" rel="noopener">${IC.pin}<span>ดูหมุดนี้ใน Google Maps</span></a>` : '<span class="muted small">ยังไม่มีตำแหน่ง</span>'}<a class="btn sm ghost" href="${esc(gmapsNameUrl(p))}" target="_blank" rel="noopener">ค้นชื่อใน Google Maps</a></div>
   </div>`;
 }
 

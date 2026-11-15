@@ -1,7 +1,7 @@
 import type { Day } from '../../core/types';
 import type { StopTiming } from '../../core/schedule';
 import { app } from '../app';
-import { dayColor, dayDate, esc } from '../util';
+import { dayColor, dayDate, esc, IC, iconBtn } from '../util';
 import { mealName } from '../../core/meals';
 import { fmtDur, fmtHM, seoulNow } from '../../core/time';
 import { tripIssues } from '../../core/planOps';
@@ -26,7 +26,7 @@ function stopLine(t: StopTiming): string {
   const warn = t.lateMin ? `สาย ${fmtDur(t.lateMin)}` : t.warnings.find((w) => w.startsWith('ปิด')) ?? '';
   return `<li class="${s.kind === 'dinner' && !p ? 'ov-empty' : ''}">
     <span class="ov-t">${t.arrive != null ? `${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive)}` : ''}</span>
-    <span class="ov-n">${meal}${p && p.kind !== 'hotel' ? `<button class="ov-place" data-act="place-modal" data-place="${esc(p.id)}">${esc(name)}${p.custom && p.photos?.length ? ' <span aria-hidden="true">📷</span>' : ''}</button>` : esc(name)}${s.lockedTime ? ` <span class="ov-lock">นัด ${esc(s.lockedTime)}</span>` : ''}${s.note ? `<small>${esc(s.note)}</small>` : ''}${warn ? `<small class="bad-text">${esc(warn)}</small>` : ''}</span>
+    <span class="ov-n">${meal}${p && p.kind !== 'hotel' ? `<button class="ov-place" data-act="place-modal" data-place="${esc(p.id)}">${esc(name)}${p.custom && p.photos?.length ? ` <span class="ico-inline" aria-label="มีรูป">${IC.camera}</span>` : ''}</button>` : esc(name)}${s.lockedTime ? ` <span class="ov-lock">นัด ${esc(s.lockedTime)}</span>` : ''}${s.note ? `<small>${esc(s.note)}</small>` : ''}${warn ? `<small class="bad-text">${esc(warn)}</small>` : ''}</span>
   </li>`;
 }
 
@@ -58,7 +58,7 @@ function dayCard(d: Day, i: number): string {
         <b>${esc(dayDate(d))}</b>${d.title ? `<span class="ov-title">${esc(d.title)}</span>` : ''}${today ? '<span class="ov-today">วันนี้</span>' : ''}
         <span class="muted">วัน ${i + 1}${d.startTime ? ` · ${esc(d.startTime)}–${esc(d.endTime ?? '')}` : ''}${editedBy(d.id)}</span>
       </button>
-      <button class="btn sm" data-act="edit-day" data-day="${d.id}">แก้</button>
+      ${iconBtn(IC.pencil, `แก้ ${dayDate(d)} ในตัวจัดแผน`, `data-act="edit-day" data-day="${d.id}"`)}
     </header>
     ${
       stops.length

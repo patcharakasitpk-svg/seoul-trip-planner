@@ -1,6 +1,6 @@
 import type { Day, Place, TravelMode } from '../../core/types';
 import { app, type Modal } from '../app';
-import { esc, dayColor, MODE_ICON, MODE_LABEL, gmapsDirUrl, kakaoToUrl, photosUrl, naverBtn, naverRouteUrl, naverLabel, dayDate } from '../util';
+import { esc, dayColor, MODE_ICON, MODE_LABEL, gmapsDirUrl, kakaoToUrl, photosUrl, naverBtn, naverRouteUrl, naverLabel, dayDate, IC, iconBtn } from '../util';
 import { diffDays as diffSchedules } from '../../core/compare';
 import { fmtDur, fmtHM, fmtDateTh, parseHM } from '../../core/time';
 import { routeSummary, stepsText, straightDist } from './leg';
@@ -335,10 +335,10 @@ function templatesBody(m: Extract<Modal, { type: 'templates' }>): string {
             const lock = s.lockedTime ? `🔒 ${esc(s.lockedTime)} ` : '';
             const tip = s.note ? `<br><span class="muted small">${esc(s.note)}</span>` : '';
             if (!p) return s.breakTitle ? `<li>☕ ${lock}${esc(s.breakTitle)} <span class="muted small">~${s.stayMin} นาที</span>${tip}</li>` : '';
-            return `<li>${CATEGORY_ICON[p.category] ?? ''} ${lock}${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <a class="btn ghost xs" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(p.nameTh)}">📷</a> ${p.category === 'base' ? '' : addBtn(i, p, inTarget(p.id))}${tip}</li>`;
+            return `<li>${CATEGORY_ICON[p.category] ?? ''} ${lock}${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <a class="btn ghost xs" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(p.nameTh)}" title="ดูรูป">${IC.camera}</a> ${p.category === 'base' ? '' : addBtn(i, p, inTarget(p.id))}${tip}</li>`;
           })
           .join('')}</ol>
-        ${near.length ? `<div class="tpl-near"><span class="muted small">ที่ใกล้เคียง (เติมเองได้):</span> ${near.map((n) => `<span class="near-chip">${addBtn(i, n.place, inTarget(n.place.id), ` ${CATEGORY_ICON[n.place.category] ?? ''} ${esc(n.place.nameTh)} <span class="muted">· ${esc(fmtDist(n.distM))}</span>`)}<a class="btn ghost xs" href="${esc(photosUrl(n.place))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(n.place.nameTh)}">📷</a></span>`).join('')}</div>` : ''}
+        ${near.length ? `<div class="tpl-near"><span class="muted small">ที่ใกล้เคียง (เติมเองได้):</span> ${near.map((n) => `<span class="near-chip">${addBtn(i, n.place, inTarget(n.place.id), ` ${CATEGORY_ICON[n.place.category] ?? ''} ${esc(n.place.nameTh)} <span class="muted">· ${esc(fmtDist(n.distM))}</span>`)}<a class="btn ghost xs" href="${esc(photosUrl(n.place))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(n.place.nameTh)}" title="ดูรูป">${IC.camera}</a></span>`).join('')}</div>` : ''}
         <div class="row-btns tpl-actions"><label class="small">ใช้กับ <select class="inp xs" data-act-change="tpl-target" data-i="${i}" aria-label="วันปลายทาง">${app.plan.days.map((dd, k) => `<option value="${dd.id}" ${dd.id === targetId ? 'selected' : ''}>${esc(dayDate(dd, k))}${dd.date ? ` (วัน ${k + 1})` : ''}</option>`).join('')}</select></label>
         <button class="btn sm primary" data-act="tpl-copy-day" data-tpl="${tpl.id}" data-i="${i}" data-mode="replace">ใช้เป็นวันนั้น</button>
         <button class="btn sm" data-act="tpl-copy-day" data-tpl="${tpl.id}" data-i="${i}" data-mode="append">เพิ่มต่อท้าย</button></div></div>`;
@@ -378,7 +378,7 @@ function shareBody(): string {
       <label class="btn">Import JSON<input type="file" accept="application/json,.json" data-act-change="import-file" hidden></label>
     </div>
     <h4>แผนในเครื่องนี้</h4>
-    <ul class="plan-list">${app.store.plans.map((p) => `<li>${p.id === app.plan.id ? '▶ ' : ''}<button class="link" data-act="switch-plan" data-v="${p.id}">${esc(p.name)}</button> <span class="muted small">${p.days.length} วัน · แก้ไข ${esc(new Date(p.updatedAt).toLocaleString('th-TH', { timeZone: 'Asia/Seoul', dateStyle: 'short', timeStyle: 'short' }))}</span>${app.store.plans.length > 1 ? ` <button class="btn ghost xs danger" data-act="delete-plan" data-v="${p.id}">ลบ</button>` : ''}</li>`).join('')}</ul>
+    <ul class="plan-list">${app.store.plans.map((p) => `<li>${p.id === app.plan.id ? '▶ ' : ''}<button class="link" data-act="switch-plan" data-v="${p.id}">${esc(p.name)}</button> <span class="muted small">${p.days.length} วัน · แก้ไข ${esc(new Date(p.updatedAt).toLocaleString('th-TH', { timeZone: 'Asia/Seoul', dateStyle: 'short', timeStyle: 'short' }))}</span>${app.store.plans.length > 1 ? ` ${iconBtn(IC.trash, `ลบแผน ${p.name}`, `data-act="delete-plan" data-v="${p.id}"`, 'ibtn danger')}` : ''}</li>`).join('')}</ul>
     <label class="small">ชื่อแผน <input class="inp" value="${esc(app.plan.name)}" maxlength="80" data-act-change="plan-name"></label>`;
 }
 
