@@ -1238,6 +1238,11 @@ document.addEventListener('change', (ev) => {
       app.requestRender();
       return;
     }
+    case 'meal-pick': {
+      const meal = (el.value || null) as Meal | null;
+      app.updateDay(dayId, (x) => ({ ...x, stops: x.stops.map((y) => (y.uid === d.stop ? setMeal(y, meal) : y)) }));
+      return;
+    }
     case 'tpl-target': {
       const m = app.modal;
       if (m?.type !== 'templates') return;
