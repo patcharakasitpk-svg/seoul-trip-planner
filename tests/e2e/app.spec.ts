@@ -710,6 +710,12 @@ test('เพิ่มสถานที่เอง: ลิงก์ย่อ �
   await f.locator('button[value="add"]').click();
   await expect(f.locator('.pl-own-error')).toContainText('ลิงก์ย่อ');
   await expect(f.locator('[name="name"]')).toHaveValue('My Cafe'); // ที่พิมพ์ไว้ไม่หาย
+  // วาง Plus Code จาก Google Maps แทนได้
+  await f.locator('[name="coord"]').fill('HX7M+HQ8 Seoul');
+  await f.locator('button[value="save"]').click();
+  await expect(page.locator('#toast')).toContainText('บันทึก My Cafe');
+  await pl.locator('[data-pl="own-open"]').click();
+  await pl.locator('form[data-form="own-place"] [name="name"]').fill('My Cafe 2');
   // แตะบนแผนที่เพื่อเลือกตำแหน่ง
   await f.locator('[data-pl="pick-map"]').click();
   await expect(pl.locator('.pl-pick-hint')).toBeVisible();
@@ -718,5 +724,5 @@ test('เพิ่มสถานที่เอง: ลิงก์ย่อ �
   await expect(f.locator('[name="coord"]')).toHaveValue(/^3\d\.\d+, 12\d\.\d+$/);
   await expect(pl.locator('.pl-pick-hint')).toHaveCount(0);
   await f.locator('button[value="add"]').click();
-  await expect(pl.locator('.pl-row.stop', { hasText: 'My Cafe' })).toBeVisible();
+  await expect(pl.locator('.pl-row.stop', { hasText: 'My Cafe 2' })).toBeVisible();
 });

@@ -400,8 +400,8 @@ function customBody(): string {
   return `<form data-form="custom" class="form">
     <label>ชื่อ* <input class="inp" name="name" required maxlength="120" placeholder="ชื่อร้าน/สถานที่"></label>
     <label>หมวด <select class="inp" name="category">${(Object.keys(OWN_CATEGORY_LABEL) as OwnCategory[]).map((c) => `<option value="${c}" ${c === 'sight' ? 'selected' : ''}>${OWN_CATEGORY_LABEL[c]}</option>`).join('')}</select></label>
-    <label>พิกัด <input class="inp" name="coord" placeholder="วาง 37.5438, 127.0557 หรือลิงก์ Google Maps (ไม่บังคับ)"></label>
-    <p class="muted small">บนคอม: คลิกขวาที่ร้านใน Google Maps → กดตัวเลขพิกัดบรรทัดแรกเพื่อคัดลอก · ไม่ใส่พิกัด = ยังจัดในแผนได้ แต่ไม่ปักหมุด</p>
+    <label>พิกัด <input class="inp" name="coord" placeholder="วางรหัส เช่น HX7M+HQ8 หรือ 37.5438, 127.0557 (ไม่บังคับ)"></label>
+    <p class="muted small">ในหน้าร้านของ Google Maps มีบรรทัดรหัสแบบ <b>HX7M+HQ8 Seoul</b> (ไอคอนจุดตาราง) → กดค้าง/คัดลอก แล้ววางที่นี่ · ไม่ใส่พิกัด = ยังจัดในแผนได้ แต่ไม่ปักหมุด</p>
     <label>อยู่ประมาณ (นาที) <input class="inp" name="stay" type="number" value="45" min="5" max="600"></label>
     <div class="modal-actions"><button type="button" class="btn" data-act="modal-close">ยกเลิก</button><button class="btn primary">บันทึก</button></div>
   </form>`;

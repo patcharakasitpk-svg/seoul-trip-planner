@@ -318,9 +318,9 @@ function ownBlock(): string {
     <p class="pl-group">เพิ่มสถานที่เอง</p>
     <label>ชื่อ<input class="inp" name="name" maxlength="120" required value="${esc(q)}" placeholder="ชื่อร้าน/สถานที่" data-autofocus></label>
     <label>หมวด<select class="inp" name="category">${(Object.keys(OWN_CATEGORY_LABEL) as OwnCategory[]).map((c) => `<option value="${c}">${OWN_CATEGORY_LABEL[c]}</option>`).join('')}</select></label>
-    <label>พิกัด <a class="pl-photo" href="${esc(gm)}" target="_blank" rel="noopener">ดูตำแหน่งใน Google Maps ↗</a><input class="inp" name="coord" placeholder="วาง 37.5438, 127.0557 (ไม่บังคับ)"></label>
+    <label>พิกัด <a class="pl-photo" href="${esc(gm)}" target="_blank" rel="noopener">ดูตำแหน่งใน Google Maps ↗</a><input class="inp" name="coord" placeholder="วางรหัส เช่น HX7M+HQ8 หรือ 37.5438, 127.0557 (ไม่บังคับ)"></label>
     <button type="button" class="pl-btn sm web" data-pl="pick-map" data-target="own">เลือกตำแหน่งบนแผนที่ (แตะตรงร้าน)</button>
-    <p class="muted small">ง่ายสุด: ดูใน Google Maps ว่าร้านอยู่ตรงไหน แล้วกดปุ่มด้านบนและแตะจุดเดียวกันบนแผนที่ทางขวา · หรือบนคอมคลิกขวาที่ร้านใน Google Maps → กดตัวเลขพิกัดเพื่อคัดลอก · ลิงก์ย่อ maps.app.goo.gl ใช้ไม่ได้</p>
+    <p class="muted small"><b>ง่ายสุด:</b> เปิดร้านใน Google Maps → หาบรรทัดรหัสแบบ <b>HX7M+HQ8 Seoul</b> (ไอคอนจุดตาราง) → กดค้าง/คัดลอก → วางในช่องด้านบน · หรือกดปุ่มแล้วแตะตรงร้านบนแผนที่ทางขวา · ลิงก์ย่อ maps.app.goo.gl ใช้ไม่ได้</p>
     <label>อยู่ประมาณ<span class="pl-field"><input class="inp xs" type="number" name="stay" min="5" max="600" value="45"> นาที</span></label>
     <div class="pl-note-actions"><button class="pl-btn primary sm" value="add">บันทึกแล้วใส่${st!.slot == null ? 'ท้ายวัน' : `ช่องที่ ${st!.slot + 1}`}</button><button class="pl-btn sm" value="save">บันทึกอย่างเดียว</button><button type="button" class="pl-btn ghost sm" data-pl="own-close">ยกเลิก</button></div>
   </form>`;

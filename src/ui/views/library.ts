@@ -219,8 +219,8 @@ function placeDetails(p: Place): string {
 export function coordFixForm(p: Place): string {
   return `<form class="coord-fix" data-form="coord" data-place="${esc(p.id)}">
     <p class="small"><b class="closed">ยังไม่มีพิกัด จึงปักหมุดไม่ได้</b> · <a href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">เปิดใน Google Maps ↗</a></p>
-    <div class="coord-row"><input class="inp sm" name="coord" placeholder="วางพิกัด เช่น 37.5438, 127.0557 หรือลิงก์ Google Maps" aria-label="พิกัดหรือลิงก์ Google Maps"><button class="btn sm primary">บันทึกพิกัด</button></div>
-    <p class="muted small">บนคอม: คลิกขวาที่ร้านใน Google Maps → กดตัวเลขพิกัดบรรทัดแรกเพื่อคัดลอก แล้ววางที่นี่</p>
+    <div class="coord-row"><input class="inp sm" name="coord" placeholder="วางรหัส เช่น HX7M+HQ8 หรือ 37.5438, 127.0557" aria-label="รหัส Plus Code หรือพิกัด"><button class="btn sm primary">บันทึกพิกัด</button></div>
+    <p class="muted small">ในหน้าร้านของ Google Maps มีบรรทัดรหัสแบบ <b>HX7M+HQ8 Seoul</b> (ไอคอนจุดตาราง) → กดค้าง/คัดลอก แล้ววางที่นี่ · บนคอมคลิกขวาที่ร้านแล้วกดตัวเลขพิกัดก็ได้</p>
   </form>`;
 }
 
