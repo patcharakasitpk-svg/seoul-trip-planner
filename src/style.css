@@ -502,3 +502,80 @@ button.link { border: 0; background: none; padding: 0; font: inherit; cursor: po
 .meal-btn { flex-direction: column; min-height: 84px; font-size: 1rem; gap: .1rem; }
 .meal-btn span { font-size: 1.6rem; }
 .meal-btn small { color: var(--muted); font-size: .75rem; font-weight: 400; }
+
+/* ---------- ตัวจัดแผนแบบขั้นตอน (คอม/iPad) ---------- */
+.planner-open-btn { width: 100%; margin-bottom: .7rem; }
+body.planner-open { overflow: hidden; }
+.planner { position: fixed; inset: 0; z-index: 80; background: var(--bg, #f5f6f8); display: grid; grid-template-rows: auto auto 1fr auto; }
+.pl-head { display: flex; align-items: center; gap: 1rem; padding: .6rem 1rem; background: var(--surface); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.pl-title { font-size: 1.05rem; }
+.pl-steps { display: flex; gap: .3rem; list-style: none; margin: 0 auto; padding: 0; }
+.pl-steps button { display: flex; align-items: center; gap: .4rem; border: 0; background: none; font: inherit; padding: .4rem .7rem; border-radius: 999px; color: var(--muted); cursor: pointer; }
+.pl-steps button span { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid currentColor; font-size: .75rem; }
+.pl-steps li.on button { background: var(--accent); color: #fff; }
+.pl-steps li.done button { color: var(--accent); }
+.pl-budget-wrap:empty { display: none; }
+.pl-budget { padding: .5rem 1rem; background: var(--surface); border-bottom: 1px solid var(--line); }
+.pl-budget.over .pl-budget-text b { color: var(--bad, #c92a2a); }
+.pl-bar { display: flex; height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; margin-top: .3rem; }
+.pl-bar i { display: block; height: 100%; }
+.pl-bar .stay { background: var(--accent); }
+.pl-bar .travel { background: #94a3b8; }
+.pl-bar .wait { background: #e2e8f0; }
+.pl-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 34%); min-height: 0; }
+.pl-main { overflow: auto; padding: 1rem; min-height: 0; }
+.pl-mapcol { display: flex; flex-direction: column; padding: 1rem 1rem 1rem 0; min-height: 0; }
+#pl-map { flex: 1; min-height: 240px; border-radius: 14px; border: 1px solid var(--line); }
+.pl-foot { display: flex; justify-content: space-between; padding: .6rem 1rem; background: var(--surface); border-top: 1px solid var(--line); }
+.pl-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.2rem; max-width: 760px; }
+.pl-card h2 { font-size: 1.15rem; margin: 0 0 .8rem; }
+.pl-card h3 { font-size: .95rem; margin: 1rem 0 .3rem; }
+.pl-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem 1rem; }
+.pl-grid2 label { display: flex; flex-direction: column; gap: .2rem; font-size: .85rem; color: var(--muted); }
+.pl-hours { font-size: 1.05rem; margin: 1rem 0 0; }
+.pl-locked { padding-left: 1.1rem; }
+.pl-lanes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 1rem; height: 100%; }
+.pl-lane { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: .8rem; display: flex; flex-direction: column; min-height: 0; }
+.pl-lane h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.pl-lane-tabs { display: flex; margin-bottom: .5rem; }
+.pl-lane-tabs button { flex: 1; }
+.pl-lane-list { overflow: auto; min-height: 0; flex: 1; display: flex; flex-direction: column; gap: .4rem; }
+.pl-plan { border: 1px solid var(--line); border-radius: 12px; padding: .5rem .6rem; }
+.pl-plan-head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.pl-plan p { margin: .1rem 0 .3rem; }
+.pl-item { display: flex; align-items: center; gap: .5rem; padding: .4rem .5rem; border-radius: 10px; background: var(--bg, #f5f6f8); cursor: grab; }
+.pl-item.in { opacity: .5; cursor: default; }
+.pl-item-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pl-item-text b { font-weight: 600; font-size: .92rem; }
+.pl-day { display: flex; flex-direction: column; overflow: auto; }
+.pl-row { display: grid; grid-template-columns: 3.2rem 1fr auto; gap: .5rem; align-items: start; padding: .5rem .4rem; border-radius: 10px; }
+.pl-row .t { font-weight: 600; font-variant-numeric: tabular-nums; }
+.pl-row.stop { background: var(--accent-soft); }
+.pl-row.locked { background: #fff7e6; }
+.pl-row.edge { grid-template-columns: 3.2rem 1fr; color: var(--muted); }
+.pl-row-main b { font-weight: 600; }
+.pl-stay { display: flex; align-items: center; gap: .4rem; margin-top: .2rem; font-size: .85rem; color: var(--muted); flex-wrap: wrap; }
+.pl-row-act { display: flex; gap: .1rem; }
+.pl-travel { padding: .2rem 0 .2rem 3.7rem; font-size: .8rem; color: var(--muted); }
+.drop { margin: .3rem 0 .3rem 3.7rem; border: 1.5px dashed transparent; border-radius: 10px; color: var(--faint); font-size: .8rem; padding: .1rem .6rem; cursor: pointer; min-height: 10px; transition: all .1s; }
+.drop:hover, .planner.dragging .drop { border-color: var(--line-2); padding: .4rem .6rem; }
+.drop.big { border-color: var(--line-2); padding: .7rem .6rem; color: var(--muted); }
+.drop.over, .drop.sel { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); padding: .6rem .6rem; }
+.pl-legs { width: 100%; border-collapse: collapse; }
+.pl-legs td { padding: .45rem .3rem; border-bottom: 1px solid var(--line); }
+.pl-legs td.num { white-space: nowrap; }
+.pl-verdict { font-weight: 600; padding: .5rem .7rem; border-radius: 10px; }
+.pl-verdict.ok { background: #e9f7f0; color: #0e8a5f; }
+.pl-verdict.bad { background: #fdecec; color: #a61e1e; }
+.pl-sum { list-style: none; padding: 0; margin: .6rem 0 0; }
+.pl-sum li { display: grid; grid-template-columns: 3.4rem 1fr auto; gap: .5rem; align-items: center; padding: .35rem 0; }
+.pl-sum .t { font-weight: 600; font-variant-numeric: tabular-nums; }
+.pl-sum .sum-leg { color: var(--muted); font-size: .85rem; padding: .1rem 0; }
+.pl-sum .sum-stop { border-top: 1px solid var(--line); }
+.pl-pin span { display: grid; place-items: center; min-width: 24px; height: 24px; padding: 0 4px; transform: translate(-50%, -50%); border-radius: 999px; background: var(--c); color: #fff; font: 600 12px/1 system-ui, sans-serif; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); white-space: nowrap; }
+@media (max-width: 899px) {
+  .pl-body { grid-template-columns: 1fr; }
+  .pl-mapcol { padding: 0 1rem 1rem; height: 260px; }
+  .pl-lanes { grid-template-columns: 1fr; }
+  .pl-steps { margin: 0; overflow-x: auto; }
+}

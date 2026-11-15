@@ -4,6 +4,7 @@ import { app, type Tab } from './ui/app';
 import { renderLibraryControls, renderLibraryList } from './ui/views/library';
 import { renderDayPanel, renderDayTabs } from './ui/views/day';
 import { renderToday, todayDay } from './ui/views/today';
+import { openPlanner } from './ui/planner';
 import { renderModal } from './ui/views/modals';
 import { esc, MODE_LABEL } from './ui/util';
 import { loadGoogle, googleStatus, onGoogleStatus } from './services/google';
@@ -921,6 +922,13 @@ document.addEventListener('click', (ev) => {
     case 'open-share':
       app.modal = { type: 'share' };
       break;
+    case 'open-planner':
+      openPlanner(dayId, (id) => {
+        app.todayDayId = app.plan.days.find((x) => x.id === id)?.date === seoulNow().date ? null : id;
+        app.tab = 'today';
+        app.requestRender();
+      });
+      return;
     case 'leg-info':
       app.modal = { type: 'leg', dayId, target: d.stop! };
       break;

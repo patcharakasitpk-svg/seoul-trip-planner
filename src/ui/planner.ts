@@ -1,0 +1,513 @@
+/**
+ * ตัวจัดแผนรายวันแบบขั้นตอน (ต้นแบบ — สำหรับคอม/iPad)
+ * 1 ตั้งวัน · 2 เลือกสถานที่ (เลนแนะนำ | เลนช่องเวลา | แผนที่) · 3 การเดินทาง · 4 สรุปแล้วยืนยัน
+ * แก้บน "ร่าง" ของวัน (สำเนา) — บันทึกลงแผนจริงเมื่อกดยืนยันเท่านั้น
+ */
+import L from 'leaflet';
+import { app } from './app';
+import { esc, dayColor } from './util';
+import { clone, insertStop, newStop, removeStop, updateStop, moveStop } from '../core/planOps';
+import { fmtDateTh, fmtDur, fmtHM, parseHM } from '../core/time';
+import { TEMPLATES } from '../data/templates';
+import { CATEGORY_LABEL } from '../data/places';
+import { placeOptions } from './views/day';
+import { travelText } from './views/leg';
+import { mealName, newMeal, MEALS, type Meal } from '../core/meals';
+import type { Day, Place, Stop, TravelMode } from '../core/types';
+import type { DaySchedule } from '../core/schedule';
+import { straightLineM } from '../core/geo';
+
+type Step = 1 | 2 | 3 | 4;
+interface PState {
+  step: Step;
+  dayId: string;
+  draft: Day;
+  lane: 'cards' | 'search';
+  q: string;
+  /** ตำแหน่งที่จะวางเมื่อกด ＋ (index ในรายการ) */
+  slot: number | null;
+  /** กลับมาหน้าสรุปหลังแก้ */
+  backToSummary: boolean;
+}
+
+let st: PState | null = null;
+let root: HTMLElement | null = null;
+let map: L.Map | null = null;
+let layer: L.LayerGroup | null = null;
+let onDone: (dayId: string) => void = () => {};
+
+const STAY_CHOICES = [15, 30, 45, 60, 90, 120, 180];
+const STEPS: [Step, string][] = [
+  [1, 'ตั้งวัน'],
+  [2, 'เลือกสถานที่'],
+  [3, 'การเดินทาง'],
+  [4, 'สรุปและยืนยัน'],
+];
+
+export function openPlanner(dayId: string, done: (dayId: string) => void) {
+  const day = app.findDay(dayId);
+  if (!day) return;
+  onDone = done;
+  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false };
+  if (!root) {
+    root = document.createElement('div');
+    root.id = 'planner';
+    root.className = 'planner';
+    document.body.append(root);
+    root.addEventListener('click', onClick);
+    root.addEventListener('change', onChange);
+    root.addEventListener('input', onInput);
+    root.addEventListener('dragstart', onDragStart);
+    root.addEventListener('dragover', onDragOver);
+    root.addEventListener('dragleave', (e) => (e.target as HTMLElement).closest('.drop')?.classList.remove('over'));
+    root.addEventListener('drop', onDrop);
+  }
+  root.hidden = false;
+  document.body.classList.add('planner-open');
+  render(true);
+}
+
+/** ร่างเริ่มต้น: ยังไม่ตั้งเวลา → เติมค่าที่ใช้บ่อย (แก้ได้ในขั้นที่ 1) */
+function withDefaults(d: Day): Day {
+  return { ...d, startTime: d.startTime ?? '09:00', endTime: d.endTime ?? '21:00' };
+}
+
+function close() {
+  if (!root) return;
+  root.hidden = true;
+  document.body.classList.remove('planner-open');
+  map?.remove();
+  map = null;
+  st = null;
+}
+
+const sched = (): DaySchedule => app.schedule(st!.draft);
+const placeOf = (s: Stop) => app.getPlace(s.placeId);
+const nameOf = (s: Stop) => (s.kind === 'dinner' ? (placeOf(s)?.nameTh ?? `${mealName(s)} (ยังไม่เลือกร้าน)`) : s.kind === 'break' || s.kind === 'buffer' ? (s.title ?? 'พัก') : (placeOf(s)?.nameTh ?? 'สถานที่'));
+const shortName = (p: Place | undefined) => (p ? (p.id === 'hotel' ? 'โรงแรม' : p.nameTh) : '—');
+
+/** เวลาที่มีทั้งวัน และที่ใช้ไป (อยู่ + เดินทาง) */
+function budget(s: DaySchedule) {
+  const d = st!.draft;
+  const start = parseHM(d.startTime);
+  const end = parseHM(d.endTime);
+  const total = start != null && end != null ? end - start : null;
+  const stay = d.stops.filter((x) => !x.skipped).reduce((a, x) => a + x.stayMin, 0);
+  const travel = s.stops.reduce((a, t) => a + (t.stop.skipped ? 0 : (t.leg.travelMin ?? 0) + t.leg.bufferMin), 0) + (s.end ? (s.end.leg.travelMin ?? 0) + s.end.leg.bufferMin : 0);
+  const wait = s.stops.reduce((a, t) => a + t.wait, 0);
+  return { total, stay, travel, wait, used: stay + travel + wait, free: total != null ? total - (stay + travel + wait) : null };
+}
+
+function budgetBar(s: DaySchedule): string {
+  const b = budget(s);
+  if (b.total == null) return '<div class="pl-budget muted">ตั้งเวลาเริ่ม–จบในขั้นที่ 1 เพื่อดูเวลาที่เหลือ</div>';
+  const pct = (n: number) => `${Math.max(0, Math.min(100, (n / b.total!) * 100))}%`;
+  const over = b.free! < 0;
+  return `<div class="pl-budget ${over ? 'over' : ''}">
+    <div class="pl-budget-text"><b>${over ? `เกินเวลา ${fmtDur(-b.free!)}` : `เหลือ ${fmtDur(b.free!)}`}</b> <span class="muted">จาก ${fmtDur(b.total)} · อยู่ ${fmtDur(b.stay)} · เดินทาง ${fmtDur(b.travel)}${b.wait ? ` · รอนัด ${fmtDur(b.wait)}` : ''}</span></div>
+    <div class="pl-bar"><i class="stay" style="width:${pct(b.stay)}"></i><i class="travel" style="width:${pct(b.travel)}"></i><i class="wait" style="width:${pct(b.wait)}"></i></div>
+  </div>`;
+}
+
+/* ---------------- render ---------------- */
+function render(resetMap = false) {
+  if (!st || !root) return;
+  const s = sched();
+  const d = st.draft;
+  const idx = app.dayIndex(st.dayId);
+  // โครงคงที่ครั้งเดียว — แผนที่ไม่ถูกสร้างใหม่ทุกครั้งที่แก้ (ไม่กะพริบ)
+  if (resetMap || !root.querySelector('#pl-map')) {
+    map?.remove();
+    map = null;
+    root.innerHTML = `<header class="pl-head"></header><div class="pl-budget-wrap"></div>
+      <div class="pl-body"><div class="pl-main"></div><div class="pl-mapcol"><div id="pl-map"></div><p class="muted small">ตัวเลขบนหมุด = ลำดับ · เส้นประ = ลำดับการเดินทาง (ไม่ใช่เส้นทางจริง)</p></div></div>
+      <footer class="pl-foot"></footer>`;
+  }
+  const $ = (sel: string) => root!.querySelector(sel) as HTMLElement;
+  $('.pl-head').innerHTML = `
+      <div class="pl-title"><b style="color:${dayColor(idx)}">วัน ${idx + 1}</b> ${d.date ? esc(fmtDateTh(d.date)) : ''} <span class="muted small">· ร่าง ยังไม่บันทึก</span></div>
+      <ol class="pl-steps">${STEPS.map(([n, t]) => `<li class="${st!.step === n ? 'on' : n < st!.step ? 'done' : ''}"><button data-pl="goto" data-v="${n}"><span>${n}</span>${t}</button></li>`).join('')}</ol>
+      <button class="btn ghost sm" data-pl="cancel">ปิด (ไม่บันทึก)</button>`;
+  $('.pl-budget-wrap').innerHTML = st.step === 2 || st.step === 3 ? budgetBar(s) : '';
+  $('.pl-body').className = `pl-body step-${st.step}`;
+  const main = $('.pl-main');
+  const scroll = main.scrollTop;
+  const laneScroll = (root.querySelector('.pl-lane-list') as HTMLElement | null)?.scrollTop ?? 0;
+  main.innerHTML = st.step === 1 ? step1() : st.step === 2 ? step2(s) : st.step === 3 ? step3(s) : step4(s);
+  main.scrollTop = scroll;
+  const lane = root.querySelector('.pl-lane-list') as HTMLElement | null;
+  if (lane) lane.scrollTop = laneScroll;
+  $('.pl-foot').innerHTML = footer();
+  drawMap(s);
+  (root.querySelector('[data-autofocus]') as HTMLInputElement | null)?.focus();
+}
+
+function footer(): string {
+  const n = st!.step;
+  if (st!.backToSummary && n !== 4) return `<span></span><button class="btn primary" data-pl="goto" data-v="4">กลับไปหน้าสรุป →</button>`;
+  return `${n > 1 ? `<button class="btn" data-pl="goto" data-v="${n - 1}">← ย้อนกลับ</button>` : '<span></span>'}
+    ${n < 4 ? `<button class="btn primary" data-pl="goto" data-v="${n + 1}">ถัดไป: ${STEPS[n][1]} →</button>` : '<button class="btn primary big" data-pl="confirm">ยืนยันแผนวันนี้</button>'}`;
+}
+
+/* ---------- ขั้น 1: ตั้งวัน ---------- */
+function step1(): string {
+  const d = st!.draft;
+  const start = parseHM(d.startTime);
+  const end = parseHM(d.endTime);
+  const locked = d.stops.filter((x) => x.lockedTime);
+  return `<section class="pl-card">
+    <h2>วันนี้เริ่มกี่โมง จบกี่โมง</h2>
+    <div class="pl-grid2">
+      <label>วัน<select class="inp" data-pl-change="day">${app.plan.days.map((x, k) => `<option value="${x.id}" ${x.id === st!.dayId ? 'selected' : ''}>วัน ${k + 1}${x.date ? ` · ${esc(fmtDateTh(x.date))}` : ''}</option>`).join('')}</select></label>
+      <label>วันที่<input class="inp" type="date" value="${esc(d.date ?? '')}" data-pl-change="date"></label>
+      <label>ออกจาก<select class="inp" data-pl-change="startPlaceId">${placeOptions(d.startPlaceId)}</select></label>
+      <label>เวลาออก<input class="inp" type="time" value="${esc(d.startTime ?? '')}" data-pl-change="startTime"></label>
+      <label>จบวันที่<select class="inp" data-pl-change="endPlaceId">${placeOptions(d.endPlaceId)}</select></label>
+      <label>ต้องถึงภายใน<input class="inp" type="time" value="${esc(d.endTime ?? '')}" data-pl-change="endTime"></label>
+    </div>
+    <p class="pl-hours">${start != null && end != null ? `วันนี้มีเวลา <b>${fmtDur(end - start)}</b>` : 'ใส่เวลาออกและเวลาจบ เพื่อให้รู้ว่าวันนี้มีเวลาเท่าไร'}</p>
+    ${
+      locked.length
+        ? `<h3>นัดที่ล็อกไว้ในวันนี้</h3><ul class="pl-locked">${locked.map((x) => `<li><b>${esc(x.lockedTime!)}</b> ${esc(nameOf(x))} · ${fmtDur(x.stayMin)}</li>`).join('')}</ul><p class="muted small">นัดเหล่านี้จะอยู่ในแผนเสมอ เวลาอื่นจะจัดรอบนัด</p>`
+        : ''
+    }
+  </section>`;
+}
+
+/* ---------- ขั้น 2: เลือกสถานที่ (2 เลน) ---------- */
+function laneItem(p: Place, inDay: boolean): string {
+  return `<div class="pl-item ${inDay ? 'in' : ''}" draggable="${inDay ? 'false' : 'true'}" data-drag-place="${esc(p.id)}">
+    <div class="pl-item-text"><b>${esc(p.nameTh)}</b><span class="muted small">${esc(CATEGORY_LABEL[p.category] ?? '')} · ${esc(p.area)} · ราว ${fmtDur(p.suggestedStayMin)}</span></div>
+    ${inDay ? '<span class="muted small">อยู่ในแผนแล้ว</span>' : `<button class="btn sm" data-pl="add" data-place="${esc(p.id)}" aria-label="ใส่ ${esc(p.nameTh)} ในช่องที่เลือก">＋</button>`}
+  </div>`;
+}
+
+function step2(s: DaySchedule): string {
+  const d = st!.draft;
+  const inDay = new Set(d.stops.map((x) => x.placeId).filter(Boolean) as string[]);
+  const menu = TEMPLATES.find((t) => t.pick)!;
+  let laneBody = '';
+  if (st!.lane === 'cards') {
+    laneBody = menu.days
+      .map(
+        (td, i) => `<div class="pl-plan">
+        <div class="pl-plan-head"><b>${esc(td.title)}</b><button class="btn ghost xs" data-pl="add-card" data-v="${i}">ใส่ทั้งการ์ด</button></div>
+        <p class="muted small">${esc(td.note)}</p>
+        ${td.stops.map((ts) => (ts.placeId ? app.getPlace(ts.placeId) : undefined)).filter((p): p is Place => !!p && p.category !== 'base').map((p) => laneItem(p, inDay.has(p.id))).join('')}
+      </div>`,
+      )
+      .join('');
+  } else {
+    const q = st!.q.trim().toLowerCase();
+    const list = app
+      .places()
+      .filter((p) => p.category !== 'base' && p.lat != null)
+      .filter((p) => !q || [p.nameTh, p.nameEn, p.nameKo, p.area, ...(p.food?.menu ?? [])].join(' ').toLowerCase().includes(q));
+    // ใกล้จุดในแผนก่อน
+    const anchors = d.stops.map(placeOf).filter((p): p is Place => !!p && p.lat != null);
+    const dist = (p: Place) => (anchors.length ? Math.min(...anchors.map((a) => straightLineM({ lat: a.lat!, lng: a.lng! }, { lat: p.lat!, lng: p.lng! }))) : 0);
+    list.sort((a, b) => dist(a) - dist(b));
+    laneBody = list.length ? list.slice(0, 60).map((p) => laneItem(p, inDay.has(p.id))).join('') : '<p class="muted">ไม่พบ — ลองคำอื่น</p>';
+  }
+  const slotLabel = st!.slot == null ? 'ท้ายวัน' : `ช่องที่ ${st!.slot + 1}`;
+  return `<div class="pl-lanes">
+    <section class="pl-lane left">
+      <div class="seg pl-lane-tabs"><button class="${st!.lane === 'cards' ? 'on' : ''}" data-pl="lane" data-v="cards">แผนแนะนำ</button><button class="${st!.lane === 'search' ? 'on' : ''}" data-pl="lane" data-v="search">ค้นหาทั้งหมด</button></div>
+      ${st!.lane === 'search' ? `<input class="inp" type="search" placeholder="ค้นหาร้าน ย่าน เมนู" value="${esc(st!.q)}" data-pl-input="q" data-autofocus>` : ''}
+      <p class="muted small">ลากไปวางในช่องทางขวา หรือกด ＋ เพื่อใส่ <b>${slotLabel}</b> · มื้ออาหาร: ${(Object.keys(MEALS) as Meal[]).map((m) => `<button class="link" data-pl="add-meal" data-v="${m}">${MEALS[m].th.replace('มื้อ', '')}</button>`).join(' · ')}</p>
+      <div class="pl-lane-list">${laneBody}</div>
+    </section>
+    <section class="pl-lane right">
+      <h3>ช่องเวลาของวัน</h3>
+      ${dayLane(s)}
+    </section>
+  </div>`;
+}
+
+/** เลนขวา: เวลาไหลต่อกัน · ช่องวาง (drop) ระหว่างทุกรายการ · ช่วงว่างแสดงเป็นช่องใหญ่ */
+function dayLane(s: DaySchedule): string {
+  const d = st!.draft;
+  const rows: string[] = [];
+  const drop = (i: number, label = '', big = false) =>
+    `<div class="drop ${big ? 'big' : ''} ${st!.slot === i ? 'sel' : ''}" data-drop="${i}" data-pl="slot" data-v="${i}">${label || (st!.slot === i ? 'ช่องที่เลือก — กด ＋ ทางซ้าย' : '＋ วางที่นี่')}</div>`;
+  rows.push(`<div class="pl-row edge"><span class="t">${esc(d.startTime ?? '--:--')}</span><span>ออกจาก <b>${esc(shortName(app.getPlace(d.startPlaceId)))}</b></span></div>`);
+  s.stops.forEach((t, i) => {
+    rows.push(t.wait > 0 ? drop(i, `ว่าง ${fmtDur(t.wait)} ก่อนนัด — วางสถานที่ที่นี่`, true) : drop(i));
+    const x = t.stop;
+    const isMove = x.kind === 'place' || x.kind === 'dinner';
+    rows.push(`
+      ${isMove && t.leg.fromId && t.leg.toId && t.leg.fromId !== t.leg.toId ? `<div class="pl-travel">เดินทาง ${travelText(t.leg)}</div>` : ''}
+      <div class="pl-row stop ${x.lockedTime ? 'locked' : ''}" data-uid="${x.uid}">
+        <span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span>
+        <div class="pl-row-main">
+          <b>${esc(nameOf(x))}</b>${x.lockedTime ? ` <span class="pill">นัด ${esc(x.lockedTime)}</span>` : ''}
+          <div class="pl-stay">อยู่ <select class="inp xs" data-pl-change="stay" data-uid="${x.uid}" aria-label="อยู่นานเท่าไร">${[...new Set([...STAY_CHOICES, x.stayMin])].sort((a, b) => a - b).map((m) => `<option value="${m}" ${m === x.stayMin ? 'selected' : ''}>${fmtDur(m)}</option>`).join('')}</select>
+            ${t.depart != null ? `<span class="muted small">ถึง ${fmtHM(t.depart)}</span>` : ''}
+            ${t.lateMin ? `<span class="bad-text small">สาย ${fmtDur(t.lateMin)}</span>` : ''}
+            ${t.warnings.find((w) => w.startsWith('ปิด')) ? `<span class="bad-text small">${esc(t.warnings.find((w) => w.startsWith('ปิด'))!)}</span>` : ''}</div>
+        </div>
+        <div class="pl-row-act">
+          <button class="icon-btn sm" data-pl="up" data-uid="${x.uid}" ${i === 0 ? 'disabled' : ''} aria-label="เลื่อนขึ้น">↑</button>
+          <button class="icon-btn sm" data-pl="down" data-uid="${x.uid}" ${i === s.stops.length - 1 ? 'disabled' : ''} aria-label="เลื่อนลง">↓</button>
+          ${x.lockedTime ? '' : `<button class="icon-btn sm" data-pl="remove" data-uid="${x.uid}" aria-label="เอาออก">✕</button>`}
+        </div>
+      </div>`);
+  });
+  const b = budget(s);
+  rows.push(drop(d.stops.length, b.free != null && b.free > 15 ? `ว่าง ${fmtDur(b.free)} ถึงเวลาจบ — วางสถานที่ที่นี่` : '', b.free != null && b.free > 15));
+  if (s.end) {
+    rows.push(`<div class="pl-travel">เดินทาง ${travelText(s.end.leg)}</div>`);
+    rows.push(`<div class="pl-row edge"><span class="t">${s.end.arrive != null ? fmtHM(s.end.arrive) : '--:--'}</span><span>ถึง <b>${esc(shortName(app.getPlace(d.endPlaceId)))}</b>${s.end.slackMin != null && s.end.slackMin < 0 ? ` <span class="bad-text small">เกิน ${esc(d.endTime ?? '')} ${fmtDur(-s.end.slackMin)}</span>` : ''}</span></div>`);
+  }
+  return `<div class="pl-day">${rows.join('')}</div>`;
+}
+
+/* ---------- ขั้น 3: การเดินทาง ---------- */
+function step3(s: DaySchedule): string {
+  const d = st!.draft;
+  const legs: { target: string; from: Place | undefined; to: Place | undefined; leg: (typeof s.stops)[number]['leg'] }[] = [];
+  s.stops.forEach((t) => {
+    if (t.stop.skipped || !(t.stop.kind === 'place' || t.stop.kind === 'dinner')) return;
+    if (!t.leg.fromId || !t.leg.toId || t.leg.fromId === t.leg.toId) return;
+    legs.push({ target: t.uid, from: app.getPlace(t.leg.fromId), to: app.getPlace(t.leg.toId), leg: t.leg });
+  });
+  if (s.end && s.end.leg.fromId && s.end.leg.toId && s.end.leg.fromId !== s.end.leg.toId) legs.push({ target: '__end', from: app.getPlace(s.end.leg.fromId), to: app.getPlace(s.end.leg.toId), leg: s.end.leg });
+  const mode = (target: string) => (target === '__end' ? d.endLeg : d.stops.find((x) => x.uid === target)!.legIn);
+  return `<section class="pl-card">
+    <h2>เดินทางระหว่างจุด ใช้เวลาประมาณเท่าไร</h2>
+    <p class="muted small">ระบบใส่เวลาประมาณจากระยะทางไว้ให้ (≈) — แก้เป็นเวลาที่คิดว่าใช้จริงได้เลย</p>
+    <table class="pl-legs"><tbody>${legs
+      .map(
+        (l) => `<tr>
+        <td>${esc(shortName(l.from))} → <b>${esc(shortName(l.to))}</b></td>
+        <td><select class="inp xs" data-pl-change="mode" data-target="${l.target}">${(['TRANSIT', 'WALKING', 'DRIVING'] as TravelMode[]).map((m) => `<option value="${m}" ${mode(l.target).mode === m ? 'selected' : ''}>${{ TRANSIT: 'รถไฟฟ้า/รถเมล์', WALKING: 'เดิน', DRIVING: 'แท็กซี่' }[m]}</option>`).join('')}</select></td>
+        <td class="num"><input class="inp xs" type="number" min="0" value="${l.leg.travelMin ?? ''}" data-pl-change="travel" data-target="${l.target}" aria-label="นาที"> นาที ${l.leg.source === 'auto' ? '<span class="muted small">(ประมาณ)</span>' : ''}</td>
+      </tr>`,
+      )
+      .join('')}</tbody></table>
+    ${legs.length ? '' : '<p class="muted">ยังไม่มีการเดินทาง — เลือกสถานที่ในขั้นที่ 2 ก่อน</p>'}
+  </section>`;
+}
+
+/* ---------- ขั้น 4: สรุป ---------- */
+function step4(s: DaySchedule): string {
+  const d = st!.draft;
+  const b = budget(s);
+  const edit = (step: Step) => `<button class="link small" data-pl="edit" data-v="${step}">แก้</button>`;
+  const rows: string[] = [];
+  rows.push(`<li class="sum-edge"><span class="t">${esc(d.startTime ?? '--:--')}</span><span>ออกจาก <b>${esc(shortName(app.getPlace(d.startPlaceId)))}</b></span>${edit(1)}</li>`);
+  for (const t of s.stops) {
+    if (t.stop.skipped) continue;
+    const isMove = t.stop.kind === 'place' || t.stop.kind === 'dinner';
+    if (isMove && t.leg.fromId !== t.leg.toId && t.leg.travelMin != null) rows.push(`<li class="sum-leg"><span></span><span>เดินทาง ${travelText(t.leg)}</span>${edit(3)}</li>`);
+    rows.push(`<li class="sum-stop"><span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span><span><b>${esc(nameOf(t.stop))}</b> · ${fmtDur(t.stop.stayMin)}${t.stop.lockedTime ? ' · นัด' : ''}${t.lateMin ? ` <span class="bad-text">สาย ${fmtDur(t.lateMin)}</span>` : ''}</span>${edit(2)}</li>`);
+  }
+  if (s.end) {
+    rows.push(`<li class="sum-leg"><span></span><span>เดินทาง ${travelText(s.end.leg)}</span>${edit(3)}</li>`);
+    rows.push(`<li class="sum-edge"><span class="t">${s.end.arrive != null ? fmtHM(s.end.arrive) : '--:--'}</span><span>ถึง <b>${esc(shortName(app.getPlace(d.endPlaceId)))}</b></span>${edit(1)}</li>`);
+  }
+  const ok = b.free != null && b.free >= 0 && !s.stops.some((t) => t.lateMin);
+  return `<section class="pl-card">
+    <h2>สรุปแผน ${d.date ? esc(fmtDateTh(d.date)) : ''} · ${esc(d.startTime ?? '--:--')}–${esc(d.endTime ?? '--:--')}</h2>
+    <p class="pl-verdict ${ok ? 'ok' : 'bad'}">${b.total == null ? 'ยังไม่ได้ตั้งเวลาเริ่ม–จบ' : ok ? `ทันเวลา · เหลือ ${fmtDur(b.free!)}` : b.free! < 0 ? `เกินเวลา ${fmtDur(-b.free!)} — ลดเวลาบางจุด หรือเอาบางที่ออก` : 'มีนัดที่ไปไม่ทัน — ปรับลำดับหรือลดเวลา'}</p>
+    <ol class="pl-sum">${rows.join('')}</ol>
+  </section>`;
+}
+
+/* ---------------- แผนที่ ---------------- */
+function drawMap(s: DaySchedule) {
+  const el = root?.querySelector('#pl-map') as HTMLElement | null;
+  if (!el) return;
+  if (!map) {
+    map = L.map(el, { zoomControl: true, attributionControl: true });
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+    layer = L.layerGroup().addTo(map);
+  }
+  layer!.clearLayers();
+  if (!layer) return;
+  const d = st!.draft;
+  const pts: { p: Place; label: string }[] = [];
+  const start = app.getPlace(d.startPlaceId);
+  if (start?.lat != null) pts.push({ p: start, label: 'เริ่ม' });
+  let n = 0;
+  for (const t of s.stops) {
+    if (t.stop.skipped) continue;
+    const p = placeOf(t.stop);
+    if (p?.lat != null) pts.push({ p, label: String(++n) });
+  }
+  const end = app.getPlace(d.endPlaceId);
+  if (end?.lat != null) pts.push({ p: end, label: 'จบ' });
+  const color = dayColor(app.dayIndex(st!.dayId));
+  const path = pts.map((x) => [x.p.lat!, x.p.lng!] as [number, number]);
+  if (path.length > 1) L.polyline(path, { color, weight: 3, dashArray: '6 8' }).addTo(layer!);
+  pts.forEach((x, i) => {
+    if (i > 0 && x.p.id === pts[i - 1].p.id) return;
+    L.marker([x.p.lat!, x.p.lng!], { icon: L.divIcon({ className: 'pl-pin', html: `<span style="--c:${color}">${esc(x.label)}</span>`, iconSize: [0, 0] }), title: x.p.nameTh }).addTo(layer!);
+  });
+  const fit = () => {
+    if (!map) return;
+    map.invalidateSize(); // กล่องแผนที่ขยายหลังสร้าง → คำนวณขนาดใหม่ ไม่ให้แผนที่โหลดแค่บางส่วน
+    if (path.length) map.fitBounds(L.latLngBounds(path), { padding: [28, 28], maxZoom: 15 });
+    else map.setView([37.5665, 126.978], 12);
+  };
+  fit();
+  requestAnimationFrame(fit);
+}
+
+/* ---------------- การแก้ร่าง ---------------- */
+function edit(fn: (d: Day) => Day) {
+  st!.draft = fn(st!.draft);
+  render();
+}
+
+function addPlace(placeId: string, at: number | null) {
+  const p = app.getPlace(placeId);
+  if (!p) return;
+  const d = st!.draft;
+  if (d.stops.some((x) => x.placeId === placeId)) return;
+  const i = at ?? d.stops.length;
+  // ร้านอาหาร → เติมช่องมื้อที่ยังว่างก่อน
+  const emptyMeal = p.category === 'food' ? d.stops.find((x) => x.kind === 'dinner' && !x.placeId) : undefined;
+  if (emptyMeal && at == null) edit((x) => updateStop(x, emptyMeal.uid, { placeId }));
+  else edit((x) => insertStop(x, i, newStop('place', placeId, p.suggestedStayMin || 60)));
+  st!.slot = null;
+  render();
+}
+
+/* ---------------- events ---------------- */
+function onClick(e: Event) {
+  const el = (e.target as HTMLElement).closest('[data-pl]') as HTMLElement | null;
+  if (!el || !st) return;
+  const v = el.dataset.v;
+  switch (el.dataset.pl) {
+    case 'cancel':
+      close();
+      return;
+    case 'goto':
+      st.step = Number(v) as Step;
+      if (st.step === 4) st.backToSummary = false;
+      break;
+    case 'edit':
+      st.step = Number(v) as Step;
+      st.backToSummary = true;
+      break;
+    case 'lane':
+      st.lane = v === 'search' ? 'search' : 'cards';
+      break;
+    case 'slot':
+      st.slot = st.slot === Number(v) ? null : Number(v);
+      break;
+    case 'add':
+      addPlace(el.dataset.place!, st.slot);
+      return;
+    case 'add-card': {
+      const td = TEMPLATES.find((t) => t.pick)!.days[Number(v)];
+      let at = st.slot ?? st.draft.stops.length;
+      for (const ts of td.stops) {
+        const p = ts.placeId ? app.getPlace(ts.placeId) : undefined;
+        if (!p || p.category === 'base' || st.draft.stops.some((x) => x.placeId === p.id)) continue;
+        st.draft = insertStop(st.draft, at++, newStop('place', p.id, ts.stayMin));
+      }
+      st.slot = null;
+      break;
+    }
+    case 'add-meal':
+      st.draft = insertStop(st.draft, st.slot ?? st.draft.stops.length, newMeal(v as Meal));
+      st.slot = null;
+      break;
+    case 'up':
+    case 'down':
+      st.draft = moveStop(st.draft, el.dataset.uid!, el.dataset.pl === 'up' ? -1 : 1);
+      break;
+    case 'remove':
+      st.draft = removeStop(st.draft, el.dataset.uid!);
+      break;
+    case 'confirm': {
+      const dayId = st.dayId;
+      const before = clone(app.findDay(dayId)!);
+      app.setDay(dayId, st.draft);
+      app.showToast('บันทึกแผนวันนี้แล้ว', () => app.setDay(dayId, before, 'เลิกทำแล้ว'));
+      close();
+      onDone(dayId);
+      return;
+    }
+    default:
+      return;
+  }
+  render();
+}
+
+function onChange(e: Event) {
+  const el = e.target as HTMLInputElement;
+  const k = el.dataset.plChange;
+  if (!k || !st) return;
+  const d = st.draft;
+  switch (k) {
+    case 'day': {
+      const day = app.findDay(el.value);
+      if (day) Object.assign(st, { dayId: day.id, draft: withDefaults(clone(day)), slot: null });
+      render(true);
+      return;
+    }
+    case 'date':
+    case 'startTime':
+    case 'endTime':
+    case 'startPlaceId':
+    case 'endPlaceId':
+      st.draft = { ...d, [k]: el.value || null };
+      break;
+    case 'stay':
+      st.draft = updateStop(d, el.dataset.uid!, { stayMin: Number(el.value) });
+      break;
+    case 'mode': {
+      const t = el.dataset.target!;
+      const m = el.value as TravelMode;
+      st.draft = t === '__end' ? { ...d, endLeg: { ...d.endLeg, mode: m, manualMin: null } } : updateStop(d, t, { legIn: { ...d.stops.find((x) => x.uid === t)!.legIn, mode: m, manualMin: null } });
+      break;
+    }
+    case 'travel': {
+      const t = el.dataset.target!;
+      const v = el.value === '' ? null : Math.max(0, Math.min(600, Math.round(Number(el.value))));
+      const leg = { manualMin: v, manualKind: v == null ? undefined : ('user' as const) };
+      st.draft = t === '__end' ? { ...d, endLeg: { ...d.endLeg, ...leg } } : updateStop(d, t, { legIn: { ...d.stops.find((x) => x.uid === t)!.legIn, ...leg } });
+      break;
+    }
+    default:
+      return;
+  }
+  render();
+}
+
+function onInput(e: Event) {
+  const el = e.target as HTMLInputElement;
+  if (el.dataset.plInput !== 'q' || !st) return;
+  st.q = el.value;
+  // อัปเดตเฉพาะรายการในเลนซ้าย (ช่องค้นหาไม่เสียโฟกัส แผนที่ไม่ขยับ)
+  const tmp = document.createElement('div');
+  tmp.innerHTML = step2(sched());
+  const fresh = tmp.querySelector('.pl-lane-list');
+  const cur = root?.querySelector('.pl-lane-list');
+  if (fresh && cur) cur.innerHTML = fresh.innerHTML;
+}
+
+function onDragStart(e: DragEvent) {
+  const el = (e.target as HTMLElement).closest('[data-drag-place]') as HTMLElement | null;
+  if (!el || !e.dataTransfer) return;
+  e.dataTransfer.setData('text/plain', el.dataset.dragPlace!);
+  e.dataTransfer.effectAllowed = 'copy';
+  root?.classList.add('dragging');
+}
+function onDragOver(e: DragEvent) {
+  const z = (e.target as HTMLElement).closest('.drop');
+  if (!z) return;
+  e.preventDefault();
+  z.classList.add('over');
+}
+function onDrop(e: DragEvent) {
+  root?.classList.remove('dragging');
+  const z = (e.target as HTMLElement).closest('[data-drop]') as HTMLElement | null;
+  const id = e.dataTransfer?.getData('text/plain');
+  if (!z || !id) return;
+  e.preventDefault();
+  addPlace(id, Number(z.dataset.drop));
+}
