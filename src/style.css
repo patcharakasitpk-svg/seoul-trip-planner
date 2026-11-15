@@ -646,3 +646,7 @@ body.planner-open .toast { bottom: 76px; z-index: 90; }
 .pl-name { color: var(--text); font-weight: 600; text-decoration: none; border-bottom: 1px dashed var(--line-2); }
 .pl-name:hover { color: var(--accent); border-bottom-color: var(--accent); }
 .pl-name-ico { font-size: .75em; margin-left: .2rem; color: var(--accent); }
+
+.pl-meals { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; margin-top: .3rem; }
+.pl-meals .chip { min-height: 26px; padding: 0 .55rem; font-size: .78rem; }
+.pl-meal-tag { display: inline-block; font-size: .72rem; font-weight: 600; color: #b45309; background: #fff7e6; border: 1px solid #f59e0b; border-radius: 999px; padding: .05rem .5rem; vertical-align: 2px; }

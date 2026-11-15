@@ -9,7 +9,7 @@ export const MEALS: Record<Meal, { th: string; icon: string; stay: number; at: s
   breakfast: { th: 'มื้อเช้า', icon: '🍳', stay: 45, at: '08:00' },
   lunch: { th: 'มื้อกลางวัน', icon: '🍜', stay: 60, at: '12:00' },
   dinner: { th: 'มื้อเย็น', icon: '🍽️', stay: 75, at: '18:00' },
-  snack: { th: 'มื้อระหว่างทาง', icon: '🧋', stay: 20, at: null },
+  snack: { th: 'มื้อกินเล่น', icon: '🧋', stay: 20, at: null },
 };
 export const isMeal = (x: unknown): x is Meal => typeof x === 'string' && x in MEALS;
 
@@ -31,4 +31,17 @@ export function mealInsertIndex(day: Day, s: DaySchedule, meal: Meal): number {
   const i = s.stops.findIndex((t) => !t.stop.skipped && t.arrive != null && t.arrive >= at);
   if (i >= 0) return i;
   return meal === 'breakfast' ? 0 : day.stops.length;
+}
+
+/**
+ * ตั้ง/ยกเลิกมื้อของจุดแวะ: ร้านที่ใส่ในแผน → เป็นช่องมื้อ (kind 'dinner') ที่มีร้านแล้ว
+ * ยกเลิก (null) → กลับเป็นจุดแวะธรรมดา · ช่องมื้อที่ยังไม่มีร้านยกเลิกไม่ได้ (ไม่งั้นเหลือรายการว่าง)
+ */
+export function setMeal(s: Stop, meal: Meal | null): Stop {
+  if (meal == null) {
+    if (s.kind !== 'dinner' || !s.placeId) return s;
+    const { meal: _m, ...rest } = s;
+    return { ...rest, kind: 'place', title: undefined };
+  }
+  return { ...s, kind: 'dinner', meal, title: MEALS[meal].th };
 }

@@ -146,9 +146,10 @@ export function stopInfoBody(day: Day, t: StopTiming, i: number, total: number):
     <p class="sub">${t.start != null && t.depart != null ? `${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive ?? t.start)} ถึง · ออก ${fmtHM(t.depart)}` : 'ยังไม่มีเวลา'}</p>
     ${t.warnings.length ? `<ul class="warns">${t.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}
     ${
-      s.kind === 'dinner'
-        ? `<div class="seg meal-seg" role="radiogroup" aria-label="มื้อ">${(Object.keys(MEALS) as Meal[]).map((m) => `<button class="${mealOf(s) === m ? 'on' : ''}" data-act="meal-set" data-day="${day.id}" data-stop="${s.uid}" data-v="${m}" role="radio" aria-checked="${mealOf(s) === m}">${MEALS[m].icon} ${MEALS[m].th.replace('มื้อ', '')}</button>`).join('')}</div>
-           <div class="row-btns"><button class="btn sm primary" data-act="dinner-options" data-day="${day.id}" data-stop="${s.uid}">${p ? 'เปลี่ยนร้าน' : 'เลือกร้าน'}</button><button class="btn sm" data-act="stop-skip" data-day="${day.id}" data-stop="${s.uid}">${s.skipped ? 'ไม่ข้าม' : 'ข้ามมื้อนี้'}</button></div>`
+      s.kind === 'dinner' || p?.category === 'food'
+        ? `<div class="seg meal-seg" role="radiogroup" aria-label="มื้อ">${(['breakfast', 'lunch', 'snack', 'dinner'] as Meal[]).map((m) => `<button class="${s.kind === 'dinner' && mealOf(s) === m ? 'on' : ''}" data-act="meal-set" data-day="${day.id}" data-stop="${s.uid}" data-v="${m}" role="radio" aria-checked="${s.kind === 'dinner' && mealOf(s) === m}">${MEALS[m].icon} ${MEALS[m].th.replace('มื้อ', '')}</button>`).join('')}</div>
+           ${s.kind !== 'dinner' ? '<p class="muted small">เลือกมื้อเพื่อจัดเป็นมื้ออาหารของวัน (กดซ้ำ = ยกเลิก)</p>' : ''}
+           <div class="row-btns" ${s.kind === 'dinner' ? '' : 'hidden'}><button class="btn sm primary" data-act="dinner-options" data-day="${day.id}" data-stop="${s.uid}">${p ? 'เปลี่ยนร้าน' : 'เลือกร้าน'}</button><button class="btn sm" data-act="stop-skip" data-day="${day.id}" data-stop="${s.uid}">${s.skipped ? 'ไม่ข้าม' : 'ข้ามมื้อนี้'}</button></div>`
         : ''
     }
     <div class="field-row">

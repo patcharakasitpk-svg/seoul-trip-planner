@@ -6,10 +6,10 @@ import { validatePlan } from '../../src/storage/validate';
 import { ctxWith, day } from './helpers';
 
 describe('มื้ออาหาร', () => {
-  it('4 แบบ: เช้า กลางวัน เย็น ระหว่างทาง', () => {
+  it('4 แบบ: เช้า กลางวัน เย็น กินเล่น', () => {
     expect(Object.keys(MEALS)).toEqual(['breakfast', 'lunch', 'dinner', 'snack']);
     expect(mealName(newMeal('breakfast'))).toBe('มื้อเช้า');
-    expect(mealName(newMeal('snack'))).toBe('มื้อระหว่างทาง');
+    expect(mealName(newMeal('snack'))).toBe('มื้อกินเล่น');
     expect(newMeal('snack').stayMin).toBeLessThan(newMeal('dinner').stayMin);
   });
   it('มื้อเก่าที่ไม่มีชนิด = มื้อเย็น', () => {
@@ -27,5 +27,23 @@ describe('มื้ออาหาร', () => {
     p.days[0].stops = [newMeal('lunch'), { ...newMeal('snack'), meal: 'xx' as any }];
     const v = validatePlan(JSON.parse(JSON.stringify(p)));
     expect(v.ok && v.plan.days[0].stops.map((s) => s.meal)).toEqual(['lunch', undefined]);
+  });
+});
+
+import { setMeal } from '../../src/core/meals';
+describe('เลือกมื้อให้ร้านอาหาร', () => {
+  it('ร้านอาหารที่ใส่ในแผน → ตั้งเป็นมื้อได้ และยกเลิกได้', () => {
+    const st = newStop('place', 'myeongdong-kyoja', 60);
+    const lunch = setMeal(st, 'lunch');
+    expect(lunch).toMatchObject({ kind: 'dinner', meal: 'lunch', placeId: 'myeongdong-kyoja', stayMin: 60 });
+    expect(mealName(lunch)).toBe('มื้อกลางวัน');
+    const back = setMeal(lunch, null);
+    expect(back).toMatchObject({ kind: 'place', placeId: 'myeongdong-kyoja' });
+    expect(back.meal).toBeUndefined();
+  });
+  it('ช่องมื้อที่ยังไม่เลือกร้าน ยกเลิกมื้อไม่ได้ (เปลี่ยนชนิดได้อย่างเดียว)', () => {
+    const slot = newMeal('dinner');
+    expect(setMeal(slot, null)).toBe(slot);
+    expect(setMeal(slot, 'breakfast').meal).toBe('breakfast');
   });
 });

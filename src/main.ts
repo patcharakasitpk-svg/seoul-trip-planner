@@ -21,7 +21,7 @@ import { TEMPLATES, templateDayStops, applyDatedTemplate, mergeDayStops } from '
 import { tplTargetDay } from './ui/views/modals';
 import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
 import { stopLocationId } from './core/schedule';
-import { MEALS, mealName, mealOf, newMeal, mealInsertIndex, type Meal } from './core/meals';
+import { MEALS, mealName, mealOf, newMeal, mealInsertIndex, setMeal, type Meal } from './core/meals';
 import { parseLatLng } from './core/coords';
 import { buildOwnPlace } from './core/ownPlace';
 import { searchPlaces, placeFromResult, findExisting } from './services/placeSearch';
@@ -556,7 +556,7 @@ function quickToggle(placeId: string) {
     applyWithUndo(day.id, nd, `เอา ${p.nameTh} ออกจากวัน ${n}`);
     return;
   }
-  // คาเฟ่เติมได้เฉพาะช่องมื้อระหว่างทาง (ไม่ไปแทนมื้อหลัก)
+  // คาเฟ่เติมได้เฉพาะช่องมื้อกินเล่น (ไม่ไปแทนมื้อหลัก)
   const emptyDinner = p.food ? day.stops.find((s) => s.kind === 'dinner' && !s.placeId && !s.skipped && (p.food!.type !== 'cafe' || mealOf(s) === 'snack')) : undefined;
   const nd = emptyDinner
     ? updateStop(day, emptyDinner.uid, { placeId, stayMin: app.stayFor(placeId) })
@@ -952,7 +952,7 @@ document.addEventListener('click', (ev) => {
     }
     case 'meal-set': {
       const meal = d.v as Meal;
-      app.updateDay(dayId, (x) => updateStop(x, d.stop!, { meal, title: MEALS[meal].th }));
+      app.updateDay(dayId, (x) => ({ ...x, stops: x.stops.map((y) => (y.uid !== d.stop ? y : y.kind === 'dinner' && mealOf(y) === meal ? setMeal(y, null) : setMeal(y, meal))) }));
       return;
     }
     case 'live-start':

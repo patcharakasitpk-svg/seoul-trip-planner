@@ -489,7 +489,7 @@ test('มื้ออาหาร: เลือกเช้า/กลางว�
   // ⓘ → เปลี่ยนเป็นมื้อระหว่างทาง
   await lunch.locator('[data-act="stop-info"]').click();
   await page.locator('.modal [data-act="meal-set"][data-v="snack"]').click();
-  await expect(page.locator('.timeline')).toContainText('มื้อระหว่างทาง');
+  await expect(page.locator('.timeline')).toContainText('มื้อกินเล่น');
   await page.locator('.modal [data-act="modal-close"]').last().click();
   // แถวเดินทางแบบย่อ: ไม่มีช่องกรอก/ลิงก์ลอย ๆ — มีเวลา + วิธีไป + ⓘ
   await expect(page.locator('.timeline [data-act-change="leg-manual"]')).toHaveCount(0);
@@ -620,6 +620,12 @@ test('โน้ต "จะไปทำอะไร": เพิ่ม/บัน�
   const pl = page.locator('#planner');
   await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
   const row = pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' });
+  // ร้านอาหาร: เลือกมื้อได้ (กลางวัน) → ป้ายมื้อข้างชื่อ · กดซ้ำ = ยกเลิก
+  await row.locator('[data-pl="meal"][data-v="lunch"]').click();
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' }).locator('.pl-meal-tag')).toContainText('มื้อกลางวัน');
+  await pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' }).locator('[data-pl="meal"][data-v="lunch"]').click();
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' }).locator('.pl-meal-tag')).toHaveCount(0);
+  await pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' }).locator('[data-pl="meal"][data-v="lunch"]').click();
   await row.locator('[data-pl="note-edit"]').click();
   await row.locator('textarea').fill('กินคัลกุกซุ + เกี๊ยว สั่ง 2 ที่');
   await row.locator('[data-pl="note-save"]').click();

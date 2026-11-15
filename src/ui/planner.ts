@@ -14,7 +14,7 @@ import { placeOptions } from './views/day';
 import { coordFixForm } from './views/library';
 import { buildOwnPlace, OWN_CATEGORY_LABEL, type OwnCategory } from '../core/ownPlace';
 import { legSummary } from './views/leg';
-import { mealName, mealOf, newMeal, MEALS, type Meal } from '../core/meals';
+import { mealName, mealOf, newMeal, setMeal, MEALS, type Meal } from '../core/meals';
 import { systemDayDefaults, recommendedStops } from '../core/dayDefaults';
 import type { Day, Place, Stop, TravelMode } from '../core/types';
 import type { DaySchedule } from '../core/schedule';
@@ -441,6 +441,15 @@ function step2(s: DaySchedule): string {
   </div>`;
 }
 
+/** ร้านอาหาร/คาเฟ่/ช่องมื้อ: เลือกมื้อ (กดซ้ำ = ยกเลิก) */
+const MEAL_ORDER: Meal[] = ['breakfast', 'lunch', 'snack', 'dinner'];
+function mealChips(x: Stop): string {
+  const p = placeOf(x);
+  if (!(x.kind === 'dinner' || p?.category === 'food')) return '';
+  const cur = x.kind === 'dinner' ? mealOf(x) : null;
+  return `<div class="pl-meals"><span class="muted small">มื้อ</span>${MEAL_ORDER.map((m) => `<button class="chip ${cur === m ? 'on' : ''}" data-pl="meal" data-uid="${x.uid}" data-v="${m}" aria-pressed="${cur === m}">${MEALS[m].th.replace('มื้อ', '')}</button>`).join('')}</div>`;
+}
+
 /** โน้ต "จะไปทำอะไรที่นี่": แสดง / แก้ไข (กดบันทึก) */
 function noteBlock(x: Stop): string {
   if (st!.noteEdit === x.uid)
@@ -468,12 +477,13 @@ function dayLane(s: DaySchedule): string {
       <div class="pl-row stop ${x.lockedTime ? 'locked' : ''}" data-uid="${x.uid}">
         <span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span>
         <div class="pl-row-main">
-          ${numBadge(nums.get(x.uid))} ${nameLink(x)}${x.lockedTime ? ` <span class="pill">นัด ${esc(x.lockedTime)}</span>` : ''}
+          ${numBadge(nums.get(x.uid))} ${nameLink(x)}${x.kind === 'dinner' && x.placeId ? ` <span class="pl-meal-tag">${esc(mealName(x))}</span>` : ''}${x.lockedTime ? ` <span class="pill">นัด ${esc(x.lockedTime)}</span>` : ''}
           <div class="pl-stay">อยู่ <select class="inp xs" data-pl-change="stay" data-uid="${x.uid}" aria-label="อยู่นานเท่าไร">${[...new Set([...STAY_CHOICES, x.stayMin])].sort((a, b) => a - b).map((m) => `<option value="${m}" ${m === x.stayMin ? 'selected' : ''}>${fmtDur(m)}</option>`).join('')}</select>
             ${defaultStay(x) != null && defaultStay(x) !== x.stayMin ? resetBtn('reset-stay', x.uid, `คืนเวลาที่แนะนำ (${fmtDur(defaultStay(x)!)})`) : ''}
             ${t.depart != null ? `<span class="muted small">ถึง ${fmtHM(t.depart)}</span>` : ''}
             ${t.lateMin ? `<span class="bad-text small">สาย ${fmtDur(t.lateMin)}</span>` : ''}
             ${t.warnings.find((w) => w.startsWith('ปิด')) ? `<span class="bad-text small">${esc(t.warnings.find((w) => w.startsWith('ปิด'))!)}</span>` : ''}</div>
+          ${mealChips(x)}
           ${noteBlock(x)}
         </div>
         <div class="pl-row-act">
@@ -695,6 +705,14 @@ function onClick(e: Event) {
     case 'own-close':
       st.ownOpen = false;
       break;
+    case 'meal': {
+      const x = st.draft.stops.find((y) => y.uid === el.dataset.uid);
+      if (!x) return;
+      const m = v as Meal;
+      const next = x.kind === 'dinner' && mealOf(x) === m ? setMeal(x, null) : setMeal(x, m);
+      st.draft = { ...st.draft, stops: st.draft.stops.map((y) => (y.uid === x.uid ? next : y)) };
+      break;
+    }
     case 'note-edit':
       st.noteEdit = el.dataset.uid ?? null;
       break;
