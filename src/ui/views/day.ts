@@ -187,7 +187,7 @@ export function renderDayPanel(day: Day): string {
   const noDates = tripSetupNeeded(app.plan);
   return `
   ${noDates ? `<div class="notice trip">ทริป ${esc(fmtDateTh(trip[0]))} – ${esc(fmtDateTh(trip[trip.length - 1]))} (${trip.length} วัน) · ถึงอินชอน T1 30 พ.ย. 06:55 · คืน 5 ธ.ค. นอน Novotel ซูวอน · บินกลับ 6 ธ.ค. 17:00 <button class="btn sm primary" data-act="apply-trip-dates">ตั้งวันเที่ยวให้ครบ</button></div>` : ''}
-  <button class="btn primary planner-open-btn" data-act="open-planner" data-day="${day.id}">จัดแผนวันนี้แบบขั้นตอน (ใหม่ · ทดลอง)</button>
+  <button class="btn primary planner-open-btn" data-act="open-planner" data-day="${day.id}">จัดแผนวันนี้แบบขั้นตอน</button>
   <div class="day-head">
     <h2 style="--c:${dayColor(idx)}">วัน ${idx + 1}</h2>
   </div>

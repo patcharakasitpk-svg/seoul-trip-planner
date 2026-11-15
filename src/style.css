@@ -506,7 +506,8 @@ button.link { border: 0; background: none; padding: 0; font: inherit; cursor: po
 /* ---------- ตัวจัดแผนแบบขั้นตอน (คอม/iPad) ---------- */
 .planner-open-btn { width: 100%; margin-bottom: .7rem; }
 body.planner-open { overflow: hidden; }
-.planner { position: fixed; inset: 0; z-index: 80; background: var(--bg, #f5f6f8); display: grid; grid-template-rows: auto auto 1fr auto; }
+.planner { position: fixed; inset: 0; z-index: 80; background: var(--bg, #f5f6f8); display: flex; flex-direction: column; }
+.planner[hidden] { display: none; }
 .pl-head { display: flex; align-items: center; gap: 1rem; padding: .6rem 1rem; background: var(--surface); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .pl-title { font-size: 1.05rem; }
 .pl-steps { display: flex; gap: .3rem; list-style: none; margin: 0 auto; padding: 0; }
@@ -522,12 +523,30 @@ body.planner-open { overflow: hidden; }
 .pl-bar .stay { background: var(--accent); }
 .pl-bar .travel { background: #94a3b8; }
 .pl-bar .wait { background: #e2e8f0; }
-.pl-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 34%); min-height: 0; }
+.pl-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 34%); min-height: 0; }
 .pl-main { overflow: auto; padding: 1rem; min-height: 0; }
 .pl-mapcol { display: flex; flex-direction: column; padding: 1rem 1rem 1rem 0; min-height: 0; }
 #pl-map { flex: 1; min-height: 240px; border-radius: 14px; border: 1px solid var(--line); }
-.pl-foot { display: flex; justify-content: space-between; padding: .6rem 1rem; background: var(--surface); border-top: 1px solid var(--line); }
-.pl-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.2rem; max-width: 760px; }
+.pl-foot { flex: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .55rem 1rem; background: var(--surface); border-top: 1px solid var(--line); }
+.pl-foot-mid { color: var(--muted); font-size: .85rem; }
+.pl-btn { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; height: 40px; padding: 0 1.1rem; border-radius: 10px; border: 1px solid var(--line-2); background: var(--surface); color: var(--text); font: inherit; font-size: .95rem; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.pl-btn:hover { background: var(--bg, #f5f6f8); }
+.pl-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.pl-btn.primary:hover { filter: brightness(1.06); }
+.pl-btn.confirm { padding: 0 1.4rem; }
+.pl-btn.ghost { border-color: transparent; background: none; color: var(--muted); }
+.pl-btn.ghost:hover { background: var(--bg, #f5f6f8); color: var(--text); }
+.pl-btn.sm { height: 32px; padding: 0 .7rem; font-size: .85rem; }
+.pl-card-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; margin-bottom: .4rem; }
+.pl-card-head h2, .pl-card-head h3 { margin: 0; }
+.pl-mini-actions { display: flex; gap: .2rem; }
+.pl-field { display: flex; align-items: center; gap: .3rem; }
+.pl-field .inp { flex: 1; min-width: 0; }
+.reset { flex: none; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); color: var(--accent); font-size: 1rem; cursor: pointer; display: inline-grid; place-items: center; }
+.reset:hover { background: var(--accent-soft); }
+.pl-group { margin: .4rem 0 .1rem; font-size: .8rem; font-weight: 600; color: var(--muted); }
+.pl-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 1rem 1.2rem; }
+body.planner-open .toast { bottom: 76px; z-index: 90; }
 .pl-card h2 { font-size: 1.15rem; margin: 0 0 .8rem; }
 .pl-card h3 { font-size: .95rem; margin: 1rem 0 .3rem; }
 .pl-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem 1rem; }

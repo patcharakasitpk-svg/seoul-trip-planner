@@ -496,3 +496,53 @@ test('มื้ออาหาร: เลือกเช้า/กลางว�
   await expect(page.locator('.timeline .leg.slim [data-act="leg-info"]').first()).toBeVisible();
   await expect(page.locator('.timeline')).not.toContainText('≈ 0 ม.');
 });
+
+test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั้งวัน → เลือกสถานที่ → เดินทาง → สรุป → ยืนยัน · ปุ่มคืนค่า ↺', async ({ page }) => {
+  test.skip(isMobile(page), 'ออกแบบให้จัดแผนบนคอม/iPad');
+  await page.goto('/');
+  await page.locator('[data-act="open-planner"]').click();
+  const pl = page.locator('#planner');
+  await expect(pl).toBeVisible();
+  // ขั้น 1: เปลี่ยนเวลา แล้วกด ↺ กลับค่าที่ระบบตั้งไว้ (วันแรก = ออกจากสนามบิน 08:00)
+  await pl.locator('[data-pl-change="startTime"]').fill('10:30');
+  await pl.locator('[data-pl-change="startTime"]').dispatchEvent('change');
+  await pl.locator('[data-pl="reset-field"][data-v="startTime"]').click();
+  await expect(pl.locator('[data-pl-change="startTime"]')).toHaveValue('08:00');
+  await expect(pl.locator('.pl-hours')).toContainText('วันนี้มีเวลา');
+  // ปุ่มด้านล่างขนาดปกติ
+  const box = await pl.locator('.pl-foot .pl-btn.primary').boundingBox();
+  expect(box!.height).toBeLessThanOrEqual(48);
+  // ขั้น 2: ค้นหาทั้งหมดมีสถานที่หลัก · ใส่โรงแรมและร้าน · เปลี่ยนเวลาอยู่แล้ว ↺
+  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('[data-pl="clear-stops"]').click();
+  await pl.locator('[data-pl="lane"][data-v="search"]').click();
+  await expect(pl.locator('.pl-group').first()).toContainText('สถานที่หลัก');
+  await pl.locator('[data-pl="add"][data-place="hotel"]').click();
+  await pl.locator('[data-pl-input="q"]').fill('กวางจัง');
+  await pl.locator('[data-pl="add"][data-place="gwangjang"]').click();
+  const row = pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' });
+  await expect(row).toBeVisible();
+  await row.locator('[data-pl-change="stay"]').selectOption('120');
+  await row.locator('[data-pl="reset-stay"]').click();
+  await expect(pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' }).locator('[data-pl="reset-stay"]')).toHaveCount(0);
+  await expect(pl.locator('.pl-budget')).toContainText('จาก');
+  // ขั้น 3: แก้เวลาเดินทาง แล้ว ↺
+  await pl.locator('.pl-foot [data-pl="goto"][data-v="3"]').click();
+  const t = pl.locator('[data-pl-change="travel"]').first();
+  await t.fill('70');
+  await t.dispatchEvent('change');
+  await expect(pl.locator('[data-pl="reset-leg"]').first()).toBeVisible();
+  await pl.locator('[data-pl="reset-step"][data-v="3"]').click();
+  await expect(pl.locator('[data-pl="reset-leg"]')).toHaveCount(0);
+  // ขั้น 4: สรุป · แก้ → กลับขั้น 2 → กลับหน้าสรุป · ยืนยัน → ไปหน้า วันนี้
+  await pl.locator('.pl-foot [data-pl="goto"][data-v="4"]').click();
+  await expect(pl.locator('.pl-sum')).toContainText('ตลาดกวางจัง');
+  await pl.locator('[data-pl="edit"][data-v="2"]').first().click();
+  await expect(pl.locator('.pl-steps li.on')).toContainText('เลือกสถานที่');
+  await pl.locator('.pl-foot [data-pl="goto"][data-v="4"]').click();
+  await pl.locator('[data-pl="confirm"]').click();
+  await expect(pl).toBeHidden();
+  await expect(page.locator('#toast')).toContainText('บันทึกแผนวันนี้แล้ว');
+  await expect(page.locator('body')).toHaveAttribute('data-tab', 'today');
+  await expect(page.locator('.tl-list')).toContainText('ตลาดกวางจัง');
+});

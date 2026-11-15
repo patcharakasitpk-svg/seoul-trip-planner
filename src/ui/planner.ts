@@ -12,7 +12,8 @@ import { TEMPLATES } from '../data/templates';
 import { CATEGORY_LABEL } from '../data/places';
 import { placeOptions } from './views/day';
 import { travelText } from './views/leg';
-import { mealName, newMeal, MEALS, type Meal } from '../core/meals';
+import { mealName, mealOf, newMeal, MEALS, type Meal } from '../core/meals';
+import { systemDayDefaults, recommendedStops } from '../core/dayDefaults';
 import type { Day, Place, Stop, TravelMode } from '../core/types';
 import type { DaySchedule } from '../core/schedule';
 import { straightLineM } from '../core/geo';
@@ -28,6 +29,8 @@ interface PState {
   slot: number | null;
   /** กลับมาหน้าสรุปหลังแก้ */
   backToSummary: boolean;
+  /** วันตามที่อยู่ในแผนตอนเปิด (ใช้กับ "คืนค่าก่อนแก้") */
+  orig: Day;
 }
 
 let st: PState | null = null;
@@ -48,7 +51,7 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
   const day = app.findDay(dayId);
   if (!day) return;
   onDone = done;
-  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false };
+  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day) };
   if (!root) {
     root = document.createElement('div');
     root.id = 'planner';
@@ -69,7 +72,26 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
 
 /** ร่างเริ่มต้น: ยังไม่ตั้งเวลา → เติมค่าที่ใช้บ่อย (แก้ได้ในขั้นที่ 1) */
 function withDefaults(d: Day): Day {
-  return { ...d, startTime: d.startTime ?? '09:00', endTime: d.endTime ?? '21:00' };
+  const def = systemDayDefaults(d.date);
+  return { ...d, startTime: d.startTime ?? def.startTime, endTime: d.endTime ?? def.endTime, startPlaceId: d.startPlaceId ?? def.startPlaceId, endPlaceId: d.endPlaceId ?? def.endPlaceId };
+}
+
+/** ปุ่ม ↺ คืนค่าที่ระบบตั้งไว้ (แสดงเฉพาะเมื่อค่าเปลี่ยนไปจากค่าเริ่มต้น) */
+const resetBtn = (act: string, v: string, label = 'คืนค่าเริ่มต้น') => `<button class="reset" data-pl="${act}" data-v="${esc(v)}" title="${label}" aria-label="${label}">↺</button>`;
+
+/** เวลาอยู่ที่เป็น "ค่าเริ่มต้น" ของรายการ: ในแผนตอนเปิด › ในแผนแนะนำของวัน › ที่แนะนำของสถานที่ */
+function defaultStay(x: Stop): number | null {
+  const o = st?.orig.stops.find((y) => y.uid === x.uid);
+  if (o) return o.stayMin;
+  const rec = x.placeId ? recommendedStops(st?.draft.date ?? null).find((y) => y.placeId === x.placeId) : undefined;
+  if (rec) return rec.stayMin;
+  return suggestedStay(x);
+}
+
+function suggestedStay(x: Stop): number | null {
+  if (x.kind === 'dinner') return x.placeId ? (app.getPlace(x.placeId)?.suggestedStayMin || MEALS[mealOf(x)].stay) : MEALS[mealOf(x)].stay;
+  if (x.kind === 'place') return app.getPlace(x.placeId)?.suggestedStayMin || 60;
+  return null;
 }
 
 function close() {
@@ -144,28 +166,33 @@ function render(resetMap = false) {
 
 function footer(): string {
   const n = st!.step;
-  if (st!.backToSummary && n !== 4) return `<span></span><button class="btn primary" data-pl="goto" data-v="4">กลับไปหน้าสรุป →</button>`;
-  return `${n > 1 ? `<button class="btn" data-pl="goto" data-v="${n - 1}">← ย้อนกลับ</button>` : '<span></span>'}
-    ${n < 4 ? `<button class="btn primary" data-pl="goto" data-v="${n + 1}">ถัดไป: ${STEPS[n][1]} →</button>` : '<button class="btn primary big" data-pl="confirm">ยืนยันแผนวันนี้</button>'}`;
+  const back = n > 1 && !st!.backToSummary ? `<button class="pl-btn ghost" data-pl="goto" data-v="${n - 1}">← ${STEPS[n - 2][1]}</button>` : '<span></span>';
+  const mid = `<span class="pl-foot-mid">ขั้นที่ ${n} จาก 4</span>`;
+  if (st!.backToSummary && n !== 4) return `${back}${mid}<button class="pl-btn primary" data-pl="goto" data-v="4">กลับไปหน้าสรุป</button>`;
+  return `${back}${mid}${n < 4 ? `<button class="pl-btn primary" data-pl="goto" data-v="${n + 1}">${STEPS[n][1]} →</button>` : '<button class="pl-btn primary confirm" data-pl="confirm">ยืนยันแผนวันนี้</button>'}`;
 }
 
 /* ---------- ขั้น 1: ตั้งวัน ---------- */
 function step1(): string {
   const d = st!.draft;
+  const def = systemDayDefaults(d.date);
   const start = parseHM(d.startTime);
   const end = parseHM(d.endTime);
   const locked = d.stops.filter((x) => x.lockedTime);
+  const r = (field: keyof typeof def) => (d[field] !== def[field] ? resetBtn('reset-field', field) : '');
+  const changed = (Object.keys(def) as (keyof typeof def)[]).some((k) => d[k] !== def[k]) || d.date !== st!.orig.date;
   return `<section class="pl-card">
-    <h2>วันนี้เริ่มกี่โมง จบกี่โมง</h2>
+    <div class="pl-card-head"><h2>วันนี้เริ่มกี่โมง จบกี่โมง</h2>${changed ? '<button class="pl-btn ghost sm" data-pl="reset-step" data-v="1">↺ คืนค่าเริ่มต้นทั้งหมด</button>' : ''}</div>
     <div class="pl-grid2">
       <label>วัน<select class="inp" data-pl-change="day">${app.plan.days.map((x, k) => `<option value="${x.id}" ${x.id === st!.dayId ? 'selected' : ''}>วัน ${k + 1}${x.date ? ` · ${esc(fmtDateTh(x.date))}` : ''}</option>`).join('')}</select></label>
-      <label>วันที่<input class="inp" type="date" value="${esc(d.date ?? '')}" data-pl-change="date"></label>
-      <label>ออกจาก<select class="inp" data-pl-change="startPlaceId">${placeOptions(d.startPlaceId)}</select></label>
-      <label>เวลาออก<input class="inp" type="time" value="${esc(d.startTime ?? '')}" data-pl-change="startTime"></label>
-      <label>จบวันที่<select class="inp" data-pl-change="endPlaceId">${placeOptions(d.endPlaceId)}</select></label>
-      <label>ต้องถึงภายใน<input class="inp" type="time" value="${esc(d.endTime ?? '')}" data-pl-change="endTime"></label>
+      <label>วันที่<span class="pl-field"><input class="inp" type="date" value="${esc(d.date ?? '')}" data-pl-change="date">${d.date !== st!.orig.date ? resetBtn('reset-field', 'date') : ''}</span></label>
+      <label>ออกจาก<span class="pl-field"><select class="inp" data-pl-change="startPlaceId">${placeOptions(d.startPlaceId)}</select>${r('startPlaceId')}</span></label>
+      <label>เวลาออก<span class="pl-field"><input class="inp" type="time" value="${esc(d.startTime ?? '')}" data-pl-change="startTime">${r('startTime')}</span></label>
+      <label>จบวันที่<span class="pl-field"><select class="inp" data-pl-change="endPlaceId">${placeOptions(d.endPlaceId)}</select>${r('endPlaceId')}</span></label>
+      <label>ต้องถึงภายใน<span class="pl-field"><input class="inp" type="time" value="${esc(d.endTime ?? '')}" data-pl-change="endTime">${r('endTime')}</span></label>
     </div>
     <p class="pl-hours">${start != null && end != null ? `วันนี้มีเวลา <b>${fmtDur(end - start)}</b>` : 'ใส่เวลาออกและเวลาจบ เพื่อให้รู้ว่าวันนี้มีเวลาเท่าไร'}</p>
+    <p class="muted small">↺ = กลับเป็นค่าที่ระบบตั้งไว้ตามทริป (เที่ยวบิน · ที่พัก · 09:00–21:00)</p>
     ${
       locked.length
         ? `<h3>นัดที่ล็อกไว้ในวันนี้</h3><ul class="pl-locked">${locked.map((x) => `<li><b>${esc(x.lockedTime!)}</b> ${esc(nameOf(x))} · ${fmtDur(x.stayMin)}</li>`).join('')}</ul><p class="muted small">นัดเหล่านี้จะอยู่ในแผนเสมอ เวลาอื่นจะจัดรอบนัด</p>`
@@ -177,7 +204,7 @@ function step1(): string {
 /* ---------- ขั้น 2: เลือกสถานที่ (2 เลน) ---------- */
 function laneItem(p: Place, inDay: boolean): string {
   return `<div class="pl-item ${inDay ? 'in' : ''}" draggable="${inDay ? 'false' : 'true'}" data-drag-place="${esc(p.id)}">
-    <div class="pl-item-text"><b>${esc(p.nameTh)}</b><span class="muted small">${esc(CATEGORY_LABEL[p.category] ?? '')} · ${esc(p.area)} · ราว ${fmtDur(p.suggestedStayMin)}</span></div>
+    <div class="pl-item-text"><b>${esc(p.nameTh)}</b><span class="muted small">${esc(CATEGORY_LABEL[p.category] ?? '')} · ${esc(p.area)}${p.suggestedStayMin ? ` · ราว ${fmtDur(p.suggestedStayMin)}` : ''}</span></div>
     ${inDay ? '<span class="muted small">อยู่ในแผนแล้ว</span>' : `<button class="btn sm" data-pl="add" data-place="${esc(p.id)}" aria-label="ใส่ ${esc(p.nameTh)} ในช่องที่เลือก">＋</button>`}
   </div>`;
 }
@@ -201,13 +228,17 @@ function step2(s: DaySchedule): string {
     const q = st!.q.trim().toLowerCase();
     const list = app
       .places()
-      .filter((p) => p.category !== 'base' && p.lat != null)
+      .filter((p) => p.lat != null)
       .filter((p) => !q || [p.nameTh, p.nameEn, p.nameKo, p.area, ...(p.food?.menu ?? [])].join(' ').toLowerCase().includes(q));
     // ใกล้จุดในแผนก่อน
     const anchors = d.stops.map(placeOf).filter((p): p is Place => !!p && p.lat != null);
     const dist = (p: Place) => (anchors.length ? Math.min(...anchors.map((a) => straightLineM({ lat: a.lat!, lng: a.lng! }, { lat: p.lat!, lng: p.lng! }))) : 0);
     list.sort((a, b) => dist(a) - dist(b));
-    laneBody = list.length ? list.slice(0, 60).map((p) => laneItem(p, inDay.has(p.id))).join('') : '<p class="muted">ไม่พบ — ลองคำอื่น</p>';
+    const main = list.filter((p) => p.category === 'base');
+    const others = list.filter((p) => p.category !== 'base');
+    laneBody = list.length
+      ? `${main.length ? `<p class="pl-group">สถานที่หลัก</p>${main.map((p) => laneItem(p, inDay.has(p.id))).join('')}` : ''}${others.length ? `<p class="pl-group">สถานที่อื่น ๆ <span class="muted">(ใกล้จุดในแผนก่อน)</span></p>${others.slice(0, 80).map((p) => laneItem(p, inDay.has(p.id))).join('')}` : ''}`
+      : '<p class="muted">ไม่พบ — ลองคำอื่น</p>';
   }
   const slotLabel = st!.slot == null ? 'ท้ายวัน' : `ช่องที่ ${st!.slot + 1}`;
   return `<div class="pl-lanes">
@@ -218,7 +249,8 @@ function step2(s: DaySchedule): string {
       <div class="pl-lane-list">${laneBody}</div>
     </section>
     <section class="pl-lane right">
-      <h3>ช่องเวลาของวัน</h3>
+      <div class="pl-card-head"><h3>ช่องเวลาของวัน</h3>
+        <div class="pl-mini-actions">${recommendedStops(st!.draft.date).length ? '<button class="pl-btn ghost sm" data-pl="reset-step" data-v="2">↺ ใช้แผนแนะนำของวันนี้</button>' : ''}<button class="pl-btn ghost sm" data-pl="clear-stops">ล้างทั้งหมด</button></div></div>
       ${dayLane(s)}
     </section>
   </div>`;
@@ -242,6 +274,7 @@ function dayLane(s: DaySchedule): string {
         <div class="pl-row-main">
           <b>${esc(nameOf(x))}</b>${x.lockedTime ? ` <span class="pill">นัด ${esc(x.lockedTime)}</span>` : ''}
           <div class="pl-stay">อยู่ <select class="inp xs" data-pl-change="stay" data-uid="${x.uid}" aria-label="อยู่นานเท่าไร">${[...new Set([...STAY_CHOICES, x.stayMin])].sort((a, b) => a - b).map((m) => `<option value="${m}" ${m === x.stayMin ? 'selected' : ''}>${fmtDur(m)}</option>`).join('')}</select>
+            ${defaultStay(x) != null && defaultStay(x) !== x.stayMin ? resetBtn('reset-stay', x.uid, `คืนเวลาที่แนะนำ (${fmtDur(defaultStay(x)!)})`) : ''}
             ${t.depart != null ? `<span class="muted small">ถึง ${fmtHM(t.depart)}</span>` : ''}
             ${t.lateMin ? `<span class="bad-text small">สาย ${fmtDur(t.lateMin)}</span>` : ''}
             ${t.warnings.find((w) => w.startsWith('ปิด')) ? `<span class="bad-text small">${esc(t.warnings.find((w) => w.startsWith('ปิด'))!)}</span>` : ''}</div>
@@ -274,14 +307,14 @@ function step3(s: DaySchedule): string {
   if (s.end && s.end.leg.fromId && s.end.leg.toId && s.end.leg.fromId !== s.end.leg.toId) legs.push({ target: '__end', from: app.getPlace(s.end.leg.fromId), to: app.getPlace(s.end.leg.toId), leg: s.end.leg });
   const mode = (target: string) => (target === '__end' ? d.endLeg : d.stops.find((x) => x.uid === target)!.legIn);
   return `<section class="pl-card">
-    <h2>เดินทางระหว่างจุด ใช้เวลาประมาณเท่าไร</h2>
+    <div class="pl-card-head"><h2>เดินทางระหว่างจุด ใช้เวลาประมาณเท่าไร</h2>${legs.some((l) => mode(l.target).manualMin != null || mode(l.target).mode !== 'TRANSIT') ? '<button class="pl-btn ghost sm" data-pl="reset-step" data-v="3">↺ ใช้เวลาประมาณทั้งหมด</button>' : ''}</div>
     <p class="muted small">ระบบใส่เวลาประมาณจากระยะทางไว้ให้ (≈) — แก้เป็นเวลาที่คิดว่าใช้จริงได้เลย</p>
     <table class="pl-legs"><tbody>${legs
       .map(
         (l) => `<tr>
         <td>${esc(shortName(l.from))} → <b>${esc(shortName(l.to))}</b></td>
         <td><select class="inp xs" data-pl-change="mode" data-target="${l.target}">${(['TRANSIT', 'WALKING', 'DRIVING'] as TravelMode[]).map((m) => `<option value="${m}" ${mode(l.target).mode === m ? 'selected' : ''}>${{ TRANSIT: 'รถไฟฟ้า/รถเมล์', WALKING: 'เดิน', DRIVING: 'แท็กซี่' }[m]}</option>`).join('')}</select></td>
-        <td class="num"><input class="inp xs" type="number" min="0" value="${l.leg.travelMin ?? ''}" data-pl-change="travel" data-target="${l.target}" aria-label="นาที"> นาที ${l.leg.source === 'auto' ? '<span class="muted small">(ประมาณ)</span>' : ''}</td>
+        <td class="num"><input class="inp xs" type="number" min="0" value="${l.leg.travelMin ?? ''}" data-pl-change="travel" data-target="${l.target}" aria-label="นาที"> นาที ${l.leg.source === 'auto' ? '<span class="muted small">(ประมาณ)</span>' : ''}${mode(l.target).manualMin != null || mode(l.target).mode !== 'TRANSIT' ? resetBtn('reset-leg', l.target, 'กลับเป็นเวลาประมาณ') : ''}</td>
       </tr>`,
       )
       .join('')}</tbody></table>
@@ -391,6 +424,40 @@ function onClick(e: Event) {
       st.step = Number(v) as Step;
       st.backToSummary = true;
       break;
+    case 'reset-field': {
+      const def = systemDayDefaults(st.draft.date);
+      const f = v as keyof typeof def | 'date';
+      st.draft = f === 'date' ? { ...st.draft, date: st.orig.date } : { ...st.draft, [f]: def[f] };
+      break;
+    }
+    case 'reset-step': {
+      if (v === '1') {
+        const def = systemDayDefaults(st.orig.date);
+        st.draft = { ...st.draft, date: st.orig.date, ...def };
+      } else if (v === '2') {
+        const rec = recommendedStops(st.draft.date);
+        if (rec.length) st.draft = { ...st.draft, stops: rec };
+      } else if (v === '3') {
+        const clear = <T extends { manualMin: number | null; manualKind?: 'user' | 'estimate'; mode: TravelMode }>(l: T): T => ({ ...l, manualMin: null, manualKind: undefined, mode: 'TRANSIT' });
+        st.draft = { ...st.draft, endLeg: clear(st.draft.endLeg), stops: st.draft.stops.map((x) => ({ ...x, legIn: clear(x.legIn) })) };
+      }
+      break;
+    }
+    case 'clear-stops':
+      st.draft = { ...st.draft, stops: st.draft.stops.filter((x) => x.lockedTime) };
+      st.slot = null;
+      break;
+    case 'reset-stay': {
+      const x = st.draft.stops.find((y) => y.uid === v);
+      const m = x ? defaultStay(x) : null;
+      if (x && m != null) st.draft = updateStop(st.draft, x.uid, { stayMin: m });
+      break;
+    }
+    case 'reset-leg': {
+      const clear = { manualMin: null, manualKind: undefined, mode: 'TRANSIT' as TravelMode };
+      st.draft = v === '__end' ? { ...st.draft, endLeg: { ...st.draft.endLeg, ...clear } } : updateStop(st.draft, v!, { legIn: { ...st.draft.stops.find((y) => y.uid === v)!.legIn, ...clear } });
+      break;
+    }
     case 'lane':
       st.lane = v === 'search' ? 'search' : 'cards';
       break;
@@ -445,7 +512,7 @@ function onChange(e: Event) {
   switch (k) {
     case 'day': {
       const day = app.findDay(el.value);
-      if (day) Object.assign(st, { dayId: day.id, draft: withDefaults(clone(day)), slot: null });
+      if (day) Object.assign(st, { dayId: day.id, draft: withDefaults(clone(day)), orig: clone(day), slot: null });
       render(true);
       return;
     }
