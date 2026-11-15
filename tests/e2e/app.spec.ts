@@ -484,7 +484,7 @@ test('มื้ออาหาร: เลือกเช้า/กลางว�
   await expect(page.locator('.modal')).toContainText('มื้อกลางวัน');
   await page.locator('.modal [data-act="meal-add"][data-v="lunch"]').click();
   await expect(page.locator('#toast')).toContainText('เพิ่มมื้อกลางวัน');
-  const lunch = page.locator('.stop', { hasText: 'มื้อกลางวัน' });
+  const lunch = page.locator('.stop', { has: page.locator('.stop-title .t', { hasText: 'มื้อกลางวัน' }) });
   await expect(lunch).toBeVisible();
   // ⓘ → เปลี่ยนเป็นมื้อระหว่างทาง
   await lunch.locator('[data-act="stop-info"]').click();
@@ -599,4 +599,39 @@ test('จัดแผนแบบขั้นตอน: ค้นไม่เจ
   await pl.locator('[data-pl-input="q"]').dispatchEvent('input');
   await expect(pl.locator('.pl-lane-list')).toContainText('MUSINSA STANDARD Myeongdong Jungang');
   expect(await pl.locator('.pl-lane-list .pl-item').count()).toBeGreaterThanOrEqual(4);
+});
+
+test('โน้ต "จะไปทำอะไร": เพิ่ม/บันทึก/แก้ ในตัวจัดแผน และในหน้าแผน (ⓘ) · แสดงในหน้า วันนี้', async ({ page }) => {
+  test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
+  await page.clock.setFixedTime(new Date('2026-11-30T01:00:00Z')); // 10:00 โซล วันที่ 30 พ.ย.
+  await page.goto('/');
+  await page.locator('[data-act="open-templates"]').click();
+  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
+  await page.locator('[data-act="tpl-apply-all"]').click();
+  await page.locator('[data-act="confirm-ok"]').click();
+  await page.locator('[data-act="open-planner"]').click();
+  const pl = page.locator('#planner');
+  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  const row = pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' });
+  await row.locator('[data-pl="note-edit"]').click();
+  await row.locator('textarea').fill('กินคัลกุกซุ + เกี๊ยว สั่ง 2 ที่');
+  await row.locator('[data-pl="note-save"]').click();
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' }).locator('.pl-note')).toContainText('คัลกุกซุ');
+  // แก้
+  await pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' }).locator('[data-pl="note-edit"]').click();
+  await pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' }).locator('textarea').fill('กินคัลกุกซุ');
+  await pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' }).locator('[data-pl="note-save"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="4"]').click();
+  await expect(pl.locator('.pl-sum')).toContainText('กินคัลกุกซุ');
+  await pl.locator('[data-pl="confirm"]').click();
+  // หน้าแผน: โน้ตแสดงใต้ชื่อ · แก้ใน ⓘ แล้วกดบันทึก
+  await page.locator('[data-act="tab"][data-tab="plan"]').filter({ visible: true }).first().click();
+  const stop = page.locator('.stop', { hasText: 'Myeongdong Kyoja' });
+  await expect(stop.locator('.stop-note')).toContainText('กินคัลกุกซุ');
+  await stop.locator('[data-act="stop-info"]').click();
+  await page.locator('.modal form[data-form="stop-note"] textarea').fill('กินคัลกุกซุ แล้วซื้อของฝาก');
+  await page.locator('.modal form[data-form="stop-note"] button').click();
+  await expect(page.locator('#toast')).toContainText('บันทึกโน้ตแล้ว');
+  await page.locator('.modal [data-act="modal-close"]').last().click();
+  await expect(page.locator('.stop', { hasText: 'Myeongdong Kyoja' }).locator('.stop-note')).toContainText('ซื้อของฝาก');
 });

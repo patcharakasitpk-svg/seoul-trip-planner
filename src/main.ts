@@ -1370,6 +1370,11 @@ document.addEventListener('submit', (ev) => {
     };
     app.modal = null;
     app.commit((p) => p.customPlaces.push(place), 'เพิ่มสถานที่แล้ว');
+  } else if (kind === 'stop-note') {
+    const note = String(fd.get('note') ?? '').trim().slice(0, 500);
+    app.updateDay(form.dataset.day!, (x) => updateStop(x, form.dataset.stop!, { note }));
+    app.showToast(note ? 'บันทึกโน้ตแล้ว' : 'ลบโน้ตแล้ว');
+    app.requestRender();
   } else if (kind === 'shop-item') {
     const r = parseItemInput({ name: String(fd.get('name') ?? ''), thb: String(fd.get('thb') ?? ''), thbLabel: String(fd.get('thbLabel') ?? ''), qty: String(fd.get('qty') ?? '') });
     if (!r.ok) {

@@ -52,7 +52,7 @@ function heroMoving(day: Day, s: DaySchedule, t: StopTiming, live: boolean, eyeb
     <h2>${esc(stopName(t))}</h2>
     <p class="hero-big">${t.arrive != null ? `ถึงประมาณ <b>${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive)}</b>` : 'ยังไม่มีเวลา'}</p>
     <p class="hero-facts">${isMove ? `<span>${MODE_ICON[t.leg.mode]} เดินทาง <b>${travelText(t.leg)}</b></span>` : ''}<span>⏱ อยู่ <b>${fmtDur(t.stop.stayMin)}</b></span>${t.stop.lockedTime ? `<span>🔒 นัด <b>${esc(t.stop.lockedTime)}</b></span>` : ''}</p>
-    ${t.stop.note ? `<p class="hero-note">${esc(t.stop.note)}</p>` : ''}
+    ${t.stop.note ? `<p class="stop-note">${esc(t.stop.note)}</p>` : ''}
     ${isMove ? navRow(from, to, t.leg.mode) : ''}
     ${live ? `<button class="btn primary huge" data-act="live-arrive" data-stop="${t.uid}">✓ ถึงแล้ว</button>` : ''}
   </section>`;
@@ -75,6 +75,7 @@ function heroAt(day: Day, s: DaySchedule, t: StopTiming, now: number | null): st
     <p class="hero-big ${left != null && left < 0 ? 'bad' : ''}">${left == null ? `อยู่ ${fmtDur(t.stop.stayMin)}` : left >= 0 ? `อยู่ได้อีก <b>${fmtDur(left)}</b>` : `เกินเวลา <b>${fmtDur(-left)}</b>`}</p>
     <div class="bar" role="progressbar" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     <p class="hero-facts"><span>ควรออก <b>${fmtHM(plannedOut)}</b></span>${t.stop.lockedTime ? `<span>🔒 ${esc(t.stop.lockedTime)}</span>` : ''}</p>
+    ${t.stop.note ? `<p class="stop-note">${esc(t.stop.note)}</p>` : ''}
     <button class="btn primary huge" data-act="live-depart" data-stop="${t.uid}">✓ ออกจากที่นี่</button>
     ${
       nextTo && nextLeg

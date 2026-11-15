@@ -36,6 +36,8 @@ interface PState {
   orig: Day;
   /** สถานที่ที่กำลังดูหมุดแดงก่อนใส่ */
   preview: string | null;
+  /** จุดที่กำลังเขียนโน้ต */
+  noteEdit: string | null;
   /** ตัวกรองในแท็บค้นหา: หมวด และย่าน */
   cat: string;
   zone: string;
@@ -61,7 +63,7 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
   const day = app.findDay(dayId);
   if (!day) return;
   onDone = done;
-  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null, web: null, cat: '', zone: '' };
+  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null, web: null, cat: '', zone: '', noteEdit: null };
   if (!root) {
     root = document.createElement('div');
     root.id = 'planner';
@@ -393,6 +395,16 @@ function step2(s: DaySchedule): string {
   </div>`;
 }
 
+/** โน้ต "จะไปทำอะไรที่นี่": แสดง / แก้ไข (กดบันทึก) */
+function noteBlock(x: Stop): string {
+  if (st!.noteEdit === x.uid)
+    return `<div class="pl-note-edit"><textarea class="inp" rows="2" maxlength="500" placeholder="จะไปทำอะไรที่นี่ เช่น ซื้อ… / กินเมนู… / ถ่ายรูปที่…" data-autofocus>${esc(x.note)}</textarea>
+      <div class="pl-note-actions"><button class="pl-btn primary sm" data-pl="note-save" data-uid="${x.uid}">บันทึก</button><button class="pl-btn ghost sm" data-pl="note-cancel">ยกเลิก</button></div></div>`;
+  return x.note
+    ? `<div class="pl-note"><span>${esc(x.note)}</span><button class="link small" data-pl="note-edit" data-uid="${x.uid}">แก้</button></div>`
+    : `<button class="link small pl-note-add" data-pl="note-edit" data-uid="${x.uid}">＋ โน้ต (จะไปทำอะไร)</button>`;
+}
+
 /** เลนขวา: เวลาไหลต่อกัน · ช่องวาง (drop) ระหว่างทุกรายการ · ช่วงว่างแสดงเป็นช่องใหญ่ */
 function dayLane(s: DaySchedule): string {
   const d = st!.draft;
@@ -415,6 +427,7 @@ function dayLane(s: DaySchedule): string {
             ${t.depart != null ? `<span class="muted small">ถึง ${fmtHM(t.depart)}</span>` : ''}
             ${t.lateMin ? `<span class="bad-text small">สาย ${fmtDur(t.lateMin)}</span>` : ''}
             ${t.warnings.find((w) => w.startsWith('ปิด')) ? `<span class="bad-text small">${esc(t.warnings.find((w) => w.startsWith('ปิด'))!)}</span>` : ''}</div>
+          ${noteBlock(x)}
         </div>
         <div class="pl-row-act">
           <button class="icon-btn sm" data-pl="up" data-uid="${x.uid}" ${i === 0 ? 'disabled' : ''} aria-label="เลื่อนขึ้น">↑</button>
@@ -470,7 +483,7 @@ function step4(s: DaySchedule): string {
     if (t.stop.skipped) continue;
     const isMove = t.stop.kind === 'place' || t.stop.kind === 'dinner';
     if (isMove && t.leg.fromId !== t.leg.toId && t.leg.travelMin != null) rows.push(`<li class="sum-leg"><span></span><span>เดินทาง ${travelText(t.leg)}</span>${edit(3)}</li>`);
-    rows.push(`<li class="sum-stop"><span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span><span><b>${esc(nameOf(t.stop))}</b> ${photoLink(placeOf(t.stop))} · ${fmtDur(t.stop.stayMin)}${t.stop.lockedTime ? ' · นัด' : ''}${t.lateMin ? ` <span class="bad-text">สาย ${fmtDur(t.lateMin)}</span>` : ''}</span>${edit(2)}</li>`);
+    rows.push(`<li class="sum-stop"><span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span><span><b>${esc(nameOf(t.stop))}</b> ${photoLink(placeOf(t.stop))} · ${fmtDur(t.stop.stayMin)}${t.stop.note ? `<span class="pl-note sum">${esc(t.stop.note)}</span>` : ''}${t.stop.lockedTime ? ' · นัด' : ''}${t.lateMin ? ` <span class="bad-text">สาย ${fmtDur(t.lateMin)}</span>` : ''}</span>${edit(2)}</li>`);
   }
   if (s.end) {
     rows.push(`<li class="sum-leg"><span></span><span>เดินทาง ${travelText(s.end.leg)}</span>${edit(3)}</li>`);
@@ -611,6 +624,18 @@ function onClick(e: Event) {
     case 'reset-leg': {
       const clear = { manualMin: null, manualKind: undefined, mode: 'TRANSIT' as TravelMode };
       st.draft = v === '__end' ? { ...st.draft, endLeg: { ...st.draft.endLeg, ...clear } } : updateStop(st.draft, v!, { legIn: { ...st.draft.stops.find((y) => y.uid === v)!.legIn, ...clear } });
+      break;
+    }
+    case 'note-edit':
+      st.noteEdit = el.dataset.uid ?? null;
+      break;
+    case 'note-cancel':
+      st.noteEdit = null;
+      break;
+    case 'note-save': {
+      const ta = el.closest('.pl-note-edit')?.querySelector('textarea') as HTMLTextAreaElement | null;
+      st.draft = updateStop(st.draft, el.dataset.uid!, { note: (ta?.value ?? '').trim().slice(0, 500) });
+      st.noteEdit = null;
       break;
     }
     case 'cat':

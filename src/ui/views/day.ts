@@ -128,6 +128,7 @@ function stopRow(day: Day, t: StopTiming, i: number, _total: number, dayIdx: num
         <div class="t">${stopIcon(s, p)} ${stopName(s, p)}</div>
         <div class="sub">${when}${s.lockedTime ? ` · 🔒 ${esc(s.lockedTime)}` : ''}${t.wait ? ` · รอ ${fmtDur(t.wait)}` : ''}</div>
         ${warns.length ? `<div class="warn-line">⚠ ${esc(warns[0])}</div>` : ''}
+        ${s.note ? `<p class="stop-note">${esc(s.note)}</p>` : ''}
       </div>
       ${unselected && !s.skipped ? `<button class="btn sm primary" data-act="dinner-options" data-day="${day.id}" data-stop="${s.uid}">เลือกร้าน</button>` : ''}
       <button class="icon-btn info" data-act="stop-info" data-day="${day.id}" data-stop="${s.uid}" aria-label="รายละเอียด / แก้ไข ${stopName(s, p).replace(/<[^>]+>/g, '')}">ⓘ</button>
@@ -155,7 +156,10 @@ export function stopInfoBody(day: Day, t: StopTiming, i: number, total: number):
       <label>นัดเวลา 🔒 <input class="inp xs" type="time" value="${esc(s.lockedTime ?? '')}" data-act-change="stop-field" data-field="lockedTime" data-day="${day.id}" data-stop="${s.uid}" aria-label="เวลานัดที่ล็อก"></label>
     </div>
     ${p?.coordStatus === 'area-center' ? '<p class="muted small">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อถึงร้านจริง</p>' : p?.coordStatus === 'approx' ? '<p class="muted small">พิกัดจากแหล่งเดียว (หมุดเส้นประ) — เช็กใน Google Maps ก่อนไป</p>' : ''}
-    <label class="block small">โน้ต <textarea class="inp" rows="2" maxlength="500" data-act-change="stop-field" data-field="note" data-day="${day.id}" data-stop="${s.uid}">${esc(s.note)}</textarea></label>
+    <form class="note-form" data-form="stop-note" data-day="${day.id}" data-stop="${s.uid}">
+      <label class="block small">โน้ต: จะไปทำอะไรที่นี่<textarea class="inp" name="note" rows="3" maxlength="500" placeholder="เช่น ซื้อ… / กินเมนู… / ถ่ายรูปที่…">${esc(s.note)}</textarea></label>
+      <button class="btn sm primary">บันทึกโน้ต</button>
+    </form>
     ${s.kind === 'break' || s.kind === 'buffer' ? `<label class="block small">ชื่อรายการ <input class="inp" value="${esc(s.title ?? '')}" maxlength="80" data-act-change="stop-field" data-field="title" data-day="${day.id}" data-stop="${s.uid}"></label>` : ''}
     ${p ? `<div class="nav-row">${naverBtn(naverPlaceUrl(p), '🟢 Naver', 'btn')}<a class="btn" target="_blank" rel="noopener" href="${esc(gmapsPlaceUrl(p))}">🧭 Google</a><a class="btn" target="_blank" rel="noopener" href="${esc(photosUrl(p))}" aria-label="ดูรูป">📷</a></div>` : ''}
     <div class="row-btns">
