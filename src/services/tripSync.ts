@@ -114,6 +114,7 @@ async function signedIn(u: AuthUser) {
   st.status = 'loading';
   changed();
   await refreshLists();
+  watchInvites();
   void syncShopFx();
   const want = app.settings.activeTrip;
   const pick = st.myTrips.find((t) => t.id === want) ?? (st.myTrips.length === 1 ? st.myTrips[0] : null);
@@ -124,7 +125,27 @@ async function signedIn(u: AuthUser) {
   }
 }
 
+/** ฟังคำเชิญแบบสด: เจ้าของเชิญตอนที่เพื่อนเปิดแอปอยู่ → ขึ้นทันทีโดยไม่ต้องรีเฟรช */
+let inviteUnsub: Unsubscribe | null = null;
+function watchInvites() {
+  inviteUnsub?.();
+  inviteUnsub = null;
+  const email = myEmail();
+  if (!fs || !db || !email) return;
+  const { collection, query, where, onSnapshot } = fs;
+  inviteUnsub = onSnapshot(
+    query(collection(db, 'trips'), where('invites', 'array-contains', email)),
+    (s) => {
+      st.invited = s.docs.filter((d) => !st.myTrips.some((m) => m.id === d.id)).map((d) => ({ id: d.id, name: String(d.data().name ?? 'ทริป'), ownerEmail: String(d.data().ownerEmail ?? '') }));
+      changed();
+    },
+    () => {},
+  );
+}
+
 function signedOut() {
+  inviteUnsub?.();
+  inviteUnsub = null;
   stopListeners();
   user = null;
   st.trip = null;

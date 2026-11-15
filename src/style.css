@@ -1037,3 +1037,8 @@ body.planner-open .main-menu [data-act="tab"].on { background: none; box-shadow:
 .pp-actions { align-items: center; }
 .pl-note { display: flex; align-items: flex-start; gap: .3rem; }
 .pl-note span { flex: 1; }
+/* แถบสถานะทริปที่แชร์ */
+.trip-banner { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; padding: .55rem 1rem; background: #fff7e6; color: #7a4a06; font-size: .88rem; border-bottom: 1px solid #f5dfb3; }
+.trip-banner.invite { background: #eaf1ff; color: #1d3f8a; border-bottom-color: #c9d9ff; }
+.trip-banner .btn { flex: none; }
+.status-bar:has(.trip-banner) { padding: 0; background: none; }

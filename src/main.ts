@@ -6,7 +6,7 @@ import { initMyPlaces, renderMyPlaces } from './ui/myPlaces';
 import { initPacking, renderPacking } from './ui/packing';
 import { initLogin, openLogin, accountButtonHtml, refreshLogin } from './ui/login';
 import { initAuth, signOutUser, authState } from './services/auth';
-import { initTripSync, personalStoreChanged, inTrip, isTripOwner } from './services/tripSync';
+import { initTripSync, personalStoreChanged, inTrip, isTripOwner, tripState, joinTrip, activate } from './services/tripSync';
 import { hydratePlacePhotos } from './ui/views/placeInfo';
 import { renderToday, todayDay } from './ui/views/today';
 import { openPlanner, refreshPlanner, closePlanner, plannerOpen } from './ui/planner';
@@ -113,6 +113,20 @@ barSizes();
 new ResizeObserver(barSizes).observe($('.topbar'));
 window.addEventListener('resize', barSizes);
 
+/** แถบบอกสถานะทริปที่แชร์: เข้าสู่ระบบแล้วแต่ยังไม่ได้อยู่ในทริป → บอกชัดว่ากำลังดูแผนในเครื่อง + ปุ่มเข้าร่วมคำเชิญ */
+function tripBanner(): string {
+  const s = authState();
+  if (s.status !== 'signed-in' || inTrip()) return '';
+  const t = tripState();
+  if (t.status === 'loading') return '';
+  const inv = t.invited[0];
+  if (inv)
+    return `<div class="trip-banner invite"><span>คุณได้รับเชิญเข้าทริป <b>${esc(inv.name)}</b> จาก ${esc(inv.ownerEmail)}</span><button class="btn sm primary" data-act="join-trip" data-v="${esc(inv.id)}" ${t.busy ? 'disabled' : ''}>${t.busy === 'join' ? 'กำลังเข้าร่วม…' : 'เข้าร่วมทริป'}</button></div>`;
+  const mine = t.myTrips[0];
+  if (mine) return `<div class="trip-banner"><span>ตอนนี้กำลังดูแผนในเครื่องนี้ ไม่ใช่ทริปที่แชร์</span><button class="btn sm primary" data-act="open-trip" data-v="${esc(mine.id)}">เปิดทริป ${esc(mine.name)}</button></div>`;
+  return `<div class="trip-banner"><span>แผนนี้อยู่ในเครื่องนี้เท่านั้น — ยังไม่ได้เข้าทริปที่แชร์ · ให้เจ้าของทริปเชิญอีเมล <b>${esc(s.user.email ?? '')}</b></span><button class="btn sm" data-act="open-login">สร้าง/เข้าทริป</button></div>`;
+}
+
 /** ชื่อแพลนเนอร์ = ชื่อบัญชีที่เข้าสู่ระบบ (เช่น "Patcharakasit's planner") · ไม่เข้าสู่ระบบ = Travel planner */
 function plannerTitle(): string {
   const s = authState();
@@ -134,7 +148,8 @@ function render() {
   if (g.status === 'error') st.push(`<span class="warn">Google Maps ใช้ไม่ได้ (${esc(g.error)}) — ใช้แผนที่ OpenStreetMap แทน</span>`);
   if (!app.storageOk) st.push('<span class="warn">บันทึกในเครื่องไม่ได้ — โปรด Export JSON ก่อนปิดหน้า</span>');
   else if (!app.saveOk) st.push('<span class="warn">บันทึกล่าสุดไม่สำเร็จ — โปรด Export JSON</span>');
-  $('#status-bar').innerHTML = st.join('');
+  const tb = tripBanner();
+  $('#status-bar').innerHTML = tb + st.join('');
   if (app.tab === 'places') renderMyPlaces();
   personalStoreChanged();
   if (app.tab === 'packing') renderPacking();
@@ -1109,6 +1124,17 @@ document.addEventListener('click', (ev) => {
     case 'place-modal':
       app.modal = { type: 'place', placeId: d.place! };
       break;
+    case 'join-trip':
+      void joinTrip(d.v!).then((err) => {
+        app.showToast(err || 'เข้าร่วมทริปแล้ว — แผนและสถานที่ของทริปขึ้นแล้ว');
+        app.tab = 'plan';
+        app.requestRender();
+      });
+      return;
+    case 'open-trip':
+      activate(d.v!);
+      app.requestRender();
+      return;
     case 'open-login':
       app.modal = null;
       app.requestRender();
