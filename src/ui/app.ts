@@ -77,7 +77,7 @@ class AppState {
   fitSearch = false;
 
   private needs = new Map<string, RouteReq>();
-  private placeCache: { custom: Place[]; map: Map<string, Place>; list: Place[] } | null = null;
+  private placeCache: { custom: Place[]; over: Plan['coordOverrides']; map: Map<string, Place>; list: Place[] } | null = null;
   renderFn: () => void = () => {};
   private renderQueued = false;
   private routeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -121,9 +121,12 @@ class AppState {
 
   private ensurePlaces() {
     const custom = this.plan.customPlaces;
-    if (!this.placeCache || this.placeCache.custom !== custom) {
-      const list = [...PUBLIC_PLACES, ...custom];
-      this.placeCache = { custom, list, map: new Map(list.map((p) => [p.id, p])) };
+    const over = this.plan.coordOverrides;
+    if (!this.placeCache || this.placeCache.custom !== custom || this.placeCache.over !== over) {
+      // พิกัดที่ผู้ใช้ตั้งเอง (สำหรับร้านที่ยังไม่มีพิกัด) — ปักหมุดได้ทุกหน้า
+      const withOver = (p: Place): Place => (over?.[p.id] ? { ...p, lat: over[p.id].lat, lng: over[p.id].lng, coordStatus: 'user' } : p);
+      const list = [...PUBLIC_PLACES, ...custom].map(withOver);
+      this.placeCache = { custom, over, list, map: new Map(list.map((p) => [p.id, p])) };
     }
   }
 

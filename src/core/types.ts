@@ -113,6 +113,8 @@ export interface Plan {
   name: string;
   days: Day[];
   customPlaces: Place[];
+  /** พิกัดที่ผู้ใช้ตั้งเองให้สถานที่ที่ยังไม่มีพิกัด (placeId → lat/lng) */
+  coordOverrides?: Record<string, { lat: number; lng: number }>;
   stayOverrides: Record<string, number>;
   saved: string[];
   coldLevel: ColdLevel;

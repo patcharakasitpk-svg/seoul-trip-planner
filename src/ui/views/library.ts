@@ -205,7 +205,7 @@ function placeDetails(p: Place): string {
       ${stationBlock(p, app.getPlace(app.day.startPlaceId) ?? app.getPlace('hotel'))}
       ${p.food?.menu?.length ? `<p class="small"><b>เมนู</b> ${p.food.menu.slice(0, 3).map(esc).join(', ')}</p>` : ''}
       ${p.budget && p.budget.textTh ? `<p class="small"><b>งบ</b> ${esc(p.budget.textTh)}${p.budget.status === 'estimate' ? ' (ประมาณ)' : ''}</p>` : ''}
-      ${p.lat == null ? '<p class="small closed">ยังไม่มีพิกัด — ไม่ปักหมุด</p>' : p.coordStatus === 'area-center' ? '<p class="small muted">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อ</p>' : p.coordStatus === 'approx' ? `<p class="small muted">หมุดเส้นประ = พิกัดจากแหล่งเดียว${p.coordSource ? ` (${esc(p.coordSource)})` : ''} — เช็กใน Google Maps ก่อนไป</p>` : ''}
+      ${p.lat == null ? coordFixForm(p) : p.coordStatus === 'area-center' ? '<p class="small muted">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อ</p>' : p.coordStatus === 'approx' ? `<p class="small muted">หมุดเส้นประ = พิกัดจากแหล่งเดียว${p.coordSource ? ` (${esc(p.coordSource)})` : ''} — เช็กใน Google Maps ก่อนไป</p>` : ''}
       <div class="row-btns">
         <a class="btn sm" href="${esc(photosUrl(p))}" target="_blank" rel="noopener">📷 ดูรูป</a>
         <a class="btn sm" href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">Google Maps ↗</a>
@@ -213,6 +213,15 @@ function placeDetails(p: Place): string {
         ${p.lat != null ? `<button class="btn sm" data-act="focus-place" data-place="${esc(p.id)}">ดูบนแผนที่</button>` : ''}
       </div>
     </div>`;
+}
+
+/** สถานที่ที่ยังไม่มีพิกัด: เปิดดูใน Google Maps แล้ววางพิกัด/ลิงก์ เพื่อปักหมุดเอง */
+export function coordFixForm(p: Place): string {
+  return `<form class="coord-fix" data-form="coord" data-place="${esc(p.id)}">
+    <p class="small"><b class="closed">ยังไม่มีพิกัด จึงปักหมุดไม่ได้</b> · <a href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">เปิดใน Google Maps ↗</a></p>
+    <div class="coord-row"><input class="inp sm" name="coord" placeholder="วางพิกัด เช่น 37.5438, 127.0557 หรือลิงก์ Google Maps" aria-label="พิกัดหรือลิงก์ Google Maps"><button class="btn sm primary">บันทึกพิกัด</button></div>
+    <p class="muted small">บนคอม: คลิกขวาที่ร้านใน Google Maps → กดตัวเลขพิกัดบรรทัดแรกเพื่อคัดลอก แล้ววางที่นี่</p>
+  </form>`;
 }
 
 export { CATEGORY_LABEL };

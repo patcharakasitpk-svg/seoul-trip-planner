@@ -635,3 +635,24 @@ test('โน้ต "จะไปทำอะไร": เพิ่ม/บัน�
   await page.locator('.modal [data-act="modal-close"]').last().click();
   await expect(page.locator('.stop', { hasText: 'Myeongdong Kyoja' }).locator('.stop-note')).toContainText('ซื้อของฝาก');
 });
+
+test('ร้านที่ยังไม่มีพิกัด: แตะแล้วบอกชัด · วางพิกัดจาก Google Maps → หมุดแดงขึ้น', async ({ page }) => {
+  test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
+  await page.goto('/');
+  await page.locator('[data-act="open-planner"]').click();
+  const pl = page.locator('#planner');
+  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('[data-pl="lane"][data-v="search"]').click();
+  await pl.locator('[data-pl-input="q"]').fill('29cm');
+  await pl.locator('[data-pl="preview"][data-place="29cm-home-seongsu"]').click();
+  await expect(pl.locator('.pl-nocoord')).toContainText('ยังไม่มีพิกัด');
+  await expect(pl.locator('.pl-nocoord a')).toHaveAttribute('href', /google\.com\/maps/);
+  await pl.locator('.pl-nocoord [name="coord"]').fill('hello');
+  await pl.locator('.pl-nocoord button').click();
+  await expect(page.locator('#toast')).toContainText('อ่านพิกัดไม่ได้');
+  await pl.locator('.pl-nocoord [name="coord"]').fill('37.5440, 127.0556');
+  await pl.locator('.pl-nocoord button').click();
+  await expect(page.locator('#toast')).toContainText('บันทึกพิกัดแล้ว');
+  await expect(pl.locator('.pl-pin.preview')).toContainText('29CM HOME Seongsu');
+  await expect(pl.locator('.pl-nocoord')).toHaveCount(0);
+});

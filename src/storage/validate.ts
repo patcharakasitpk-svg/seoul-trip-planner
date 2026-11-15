@@ -75,6 +75,7 @@ export function validatePlan(input: unknown): { ok: true; plan: Plan; warnings: 
       name: str(input.name, 80) || 'แผนเที่ยวโซล',
       days,
       customPlaces,
+      coordOverrides: coordOverrides(input.coordOverrides),
       stayOverrides,
       saved: Array.isArray(input.saved) ? input.saved.slice(0, 300).map((x) => str(x, 80)).filter(Boolean) : [],
       coldLevel: input.coldLevel === 'low' || input.coldLevel === 'high' ? input.coldLevel : 'normal',
@@ -140,6 +141,18 @@ function actualTimes(x: unknown): Day['actual'] {
     const a = hm(v.a);
     const d = hm(v.d);
     if (a || d) out[k] = { ...(a ? { a } : {}), ...(d ? { d } : {}) };
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+function coordOverrides(x: unknown): Plan['coordOverrides'] {
+  if (!isObj(x)) return undefined;
+  const out: NonNullable<Plan['coordOverrides']> = {};
+  for (const [k, v] of Object.entries(x).slice(0, 200)) {
+    if (!isObj(v) || k.length > 80) continue;
+    const lat = Number(v.lat);
+    const lng = Number(v.lng);
+    if (Number.isFinite(lat) && Number.isFinite(lng) && lat >= 33 && lat <= 39 && lng >= 124 && lng <= 132) out[k] = { lat, lng };
   }
   return Object.keys(out).length ? out : undefined;
 }

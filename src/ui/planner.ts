@@ -11,6 +11,7 @@ import { fmtDateTh, fmtDur, fmtHM, parseHM } from '../core/time';
 import { TEMPLATES } from '../data/templates';
 import { CATEGORY_LABEL } from '../data/places';
 import { placeOptions } from './views/day';
+import { coordFixForm } from './views/library';
 import { travelText } from './views/leg';
 import { mealName, mealOf, newMeal, MEALS, type Meal } from '../core/meals';
 import { systemDayDefaults, recommendedStops } from '../core/dayDefaults';
@@ -104,6 +105,11 @@ function suggestedStay(x: Stop): number | null {
   if (x.kind === 'dinner') return x.placeId ? (app.getPlace(x.placeId)?.suggestedStayMin || MEALS[mealOf(x)].stay) : MEALS[mealOf(x)].stay;
   if (x.kind === 'place') return app.getPlace(x.placeId)?.suggestedStayMin || 60;
   return null;
+}
+
+/** หลังบันทึกพิกัดเอง (ฟอร์มส่งไปที่ main) → วาดตัวจัดแผนใหม่ให้หมุดแดงขึ้น */
+export function refreshPlanner() {
+  if (st && root && !root.hidden) render();
 }
 
 function close() {
@@ -351,6 +357,10 @@ function previewInfo(p: Place): string {
 
 function laneItem(p: Place, _inDay: boolean): string {
   const on = st!.preview === p.id;
+  return laneItemRow(p, on) + (on && p.lat == null ? `<div class="pl-nocoord">${coordFixForm(p)}</div>` : '');
+}
+
+function laneItemRow(p: Place, on: boolean): string {
   const times = st!.draft.stops.filter((x) => x.placeId === p.id).length;
   return `<div class="pl-item ${times ? 'in' : ''} ${on ? 'preview' : ''}" draggable="true" data-drag-place="${esc(p.id)}">
     <button class="pl-item-text" data-pl="preview" data-place="${esc(p.id)}" aria-pressed="${on}" title="แตะเพื่อดูหมุดบนแผนที่"><b>${esc(p.nameTh)}</b><span class="muted small">${esc(CATEGORY_LABEL[p.category] ?? '')} · ${esc(p.area)}${p.suggestedStayMin ? ` · ราว ${fmtDur(p.suggestedStayMin)}` : ''}</span>${on ? previewInfo(p) : ''}</button>

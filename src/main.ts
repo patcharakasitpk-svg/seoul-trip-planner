@@ -4,7 +4,7 @@ import { app, type Tab } from './ui/app';
 import { renderLibraryControls, renderLibraryList } from './ui/views/library';
 import { renderDayPanel, renderDayTabs } from './ui/views/day';
 import { renderToday, todayDay } from './ui/views/today';
-import { openPlanner } from './ui/planner';
+import { openPlanner, refreshPlanner } from './ui/planner';
 import { renderModal } from './ui/views/modals';
 import { esc, MODE_LABEL } from './ui/util';
 import { loadGoogle, googleStatus, onGoogleStatus } from './services/google';
@@ -22,6 +22,7 @@ import { tplTargetDay } from './ui/views/modals';
 import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
 import { stopLocationId } from './core/schedule';
 import { MEALS, mealName, mealOf, newMeal, mealInsertIndex, type Meal } from './core/meals';
+import { parseLatLng } from './core/coords';
 import { searchPlaces, placeFromResult, findExisting } from './services/placeSearch';
 import { SEARCH_PREFIX } from './ui/mapSpecs';
 import { RoomSync, inviteUrl, newRoomId, roomFromHash, toRoomDoc, fromRoomDoc, shouldApplyRemote, type RoomDoc, type SyncState } from './services/sync';
@@ -1370,6 +1371,16 @@ document.addEventListener('submit', (ev) => {
     };
     app.modal = null;
     app.commit((p) => p.customPlaces.push(place), 'เพิ่มสถานที่แล้ว');
+  } else if (kind === 'coord') {
+    const c = parseLatLng(String(fd.get('coord') ?? ''));
+    if (!c) {
+      app.showToast('อ่านพิกัดไม่ได้ — วางตัวเลขเช่น 37.5438, 127.0557 หรือลิงก์ Google Maps แบบเต็ม (ไม่ใช่ลิงก์ย่อ)');
+      app.requestRender();
+      return;
+    }
+    const id = form.dataset.place!;
+    app.commit((p) => void (p.coordOverrides = { ...(p.coordOverrides ?? {}), [id]: c }), 'บันทึกพิกัดแล้ว — ปักหมุดได้แล้ว');
+    refreshPlanner();
   } else if (kind === 'stop-note') {
     const note = String(fd.get('note') ?? '').trim().slice(0, 500);
     app.updateDay(form.dataset.day!, (x) => updateStop(x, form.dataset.stop!, { note }));
