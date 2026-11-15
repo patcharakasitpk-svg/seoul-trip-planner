@@ -22,6 +22,8 @@ import { fmtDist, straightLineM } from '../core/geo';
 import { ZONES, zoneOf, type Zone } from '../core/zones';
 import { searchPlaces, placeFromResult, findExisting, resultMapsUrl, type SearchResult } from '../services/placeSearch';
 import { uid } from '../core/planOps';
+import { safeGet, safeSet } from '../storage/storage';
+import { validatePlan } from '../storage/validate';
 
 type Step = 1 | 2 | 3 | 4;
 interface PState {
@@ -40,6 +42,8 @@ interface PState {
   preview: string | null;
   /** เปิดฟอร์มเพิ่มสถานที่เอง */
   ownOpen: boolean;
+  /** มีร่างที่ยังไม่ยืนยันเก็บไว้ (จากครั้งก่อน) — ถามว่าจะใช้ต่อไหม */
+  restore: { draft: Day; savedAt: string } | null;
   /** จุดที่กำลังเขียนโน้ต และข้อความที่พิมพ์อยู่ (ยังไม่บันทึก — ไม่หายเมื่อแก้อย่างอื่น) */
   noteEdit: string | null;
   noteDraft: string;
@@ -68,7 +72,7 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
   const day = app.findDay(dayId);
   if (!day) return;
   onDone = done;
-  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null, web: null, cat: '', zone: '', noteEdit: null, noteDraft: '', ownOpen: false };
+  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null, web: null, cat: '', zone: '', noteEdit: null, noteDraft: '', ownOpen: false, restore: loadDraft(dayId, day) };
   if (!root) {
     root = document.createElement('div');
     root.id = 'planner';
@@ -88,6 +92,55 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
   document.body.classList.add('planner-open');
   render(true);
 }
+
+/* ---------- ร่างที่ยังไม่ยืนยัน: เก็บในเครื่องอัตโนมัติ (รีเฟรช/ปิดแท็บแล้วกู้คืนได้) ---------- */
+const DRAFT_KEY = 'stp.v1.plannerDrafts';
+type SavedDrafts = Record<string, { draft: Day; savedAt: string }>;
+const draftKey = (dayId: string) => `${app.plan.id}:${dayId}`;
+function readDrafts(): SavedDrafts {
+  try {
+    const v = JSON.parse(safeGet(DRAFT_KEY) || '{}');
+    return v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+  } catch {
+    return {};
+  }
+}
+function writeDrafts(d: SavedDrafts) {
+  safeSet(DRAFT_KEY, JSON.stringify(d));
+}
+const sameDay = (a: Day, b: Day) => JSON.stringify(a) === JSON.stringify(b);
+
+/** ร่างที่เก็บไว้ของวันนี้ (ผ่านการตรวจแบบเดียวกับนำเข้าแผน) — ไม่มี/เหมือนแผนจริง = null */
+function loadDraft(dayId: string, day: Day): { draft: Day; savedAt: string } | null {
+  const s = readDrafts()[draftKey(dayId)];
+  if (!s) return null;
+  const v = validatePlan({ version: 1, id: 'draft', name: 'draft', days: [s.draft], customPlaces: [] });
+  if (!v.ok || !v.plan.days[0]) return null;
+  const draft = { ...v.plan.days[0], id: dayId };
+  return sameDay(draft, withDefaults(clone(day))) ? null : { draft, savedAt: String(s.savedAt ?? '') };
+}
+
+/** เรียกทุกครั้งที่วาด: ร่างต่างจากแผนจริง → เก็บ · เหมือนกัน → ลบ */
+function autosaveDraft() {
+  if (!st || st.restore) return; // ยังไม่ได้ตอบว่าจะใช้ร่างเก่าไหม — อย่าเขียนทับ
+  const all = readDrafts();
+  const key = draftKey(st.dayId);
+  if (sameDay(st.draft, withDefaults(clone(st.orig)))) delete all[key];
+  else all[key] = { draft: st.draft, savedAt: new Date().toISOString() };
+  writeDrafts(all);
+}
+function clearDraft(dayId: string) {
+  const all = readDrafts();
+  delete all[draftKey(dayId)];
+  writeDrafts(all);
+}
+const hasUnsaved = () => !!st && !st.restore && !sameDay(st.draft, withDefaults(clone(st.orig)));
+window.addEventListener('beforeunload', (e) => {
+  if (root && !root.hidden && hasUnsaved()) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
 
 /** ร่างเริ่มต้น: ยังไม่ตั้งเวลา → เติมค่าที่ใช้บ่อย (แก้ได้ในขั้นที่ 1) */
 function withDefaults(d: Day): Day {
@@ -172,9 +225,9 @@ function render(resetMap = false) {
   }
   const $ = (sel: string) => root!.querySelector(sel) as HTMLElement;
   $('.pl-head').innerHTML = `
-      <div class="pl-title"><b style="color:${dayColor(idx)}">วัน ${idx + 1}</b> ${d.date ? esc(fmtDateTh(d.date)) : ''} <span class="muted small">· ร่าง ยังไม่บันทึก</span></div>
+      <div class="pl-title"><b style="color:${dayColor(idx)}">วัน ${idx + 1}</b> ${d.date ? esc(fmtDateTh(d.date)) : ''} <span class="muted small">· ${hasUnsaved() ? 'ร่างเก็บในเครื่องแล้ว · กด “ยืนยันแผนวันนี้” เพื่อบันทึกลงแผน' : 'ยังไม่มีการแก้'}</span></div>
       <ol class="pl-steps">${STEPS.map(([n, t]) => `<li class="${st!.step === n ? 'on' : n < st!.step ? 'done' : ''}"><button data-pl="goto" data-v="${n}"><span>${n}</span>${t}</button></li>`).join('')}</ol>
-      <button class="btn ghost sm" data-pl="cancel">ปิด (ไม่บันทึก)</button>`;
+      <button class="btn ghost sm" data-pl="cancel" title="ร่างจะเก็บไว้ในเครื่อง เปิดใหม่แล้วใช้ต่อได้">ปิด (ยังไม่ยืนยัน)</button>`;
   $('.pl-budget-wrap').innerHTML = st.step === 2 || st.step === 3 ? budgetBar(s) : '';
   $('.pl-body').className = `pl-body step-${st.step}`;
   const main = $('.pl-main');
@@ -182,7 +235,10 @@ function render(resetMap = false) {
   const SCROLLERS = ['.pl-main', '.pl-lane-list', '.pl-day', '.pl-card'];
   const keep = SCROLLERS.map((sel) => (root!.querySelector(sel) as HTMLElement | null)?.scrollTop ?? 0);
   const sameStep = main.dataset.step === String(st.step);
-  main.innerHTML = st.step === 1 ? step1() : st.step === 2 ? step2(s) : st.step === 3 ? step3(s) : step4(s);
+  const banner = st.restore
+    ? `<div class="pl-restore" role="alert"><b>มีร่างที่ยังไม่ยืนยันของวันนี้</b> (แก้ล่าสุด ${esc(st.restore.savedAt ? new Date(st.restore.savedAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '-')}) <button class="pl-btn primary sm" data-pl="draft-restore">ใช้ร่างนี้ต่อ</button><button class="pl-btn ghost sm" data-pl="draft-discard">ทิ้งร่าง</button></div>`
+    : '';
+  main.innerHTML = banner + (st.step === 1 ? step1() : st.step === 2 ? step2(s) : st.step === 3 ? step3(s) : step4(s));
   main.dataset.step = String(st.step);
   if (sameStep)
     SCROLLERS.forEach((sel, i) => {
@@ -190,6 +246,7 @@ function render(resetMap = false) {
       if (el) el.scrollTop = keep[i];
     });
   $('.pl-foot').innerHTML = footer();
+  autosaveDraft();
   drawMap(s);
   (root.querySelector('[data-autofocus]') as HTMLInputElement | null)?.focus();
 }
@@ -667,8 +724,16 @@ function onClick(e: Event) {
   const v = el.dataset.v;
   switch (el.dataset.pl) {
     case 'cancel':
-      close();
+      close(); // ร่างยังเก็บไว้ — เปิดใหม่จะถามว่าจะใช้ต่อไหม
       return;
+    case 'draft-restore':
+      if (st.restore) st.draft = st.restore.draft;
+      st.restore = null;
+      break;
+    case 'draft-discard':
+      st.restore = null;
+      clearDraft(st.dayId);
+      break;
     case 'goto':
       st.step = Number(v) as Step;
       if (st.step === 4) st.backToSummary = false;
@@ -787,6 +852,7 @@ function onClick(e: Event) {
       const dayId = st.dayId;
       const before = clone(app.findDay(dayId)!);
       app.setDay(dayId, st.draft);
+      clearDraft(dayId);
       app.showToast('บันทึกแผนวันนี้แล้ว', () => app.setDay(dayId, before, 'เลิกทำแล้ว'));
       close();
       onDone(dayId);
@@ -871,7 +937,7 @@ function onChange(e: Event) {
   switch (k) {
     case 'day': {
       const day = app.findDay(el.value);
-      if (day) Object.assign(st, { dayId: day.id, draft: withDefaults(clone(day)), orig: clone(day), slot: null });
+      if (day) Object.assign(st, { dayId: day.id, draft: withDefaults(clone(day)), orig: clone(day), slot: null, restore: loadDraft(day.id, day) });
       render(true);
       return;
     }

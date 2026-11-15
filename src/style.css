@@ -668,3 +668,5 @@ body.planner-open .toast { bottom: 76px; z-index: 90; }
 .sum-name { line-height: 1.5; }
 .sum-meta { font-size: .85rem; color: var(--muted); white-space: nowrap; }
 .pl-sum .pl-meal-tag { vertical-align: 1px; }
+
+.pl-restore { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .8rem; padding: .6rem .8rem; border-radius: 12px; background: #fff7e6; border: 1.5px solid #f59e0b; color: #92400e; }

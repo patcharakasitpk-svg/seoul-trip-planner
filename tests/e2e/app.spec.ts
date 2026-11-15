@@ -761,3 +761,33 @@ test('ตัวจัดแผน: แก้แล้วรายการไม
   const w = await pl.locator('#pl-map').evaluate((e) => e.getBoundingClientRect().width / window.innerWidth);
   expect(w).toBeGreaterThanOrEqual(0.45);
 });
+
+test('ตัวจัดแผน: ร่างที่ยังไม่ยืนยันไม่หายเมื่อรีเฟรช → กู้คืนได้ / ทิ้งได้', async ({ page }) => {
+  test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
+  await page.route('https://tile.openstreetmap.org/**', (r) => r.fulfill({ status: 204, body: '' }));
+  await page.goto('/');
+  await page.locator('[data-act="open-planner"]').click();
+  const pl = page.locator('#planner');
+  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('[data-pl="lane"][data-v="search"]').click();
+  await pl.locator('[data-pl-input="q"]').fill('กวางจัง');
+  await pl.locator('[data-pl="add"][data-place="gwangjang"]').click();
+  const row = pl.locator('.pl-row.stop', { hasText: 'Gwangjang Market' });
+  await row.locator('[data-pl="note-edit"]').click();
+  await row.locator('textarea').fill('กินบินแดต็อก');
+  await row.locator('[data-pl="note-save"]').click();
+  // รีเฟรชโดยไม่กดยืนยัน
+  page.on('dialog', (d) => d.accept());
+  await page.reload();
+  await page.locator('[data-act="open-planner"]').click();
+  await expect(pl.locator('.pl-restore')).toContainText('ร่างที่ยังไม่ยืนยัน');
+  await pl.locator('[data-pl="draft-restore"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="4"]').click();
+  await expect(pl.locator('.pl-sum')).toContainText('Gwangjang Market');
+  await expect(pl.locator('.pl-sum')).toContainText('กินบินแดต็อก');
+  // ยืนยันแล้ว ร่างถูกล้าง → เปิดใหม่ไม่ถามกู้
+  await pl.locator('[data-pl="confirm"]').click();
+  await page.locator('[data-act="tab"][data-tab="plan"]').filter({ visible: true }).first().click();
+  await page.locator('[data-act="open-planner"]').click();
+  await expect(pl.locator('.pl-restore')).toHaveCount(0);
+});
