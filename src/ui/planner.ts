@@ -224,6 +224,21 @@ function step1(): string {
 }
 
 /* ---------- ขั้น 2: เลือกสถานที่ (2 เลน) ---------- */
+/** เลขลำดับของแต่ละจุด (นับเฉพาะที่ไม่ข้าม) — ตรงกับตัวเลขบนหมุดแผนที่ */
+function stopNumbers(d: Day): Map<string, number> {
+  const m = new Map<string, number>();
+  let n = 0;
+  for (const x of d.stops) if (!x.skipped) m.set(x.uid, ++n);
+  return m;
+}
+const numBadge = (n: number | undefined, label?: string) => `<span class="pl-num" style="--c:${dayColor(app.dayIndex(st!.dayId))}">${label ?? n ?? ''}</span>`;
+
+/** ชื่อสถานที่ = ลิงก์ดูรูปจริง (แท็บใหม่) · พัก/มื้อที่ยังไม่เลือกร้าน = ข้อความธรรมดา */
+function nameLink(x: Stop): string {
+  const p = placeOf(x);
+  return p ? `<a class="pl-name" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" title="ดูรูป ${esc(p.nameTh)}">${esc(nameOf(x))}<span class="pl-name-ico" aria-hidden="true">↗</span></a>` : `<b>${esc(nameOf(x))}</b>`;
+}
+
 /** ลิงก์ดูรูปสถานที่ (เปิดแท็บใหม่) — ชื่อแปลก ๆ จะได้นึกออกว่าหน้าตาเป็นยังไง */
 const photoLink = (p: Place | undefined) => (p && p.category !== 'base' ? `<a class="pl-photo" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" title="ดูรูป ${esc(p.nameTh)}">ดูรูป ↗</a>` : '');
 
@@ -441,7 +456,8 @@ function dayLane(s: DaySchedule): string {
   const rows: string[] = [];
   const drop = (i: number, label = '', big = false) =>
     `<div class="drop ${big ? 'big' : ''} ${st!.slot === i ? 'sel' : ''}" data-drop="${i}" data-pl="slot" data-v="${i}">${label || (st!.slot === i ? 'ช่องที่เลือก — กด ＋ ทางซ้าย' : '＋ วางที่นี่')}</div>`;
-  rows.push(`<div class="pl-row edge"><span class="t">${esc(d.startTime ?? '--:--')}</span><span>ออกจาก <b>${esc(shortName(app.getPlace(d.startPlaceId)))}</b></span></div>`);
+  const nums = stopNumbers(d);
+  rows.push(`<div class="pl-row edge"><span class="t">${esc(d.startTime ?? '--:--')}</span><span>${numBadge(undefined, 'เริ่ม')} ออกจาก <b>${esc(shortName(app.getPlace(d.startPlaceId)))}</b></span></div>`);
   s.stops.forEach((t, i) => {
     rows.push(t.wait > 0 ? drop(i, `ว่าง ${fmtDur(t.wait)} ก่อนนัด — วางสถานที่ที่นี่`, true) : drop(i));
     const x = t.stop;
@@ -451,7 +467,7 @@ function dayLane(s: DaySchedule): string {
       <div class="pl-row stop ${x.lockedTime ? 'locked' : ''}" data-uid="${x.uid}">
         <span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span>
         <div class="pl-row-main">
-          <b>${esc(nameOf(x))}</b> ${photoLink(placeOf(x))}${x.lockedTime ? ` <span class="pill">นัด ${esc(x.lockedTime)}</span>` : ''}
+          ${numBadge(nums.get(x.uid))} ${nameLink(x)}${x.lockedTime ? ` <span class="pill">นัด ${esc(x.lockedTime)}</span>` : ''}
           <div class="pl-stay">อยู่ <select class="inp xs" data-pl-change="stay" data-uid="${x.uid}" aria-label="อยู่นานเท่าไร">${[...new Set([...STAY_CHOICES, x.stayMin])].sort((a, b) => a - b).map((m) => `<option value="${m}" ${m === x.stayMin ? 'selected' : ''}>${fmtDur(m)}</option>`).join('')}</select>
             ${defaultStay(x) != null && defaultStay(x) !== x.stayMin ? resetBtn('reset-stay', x.uid, `คืนเวลาที่แนะนำ (${fmtDur(defaultStay(x)!)})`) : ''}
             ${t.depart != null ? `<span class="muted small">ถึง ${fmtHM(t.depart)}</span>` : ''}
@@ -470,7 +486,7 @@ function dayLane(s: DaySchedule): string {
   rows.push(drop(d.stops.length, b.free != null && b.free > 15 ? `ว่าง ${fmtDur(b.free)} ถึงเวลาจบ — วางสถานที่ที่นี่` : '', b.free != null && b.free > 15));
   if (s.end) {
     rows.push(`<div class="pl-travel">เดินทาง ${travelText(s.end.leg)}</div>`);
-    rows.push(`<div class="pl-row edge"><span class="t">${s.end.arrive != null ? fmtHM(s.end.arrive) : '--:--'}</span><span>ถึง <b>${esc(shortName(app.getPlace(d.endPlaceId)))}</b>${s.end.slackMin != null && s.end.slackMin < 0 ? ` <span class="bad-text small">เกิน ${esc(d.endTime ?? '')} ${fmtDur(-s.end.slackMin)}</span>` : ''}</span></div>`);
+    rows.push(`<div class="pl-row edge"><span class="t">${s.end.arrive != null ? fmtHM(s.end.arrive) : '--:--'}</span><span>${numBadge(undefined, 'จบ')} ถึง <b>${esc(shortName(app.getPlace(d.endPlaceId)))}</b>${s.end.slackMin != null && s.end.slackMin < 0 ? ` <span class="bad-text small">เกิน ${esc(d.endTime ?? '')} ${fmtDur(-s.end.slackMin)}</span>` : ''}</span></div>`);
   }
   return `<div class="pl-day">${rows.join('')}</div>`;
 }
@@ -508,12 +524,13 @@ function step4(s: DaySchedule): string {
   const b = budget(s);
   const edit = (step: Step) => `<button class="link small" data-pl="edit" data-v="${step}">แก้</button>`;
   const rows: string[] = [];
-  rows.push(`<li class="sum-edge"><span class="t">${esc(d.startTime ?? '--:--')}</span><span>ออกจาก <b>${esc(shortName(app.getPlace(d.startPlaceId)))}</b></span>${edit(1)}</li>`);
+  const nums = stopNumbers(d);
+  rows.push(`<li class="sum-edge"><span class="t">${esc(d.startTime ?? '--:--')}</span><span>${numBadge(undefined, 'เริ่ม')} ออกจาก <b>${esc(shortName(app.getPlace(d.startPlaceId)))}</b></span>${edit(1)}</li>`);
   for (const t of s.stops) {
     if (t.stop.skipped) continue;
     const isMove = t.stop.kind === 'place' || t.stop.kind === 'dinner';
     if (isMove && t.leg.fromId !== t.leg.toId && t.leg.travelMin != null) rows.push(`<li class="sum-leg"><span></span><span>เดินทาง ${travelText(t.leg)}</span>${edit(3)}</li>`);
-    rows.push(`<li class="sum-stop"><span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span><span><b>${esc(nameOf(t.stop))}</b> ${photoLink(placeOf(t.stop))} · ${fmtDur(t.stop.stayMin)}${t.stop.note ? `<span class="pl-note sum">${esc(t.stop.note)}</span>` : ''}${t.stop.lockedTime ? ' · นัด' : ''}${t.lateMin ? ` <span class="bad-text">สาย ${fmtDur(t.lateMin)}</span>` : ''}</span>${edit(2)}</li>`);
+    rows.push(`<li class="sum-stop"><span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span><span>${numBadge(nums.get(t.stop.uid))} ${nameLink(t.stop)} · ${fmtDur(t.stop.stayMin)}${t.stop.note ? `<span class="pl-note sum">${esc(t.stop.note)}</span>` : ''}${t.stop.lockedTime ? ' · นัด' : ''}${t.lateMin ? ` <span class="bad-text">สาย ${fmtDur(t.lateMin)}</span>` : ''}</span>${edit(2)}</li>`);
   }
   if (s.end) {
     rows.push(`<li class="sum-leg"><span></span><span>เดินทาง ${travelText(s.end.leg)}</span>${edit(3)}</li>`);
@@ -542,11 +559,11 @@ function drawMap(s: DaySchedule) {
   const pts: { p: Place; label: string }[] = [];
   const start = app.getPlace(d.startPlaceId);
   if (start?.lat != null) pts.push({ p: start, label: 'เริ่ม' });
-  let n = 0;
+  const nums = stopNumbers(d);
   for (const t of s.stops) {
     if (t.stop.skipped) continue;
     const p = placeOf(t.stop);
-    if (p?.lat != null) pts.push({ p, label: String(++n) });
+    if (p?.lat != null) pts.push({ p, label: String(nums.get(t.stop.uid)) });
   }
   const end = app.getPlace(d.endPlaceId);
   if (end?.lat != null) pts.push({ p: end, label: 'จบ' });

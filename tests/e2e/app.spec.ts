@@ -536,7 +536,11 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await pl.locator('[data-pl="add"][data-place="gwangjang"]').click();
   await expect(pl.locator('.pl-pin.preview')).toHaveCount(0);
   // ชื่อสถานที่มีลิงก์ดูรูป (เปิด Google รูปภาพ)
-  await expect(pl.locator('.pl-row.stop', { hasText: 'Gwangjang Market' }).locator('.pl-photo')).toHaveAttribute('href', /google\.com\/search\?tbm=isch/);
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Gwangjang Market' }).locator('a.pl-name')).toHaveAttribute('href', /google\.com\/search\?tbm=isch/);
+  // เลขลำดับในช่องเวลา = เลขบนหมุดแผนที่
+  const nums = await pl.locator('.pl-row.stop .pl-num').allInnerTexts();
+  expect(nums.slice(0, 2)).toEqual(['1', '2']);
+  await expect(pl.locator('.pl-pin span', { hasText: '2' }).first()).toBeVisible();
   // ใส่สถานที่เดิมซ้ำได้ (เช่นแวะกลับโรงแรม) · หมุดเดียวบอกหลายลำดับ
   await pl.locator('[data-pl-input="q"]').fill('');
   await pl.locator('[data-pl-input="q"]').dispatchEvent('input');
