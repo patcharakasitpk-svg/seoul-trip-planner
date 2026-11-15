@@ -9,3 +9,4 @@ playwright-report
 firebase-debug.log
 *-debug.log
 .firebaserc.local
+firestore-debug.log

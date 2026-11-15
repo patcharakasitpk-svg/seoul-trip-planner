@@ -11,9 +11,11 @@
     "test:e2e": "npm run build:e2e && playwright test",
     "typecheck": "tsc --noEmit",
     "deploy": "bash scripts/deploy-gh-pages.sh",
-    "build:e2e": "tsc --noEmit && vite build --mode e2e"
+    "build:e2e": "tsc --noEmit && vite build --mode e2e",
+    "test:rules": "PATH=/opt/homebrew/opt/openjdk@21/bin:$PATH npx -y firebase-tools@15.36.0 emulators:exec --only firestore --project demo-rules \"npx vitest run -c vitest.rules.config.ts\""
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
     "@playwright/test": "^1.65.0",
     "@types/google.maps": "^3.66.10",
     "@types/leaflet": "^1.9.22",
