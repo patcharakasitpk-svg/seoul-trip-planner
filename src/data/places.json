@@ -54,7 +54,7 @@
  {
   "id": "yennaljip-hongdae",
   "nameTh": "เยตนัลจิบ (ร้านหมูย่างถ่านฮงแด)",
-  "nameEn": "Yennaljip (Yetnaljip) – charcoal pork BBQ",
+  "nameEn": "Yennaljip Hongdae",
   "nameKo": "옛날집",
   "branch": null,
   "category": "food",
@@ -217,7 +217,7 @@
  {
   "id": "myeongdong-kyoja",
   "nameTh": "มยองดงเกียวจา (สาขาหลัก)",
-  "nameEn": "Myeongdong Kyoja (Main)",
+  "nameEn": "Myeongdong Kyoja Main",
   "nameKo": "명동교자 본점",
   "branch": "Main (본점)",
   "category": "food",
@@ -293,7 +293,7 @@
  {
   "id": "hadongkwan-myeongdong",
   "nameTh": "ฮาดงกวาน (ร้านแม่ เมียงดง)",
-  "nameEn": "Hadongkwan (Myeongdong main)",
+  "nameEn": "Hadongkwan Myeongdong",
   "nameKo": "하동관",
   "branch": "Myeongdong main",
   "category": "food",
@@ -350,7 +350,7 @@
  {
   "id": "hadongkwan-coex",
   "nameTh": "ฮาดงกวาน สาขาโคเอ็กซ์",
-  "nameEn": "Hadongkwan COEX Mall",
+  "nameEn": "Hadongkwan COEX",
   "nameKo": "하동관 코엑스점",
   "branch": "Starfield COEX Mall B1 (J-101)",
   "category": "food",
@@ -407,7 +407,7 @@
  {
   "id": "misari-chogyeguksu-coex",
   "nameTh": "มีซารี มิลบิต โชเกกุกซุ (โคเอ็กซ์)",
-  "nameEn": "Misari Milbit Chogyeguksu (COEX Mall)",
+  "nameEn": "Misari Milbit Chogyeguksu COEX",
   "nameKo": "미사리밀빛초계국수",
   "branch": "Starfield COEX Mall B1",
   "category": "food",
@@ -462,7 +462,7 @@
  {
   "id": "gwanghwamun-seokgalbi-coex",
   "nameTh": "ควังฮวามุน ซอกกัลบี (โคเอ็กซ์)",
-  "nameEn": "Gwanghwamun Seokgalbi (COEX Mall)",
+  "nameEn": "Gwanghwamun Seokgalbi COEX",
   "nameKo": "광화문석갈비",
   "branch": "Starfield COEX Mall 1F",
   "category": "food",
@@ -826,7 +826,7 @@
  {
   "id": "myeongdong",
   "nameTh": "ถนนเมียงดง (ช้อปปิ้ง + สตรีทฟู้ดยามเย็น)",
-  "nameEn": "Myeongdong shopping street & evening street food",
+  "nameEn": "Myeongdong Shopping Street",
   "nameKo": "명동거리",
   "branch": null,
   "category": "market",
@@ -1146,7 +1146,7 @@
  {
   "id": "gotomall",
   "nameTh": "โกโตมอลล์ (สถานีรถด่วนกังนัม)",
-  "nameEn": "GOTO Mall (Express Bus Terminal underground shopping)",
+  "nameEn": "GOTO Mall",
   "nameKo": "고투몰",
   "branch": null,
   "category": "fashion",
@@ -1212,7 +1212,7 @@
  {
   "id": "hongdae",
   "nameTh": "ย่านช้อปปิ้งฮงแด",
-  "nameEn": "Hongdae shopping streets",
+  "nameEn": "Hongdae Shopping Street",
   "nameKo": "홍대거리",
   "branch": null,
   "category": "fashion",
@@ -1620,7 +1620,7 @@
  {
   "id": "mibbedong-yeonnam",
   "nameTh": "มิปปึดง (สาขายอนนัม)",
-  "nameEn": "Mibbedong (Yeonnam)",
+  "nameEn": "Mibbedong Yeonnam",
   "nameKo": "미쁘동 연남",
   "branch": "Yeonnam-dong (연남동)",
   "category": "food",
@@ -1711,7 +1711,7 @@
  {
   "id": "hanam-pig-myeongdong",
   "nameTh": "ฮานัมดเวจีจิบ (ฮานัมพิก) สาขาเมียงดง",
-  "nameEn": "Hanam Pig House (Myeongdong)",
+  "nameEn": "Hanam Pig House Myeongdong",
   "nameKo": "하남돼지집 명동점",
   "branch": "Myeongdong 1호점",
   "category": "food",
@@ -1801,7 +1801,7 @@
  {
   "id": "odarijip-myeongdong",
   "nameTh": "โอดาริจิบ (ปูดองซีอิ๊ว) เมียงดง",
-  "nameEn": "Odarijip Ganjang Gejang (Myeongdong)",
+  "nameEn": "Odarijip Myeongdong",
   "nameKo": "오다리집 간장게장 명동점",
   "branch": "Myeongdong (명동8나길 28, 2F-3F)",
   "category": "food",
@@ -2225,7 +2225,7 @@
  {
   "id": "yeonnam-mulgalbi-hongdae",
   "nameTh": "ยอนนัมมุลกัลบี (ซี่โครงวัวต้มน้ำซุปเผ็ด ฮงแด)",
-  "nameEn": "Yeonnam Mulgalbi (Hongdae main branch)",
+  "nameEn": "Yeonnam Mulgalbi Hongdae",
   "nameKo": "연남물갈비",
   "branch": "홍대본점",
   "category": "food",
@@ -2312,7 +2312,7 @@
  {
   "id": "jangin-dakgalbi-hongdae",
   "nameTh": "จังอินทักคาลบี สาขาฮงแด (ไก่ผัดซอสเผ็ดกระทะ)",
-  "nameEn": "Jangin Dakgalbi – Hongdae branch",
+  "nameEn": "Jangin Dakgalbi Hongdae",
   "nameKo": "장인닭갈비 홍대점",
   "branch": "홍대 1호점 (1F) / 홍대 2호점 (2F), same building",
   "category": "food",
@@ -2399,7 +2399,7 @@
  {
   "id": "chosun-hwaro-gui-hongdae",
   "nameTh": "โชซอนฮวาโรกุย (ปิ้งย่างเตาถ่าน ฮงแด)",
-  "nameEn": "Chosun Hwaro Gui (Chosun Brazier Grill) – Hongdae",
+  "nameEn": "Chosun Hwaro Gui Hongdae",
   "nameKo": "조선화로구이",
   "branch": "홍대",
   "category": "food",
@@ -2749,7 +2749,7 @@
  {
   "id": "soha-salt-pond-ikseon",
   "nameTh": "โซฮา ซอลต์พอนด์ (ร้านขนมปังเกลือ อิกซอนดง)",
-  "nameEn": "Soha Salt Pond (Ikseon-dong)",
+  "nameEn": "Soha Salt Pond Ikseon",
   "nameKo": "소하염전",
   "branch": "Ikseon-dong",
   "category": "food",
@@ -2840,7 +2840,7 @@
  {
   "id": "point-of-view-seongsu",
   "nameTh": "พอยต์ออฟวิว ซองซู (ร้านเครื่องเขียน)",
-  "nameEn": "POINT OF VIEW Seoul (Seongsu)",
+  "nameEn": "POINT OF VIEW Seongsu",
   "nameKo": "포인트오브뷰 성수",
   "branch": "Seongsu",
   "category": "fashion",

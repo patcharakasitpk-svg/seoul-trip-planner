@@ -73,7 +73,7 @@ export const BASE_PLACES: Place[] = [
   {
     id: 'library',
     nameTh: 'ห้องสมุดสตาร์ฟิลด์ โคเอ็กซ์',
-    nameEn: 'Starfield Library COEX',
+    nameEn: 'Starfield Library',
     nameKo: '별마당 도서관',
     category: 'sight',
     area: 'COEX/Samseong',
@@ -104,7 +104,7 @@ export const BASE_PLACES: Place[] = [
   {
     id: 'hongdae',
     nameTh: 'ย่านฮงแด (กลางย่าน)',
-    nameEn: 'Hongdae',
+    nameEn: 'Hongdae Shopping Street',
     nameKo: '홍대',
     category: 'fashion',
     area: 'Hongdae',
@@ -136,7 +136,7 @@ export const BASE_PLACES: Place[] = [
   {
     id: 'myeongdong',
     nameTh: 'ย่านเมียงดง (กลางย่าน)',
-    nameEn: 'Myeongdong',
+    nameEn: 'Myeongdong Shopping Street',
     nameKo: '명동',
     category: 'beauty',
     area: 'Myeongdong',

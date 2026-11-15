@@ -13,6 +13,8 @@ export interface Place {
   nameTh: string;
   nameEn: string;
   nameKo?: string | null;
+  /** ชื่อไทย (ใช้ค้นหา/แสดงในรายละเอียด) — ชื่อหลักที่แสดง (nameTh) เป็นชื่ออังกฤษมาตรฐานแบบที่ค้นใน Google */
+  thaiName?: string | null;
   branch?: string | null;
   category: Category;
   /** hotel / venue = หมุดแยกประเภท */

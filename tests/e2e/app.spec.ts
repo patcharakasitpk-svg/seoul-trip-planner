@@ -60,7 +60,7 @@ test('ไม่มี API key: แผนยังใช้ได้ เพิ่
   await expect(page.locator('[data-place-card="library"] .add-btn')).toHaveText('＋');
   await page.locator('[data-place-card="library"] .add-btn').click();
   await gotoPlan(page);
-  await expect(page.locator('.timeline')).toContainText('ห้องสมุดสตาร์ฟิลด์');
+  await expect(page.locator('.timeline')).toContainText('Starfield Library');
   // ข้อมูลขาด (มื้อที่ยังไม่เลือกร้าน): ไม่สรุปว่า "ทัน" — บอกว่ายังสรุปไม่ได้ หรือเกินแน่นอนแล้ว
   await expect(page.locator('.banner')).toContainText(/ยังสรุปไม่ได้ว่าทัน|เกินเวลา/);
   await expect(page.locator('.banner')).not.toContainText('ทันเวลา');
@@ -182,7 +182,7 @@ test('แม่แบบ: ดูไม่ล้างแผน และต้�
   await expect(page.locator('.modal')).toContainText('แทนที่รายการในวัน');
   await page.locator('[data-act="confirm-ok"]').click();
   await gotoPlan(page);
-  await expect(page.locator('.timeline')).toContainText('ตลาดนัมแดมุน');
+  await expect(page.locator('.timeline')).toContainText('Namdaemun Market');
   await expect(page.locator('[data-field="startTime"]')).toHaveValue('10:00'); // เวลาที่ผู้ใช้ตั้งยังอยู่
 });
 
@@ -193,7 +193,7 @@ test('ลบและย้ายจุดได้โดยไม่ต้อ�
   await page.locator('[data-act="tpl-apply-all"]').click(); // แผนแนะนำแบบลงวันที่
   await page.locator('[data-act="confirm-ok"]').click();
   await gotoPlan(page);
-  await expect(page.locator('.timeline')).toContainText('มยองดงเกียวจา');
+  await expect(page.locator('.timeline')).toContainText('Myeongdong Kyoja');
   const first = page.locator('.stop .stop-title .t').first();
   const firstText = await first.textContent();
   await page.locator('[data-act="stop-info"]').first().click();
@@ -212,15 +212,15 @@ test('ย้ายจุดแวะไปวันอื่น และเล�
   await page.locator('[data-act="tpl-apply-all"]').click();
   await page.locator('[data-act="confirm-ok"]').click();
   await gotoPlan(page);
-  await expect(page.locator('.timeline')).toContainText('มยองดงเกียวจา');
-  const card = page.locator('.stop', { hasText: 'มยองดงเกียวจา' });
+  await expect(page.locator('.timeline')).toContainText('Myeongdong Kyoja');
+  const card = page.locator('.stop', { hasText: 'Myeongdong Kyoja' });
   await card.locator('[data-act="stop-info"]').click();
   const target = await page.locator('.modal [data-act-change="stop-move-day"] option').nth(2).getAttribute('value'); // วัน 3
   await page.locator('.modal [data-act-change="stop-move-day"]').selectOption(target!);
   await expect(page.locator('#toast')).toContainText('ไปวัน 3');
-  await expect(page.locator('.timeline')).not.toContainText('มยองดงเกียวจา');
+  await expect(page.locator('.timeline')).not.toContainText('Myeongdong Kyoja');
   await page.locator('[data-act="toast-undo"]').click();
-  await expect(page.locator('.timeline')).toContainText('มยองดงเกียวจา');
+  await expect(page.locator('.timeline')).toContainText('Myeongdong Kyoja');
 });
 
 test('เลือกแผนรายวัน: ใช้การ์ดกับวันที่เลือก นัดที่ล็อกยังอยู่ และเติมที่ใกล้เคียงเองได้', async ({ page }) => {
@@ -238,8 +238,8 @@ test('เลือกแผนรายวัน: ใช้การ์ดกั
   await page.locator('.tpl-day', { hasText: 'ฮงแด ช็อปตอนเย็น' }).locator('[data-act="tpl-copy-day"][data-mode="replace"]').click();
   await expect(page.locator('#toast')).toContainText('เป็นวัน 4');
   await gotoPlan(page);
-  await expect(page.locator('.timeline')).toContainText('โคเอ็กซ์'); // นัดที่ล็อกยังอยู่
-  await expect(page.locator('.timeline')).toContainText('จังอิน');
+  await expect(page.locator('.timeline')).toContainText('COEX'); // นัดที่ล็อกยังอยู่
+  await expect(page.locator('.timeline')).toContainText('Jangin Dakgalbi');
   // เติมที่ใกล้เคียงเองจากการ์ด
   await page.locator('[data-act="open-templates"]').click();
   const c2 = page.locator('.tpl-day', { hasText: 'วันมาถึง' });
@@ -449,23 +449,23 @@ test('วันนี้ระหว่างเดินทาง: เริ่
   await page.locator('[data-act="live-start"]').click();
   await expect(page.locator('#toast')).toContainText('ออกเดินทาง 10:00');
   await expect(hero).toContainText('กำลังไป');
-  await expect(hero).toContainText('ตลาดกวางจัง');
+  await expect(hero).toContainText('Gwangjang Market');
   await expect(hero).toContainText('เดินทาง'); // มีเวลาเดินทาง (≈ ประมาณ)
   await expect(hero.locator('[data-act="naver"]')).toBeVisible();
   await page.locator('[data-act="live-arrive"]').click();
   await expect(hero).toContainText('ตอนนี้อยู่ที่');
   await expect(hero).toContainText('อยู่ได้อีก');
-  await expect(hero.locator('.hero-next')).toContainText('โซฮา'); // ถัดไป
+  await expect(hero.locator('.hero-next')).toContainText('Soha Salt Pond'); // ถัดไป
   // timeline: ออกจากโรงแรม ✓ และจุดปัจจุบัน
   await expect(page.locator('.tl.done').first()).toContainText('ออกจาก');
-  await expect(page.locator('.tl.now')).toContainText('ตลาดกวางจัง');
+  await expect(page.locator('.tl.now')).toContainText('Gwangjang Market');
   // เลิกทำการเช็กอินล่าสุด
   await page.locator('[data-act="toast-undo"]').click();
   await expect(hero).toContainText('กำลังไป');
   await page.locator('[data-act="live-arrive"]').click();
   await page.locator('[data-act="live-depart"]').click();
   await expect(hero).toContainText('กำลังไป');
-  await expect(hero).toContainText('โซฮา');
+  await expect(hero).toContainText('Soha Salt Pond');
   // วันอื่น = ดูล่วงหน้า ไม่มีปุ่มเช็กอิน
   await page.locator('[data-act-change="today-day"]').selectOption({ index: 2 });
   await expect(page.locator('.today-head')).toContainText('ดูล่วงหน้า');
@@ -521,27 +521,27 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await pl.locator('[data-pl-input="q"]').fill('กวางจัง');
   // แตะชื่อ = ดูหมุดแดงก่อน (ยังไม่ใส่) พร้อมระยะจากจุดก่อนหน้า
   await pl.locator('[data-pl="preview"][data-place="gwangjang"]').click();
-  await expect(pl.locator('.pl-pin.preview')).toContainText('ตลาดกวางจัง');
+  await expect(pl.locator('.pl-pin.preview')).toContainText('Gwangjang Market');
   await expect(pl.locator('.pl-item.preview .pl-preview-info')).toContainText('ห่างจาก');
-  await expect(pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' })).toHaveCount(0);
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Gwangjang Market' })).toHaveCount(0);
   await pl.locator('[data-pl="add"][data-place="gwangjang"]').click();
   await expect(pl.locator('.pl-pin.preview')).toHaveCount(0);
   // ชื่อสถานที่มีลิงก์ดูรูป (เปิด Google รูปภาพ)
-  await expect(pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' }).locator('.pl-photo')).toHaveAttribute('href', /google\.com\/search\?tbm=isch/);
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Gwangjang Market' }).locator('.pl-photo')).toHaveAttribute('href', /google\.com\/search\?tbm=isch/);
   // ใส่สถานที่เดิมซ้ำได้ (เช่นแวะกลับโรงแรม) · หมุดเดียวบอกหลายลำดับ
   await pl.locator('[data-pl-input="q"]').fill('');
   await pl.locator('[data-pl-input="q"]').dispatchEvent('input');
-  await expect(pl.locator('.pl-item', { hasText: 'โรงแรม Sotetsu' }).first()).toContainText('อยู่ในแผนแล้ว');
+  await expect(pl.locator('.pl-item', { hasText: 'Sotetsu' }).first()).toContainText('อยู่ในแผนแล้ว');
   await pl.locator('[data-pl="add"][data-place="hotel"]').click();
-  await expect(pl.locator('.pl-row.stop', { hasText: 'โรงแรม Sotetsu' })).toHaveCount(2);
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Sotetsu' })).toHaveCount(2);
   await expect(pl.locator('.pl-pin span', { hasText: ',' }).first()).toBeVisible();
-  await pl.locator('.pl-row.stop', { hasText: 'โรงแรม Sotetsu' }).last().locator('[data-pl="remove"]').click();
-  await expect(pl.locator('.pl-row.stop', { hasText: 'โรงแรม Sotetsu' })).toHaveCount(1);
-  const row = pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' });
+  await pl.locator('.pl-row.stop', { hasText: 'Sotetsu' }).last().locator('[data-pl="remove"]').click();
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Sotetsu' })).toHaveCount(1);
+  const row = pl.locator('.pl-row.stop', { hasText: 'Gwangjang Market' });
   await expect(row).toBeVisible();
   await row.locator('[data-pl-change="stay"]').selectOption('120');
   await row.locator('[data-pl="reset-stay"]').click();
-  await expect(pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' }).locator('[data-pl="reset-stay"]')).toHaveCount(0);
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Gwangjang Market' }).locator('[data-pl="reset-stay"]')).toHaveCount(0);
   await expect(pl.locator('.pl-budget')).toContainText('จาก');
   // ขั้น 3: แก้เวลาเดินทาง แล้ว ↺
   await pl.locator('.pl-foot [data-pl="goto"][data-v="3"]').click();
@@ -553,7 +553,7 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await expect(pl.locator('[data-pl="reset-leg"]')).toHaveCount(0);
   // ขั้น 4: สรุป · แก้ → กลับขั้น 2 → กลับหน้าสรุป · ยืนยัน → ไปหน้า วันนี้
   await pl.locator('.pl-foot [data-pl="goto"][data-v="4"]').click();
-  await expect(pl.locator('.pl-sum')).toContainText('ตลาดกวางจัง');
+  await expect(pl.locator('.pl-sum')).toContainText('Gwangjang Market');
   await pl.locator('[data-pl="edit"][data-v="2"]').first().click();
   await expect(pl.locator('.pl-steps li.on')).toContainText('เลือกสถานที่');
   await pl.locator('.pl-foot [data-pl="goto"][data-v="4"]').click();
@@ -561,5 +561,5 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await expect(pl).toBeHidden();
   await expect(page.locator('#toast')).toContainText('บันทึกแผนวันนี้แล้ว');
   await expect(page.locator('body')).toHaveAttribute('data-tab', 'today');
-  await expect(page.locator('.tl-list')).toContainText('ตลาดกวางจัง');
+  await expect(page.locator('.tl-list')).toContainText('Gwangjang Market');
 });

@@ -257,7 +257,7 @@ function step2(s: DaySchedule): string {
     const list = app
       .places()
       .filter((p) => p.lat != null)
-      .filter((p) => !q || [p.nameTh, p.nameEn, p.nameKo, p.area, ...(p.food?.menu ?? [])].join(' ').toLowerCase().includes(q));
+      .filter((p) => !q || [p.nameTh, p.thaiName, p.nameEn, p.nameKo, p.area, ...(p.food?.menu ?? [])].join(' ').toLowerCase().includes(q));
     // ใกล้จุดในแผนก่อน
     const anchors = d.stops.map(placeOf).filter((p): p is Place => !!p && p.lat != null);
     const dist = (p: Place) => (anchors.length ? Math.min(...anchors.map((a) => straightLineM({ lat: a.lat!, lng: a.lng! }, { lat: p.lat!, lng: p.lng! }))) : 0);

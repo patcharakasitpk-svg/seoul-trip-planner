@@ -96,7 +96,7 @@ export function filteredPlaces(): Place[] {
       if (f.budget === 'high' && max <= 40000) return false;
     }
     if (q) {
-      const hay = [p.nameTh, p.nameEn, p.nameKo, p.branch, p.area, p.address, p.reasonTh, ...(p.food?.menu ?? [])].join(' ').toLowerCase();
+      const hay = [p.nameTh, p.thaiName, p.nameEn, p.nameKo, p.branch, p.area, p.address, p.reasonTh, ...(p.food?.menu ?? [])].join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -196,6 +196,7 @@ function placeDetails(p: Place): string {
     : `<span class="closed">ยังไม่ยืนยัน</span> — <a href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">เช็กเวลาใน Google Maps ↗</a>`;
   return `
     <div class="place-details">
+      ${p.thaiName || p.nameKo ? `<p class="small muted">${p.thaiName && p.thaiName !== p.nameTh ? `ไทย: ${esc(p.thaiName)}` : ''}${p.thaiName && p.nameKo ? ' · ' : ''}${p.nameKo ? `เกาหลี: <span lang="ko">${esc(p.nameKo)}</span>` : ''}</p>` : ''}
       <p>${esc(p.reasonTh)}</p>
       <p class="small"><b>เวลาเปิด</b> ${hoursLine}<br>${verify}</p>
       ${stationBlock(p, app.getPlace(app.day.startPlaceId) ?? app.getPlace('hotel'))}

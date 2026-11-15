@@ -39,7 +39,10 @@ export function buildPublicPlaces(): Place[] {
       out.set(r.id, { ...r, lat: pin ? r.lat : null, lng: pin ? r.lng : null, coordStatus: status, kind: r.kind ?? 'place' });
     }
   }
-  return [...out.values()].map((p) => (p.transit || !TRANSIT[p.id] ? p : { ...p, transit: TRANSIT[p.id] }));
+  return [...out.values()]
+    .map((p) => (p.transit || !TRANSIT[p.id] ? p : { ...p, transit: TRANSIT[p.id] }))
+    // ชื่อที่แสดง = ชื่ออังกฤษมาตรฐาน (ค้นใน Google/Naver ได้ตรง) · เก็บชื่อไทยไว้ค้นหาและแสดงในรายละเอียด
+    .map((p) => ({ ...p, thaiName: p.nameTh, nameTh: p.nameEn }));
 }
 
 export const PUBLIC_PLACES = buildPublicPlaces();
