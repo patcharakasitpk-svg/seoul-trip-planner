@@ -8,9 +8,10 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "npm run build:e2e && playwright test",
     "typecheck": "tsc --noEmit",
-    "deploy": "bash scripts/deploy-gh-pages.sh"
+    "deploy": "bash scripts/deploy-gh-pages.sh",
+    "build:e2e": "tsc --noEmit && vite build --mode e2e"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.0",

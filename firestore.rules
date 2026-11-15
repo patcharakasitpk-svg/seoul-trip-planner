@@ -1,0 +1,9 @@
+rules_version = '2';
+// ชั่วคราว: ปิดทั้งหมดจนกว่ากฎของทริปที่แชร์จะทดสอบเสร็จ
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
