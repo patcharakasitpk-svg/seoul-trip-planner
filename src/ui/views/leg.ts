@@ -3,7 +3,7 @@ import type { RouteResult, TransitStep, TravelMode } from '../../core/types';
 import { app } from '../app';
 import { esc, gmapsDirUrl, kakaoToUrl, MODE_ICON, MODE_LABEL, naverBtn, naverRouteUrl } from '../util';
 import { fmtDur } from '../../core/time';
-import { fmtDist, roughEstimateMin, straightLineM } from '../../core/geo';
+import { effectiveMode, fmtDist, roughEstimateMin, straightLineM } from '../../core/geo';
 import { legTransitHint, lineChip } from './transit';
 
 export function straightDist(fromId: string | null, toId: string | null): number | null {
@@ -41,6 +41,15 @@ export function routeSummary(r: RouteResult & { status: 'ok' }): string {
 
 const SRC_TEXT: Record<string, string> = { user: 'กำหนดเอง', service: 'จาก Google', estimate: 'ประมาณ', auto: 'ประมาณจากระยะทาง', none: 'ยังไม่มีข้อมูล', same: '' };
 
+/** วิธีเดินทาง + เวลา + ระยะ: "เดิน ≈ 7 นาที · ห่าง 450 ม." — บอกว่าเวลานี้คิดจากการเดินทางแบบไหน */
+export function legSummary(leg: LegInfo): string {
+  const d = straightDist(leg.fromId, leg.toId);
+  const m = effectiveMode(leg.mode, leg.source, d);
+  const how = { WALKING: 'เดิน', TRANSIT: 'รถไฟฟ้า/รถเมล์', DRIVING: 'แท็กซี่' }[m];
+  const src = leg.source === 'user' ? ' (กำหนดเอง)' : leg.source === 'service' ? ' (Google)' : '';
+  return `${MODE_ICON[m]} ${how} ${travelText(leg)}${src}${d != null ? ` · ห่าง ${fmtDist(d)}` : ''}`;
+}
+
 /** เวลาเดินทางสั้น ๆ: "22 นาที" / "≈ 22 นาที" */
 export function travelText(leg: LegInfo): string {
   return leg.travelMin != null ? `${leg.source === 'auto' || leg.source === 'estimate' ? '≈ ' : ''}${fmtDur(leg.travelMin)}` : 'ไม่ทราบเวลา';
@@ -50,7 +59,7 @@ export function travelText(leg: LegInfo): string {
 export function shortHow(leg: LegInfo): string {
   const from = app.getPlace(leg.fromId);
   const to = app.getPlace(leg.toId);
-  if (leg.mode === 'WALKING') return 'เดิน';
+  if (leg.mode === 'WALKING' || effectiveMode(leg.mode, leg.source, straightDist(leg.fromId, leg.toId)) === 'WALKING') return 'เดิน';
   if (leg.mode === 'DRIVING') return 'แท็กซี่/รถ';
   const r = leg.route && leg.route.status === 'ok' ? leg.route : null;
   const tr = r?.steps.filter((x) => x.kind === 'transit') ?? [];
@@ -73,9 +82,9 @@ export function legRow(dayId: string, leg: LegInfo, target: string): string {
   if (!leg.fromId || !leg.toId) return '';
   const unknown = leg.travelMin == null;
   return `<div class="leg slim ${unknown ? 'missing' : ''}">
-    <span class="leg-ico" aria-hidden="true">${MODE_ICON[leg.mode]}</span>
+    <span class="leg-ico" aria-hidden="true">${MODE_ICON[effectiveMode(leg.mode, leg.source, straightDist(leg.fromId, leg.toId))]}</span>
     <b class="leg-time">${travelText(leg)}</b>${leg.bufferMin ? `<span class="muted small">+ เผื่อ ${leg.bufferMin} นาที</span>` : ''}
-    <span class="leg-how">${shortHow(leg)}</span>
+    <span class="leg-how">${shortHow(leg)}${straightDist(leg.fromId, leg.toId) != null ? ` · ห่าง ${fmtDist(straightDist(leg.fromId, leg.toId)!)}` : ''}</span>
     <button class="icon-btn sm info" data-act="leg-info" data-day="${dayId}" data-stop="${target}" aria-label="รายละเอียดการเดินทาง / กำหนดเอง">ⓘ</button>
   </div>`;
 }

@@ -102,3 +102,14 @@ describe('เวลาเดินทางโดยประมาณ (หน�
     expect(liveEstimateMin(8000, 'TRANSIT')).toBeLessThan(liveEstimateMin(8000, 'WALKING'));
   });
 });
+
+import { effectiveMode } from '../../src/core/geo';
+describe('วิธีเดินทางที่ใช้คิดเวลา', () => {
+  it('เวลาประมาณระยะใกล้ = เดิน แม้ตั้งเป็นรถสาธารณะ · ระยะไกล = รถสาธารณะ · กำหนดเอง/จากบริการ = ตามที่ตั้ง', () => {
+    expect(effectiveMode('TRANSIT', 'auto', 450)).toBe('WALKING');
+    expect(effectiveMode('TRANSIT', 'auto', 8200)).toBe('TRANSIT');
+    expect(effectiveMode('TRANSIT', 'user', 450)).toBe('TRANSIT');
+    expect(effectiveMode('DRIVING', 'auto', 450)).toBe('DRIVING');
+    expect(effectiveMode('TRANSIT', 'auto', null)).toBe('TRANSIT');
+  });
+});

@@ -41,3 +41,9 @@ export function liveEstimateMin(distM: number, mode: 'WALKING' | 'TRANSIT' | 'DR
   if (mode === 'TRANSIT' && walk <= 20) return walk;
   return roughEstimateMin(distM, mode);
 }
+
+/** วิธีเดินทางที่ใช้คิดเวลาจริง: เวลาประมาณ (auto/estimate) ระยะใกล้ของรถสาธารณะ = เดิน (ตาม liveEstimateMin) */
+export function effectiveMode(mode: 'WALKING' | 'TRANSIT' | 'DRIVING', source: string, distM: number | null): 'WALKING' | 'TRANSIT' | 'DRIVING' {
+  if (mode !== 'TRANSIT' || distM == null || (source !== 'auto' && source !== 'estimate')) return mode;
+  return roughEstimateMin(distM, 'WALKING') <= 20 ? 'WALKING' : 'TRANSIT';
+}

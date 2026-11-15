@@ -13,7 +13,7 @@ import { CATEGORY_LABEL } from '../data/places';
 import { placeOptions } from './views/day';
 import { coordFixForm } from './views/library';
 import { buildOwnPlace, OWN_CATEGORY_LABEL, type OwnCategory } from '../core/ownPlace';
-import { travelText } from './views/leg';
+import { legSummary } from './views/leg';
 import { mealName, mealOf, newMeal, MEALS, type Meal } from '../core/meals';
 import { systemDayDefaults, recommendedStops } from '../core/dayDefaults';
 import type { Day, Place, Stop, TravelMode } from '../core/types';
@@ -83,6 +83,7 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
     root.addEventListener('submit', onSubmit);
   }
   root.hidden = false;
+  fittedKey = '';
   document.body.classList.add('planner-open');
   render(true);
 }
@@ -164,7 +165,7 @@ function render(resetMap = false) {
     map?.remove();
     map = null;
     root.innerHTML = `<header class="pl-head"></header><div class="pl-budget-wrap"></div>
-      <div class="pl-body"><div class="pl-main"></div><div class="pl-mapcol"><div id="pl-map"></div><p class="muted small">ตัวเลขบนหมุด = ลำดับ · เส้นประ = ลำดับการเดินทาง (ไม่ใช่เส้นทางจริง)</p></div></div>
+      <div class="pl-body"><div class="pl-main"></div><div class="pl-mapcol"><div class="pl-mapwrap"><div id="pl-map"></div><button class="pl-btn sm pl-mapfit" data-pl="map-fit" title="ซูมให้เห็นทุกจุดของวัน">พอดีจอ</button></div><p class="muted small">ตัวเลขบนหมุด = ลำดับ · เส้นประ = ลำดับการเดินทาง (ไม่ใช่เส้นทางจริง)</p></div></div>
       <footer class="pl-foot"></footer>`;
   }
   const $ = (sel: string) => root!.querySelector(sel) as HTMLElement;
@@ -463,7 +464,7 @@ function dayLane(s: DaySchedule): string {
     const x = t.stop;
     const isMove = x.kind === 'place' || x.kind === 'dinner';
     rows.push(`
-      ${isMove && t.leg.fromId && t.leg.toId && t.leg.fromId !== t.leg.toId ? `<div class="pl-travel">เดินทาง ${travelText(t.leg)}</div>` : ''}
+      ${isMove && t.leg.fromId && t.leg.toId && t.leg.fromId !== t.leg.toId ? `<div class="pl-travel">${legSummary(t.leg)}</div>` : ''}
       <div class="pl-row stop ${x.lockedTime ? 'locked' : ''}" data-uid="${x.uid}">
         <span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span>
         <div class="pl-row-main">
@@ -485,7 +486,7 @@ function dayLane(s: DaySchedule): string {
   const b = budget(s);
   rows.push(drop(d.stops.length, b.free != null && b.free > 15 ? `ว่าง ${fmtDur(b.free)} ถึงเวลาจบ — วางสถานที่ที่นี่` : '', b.free != null && b.free > 15));
   if (s.end) {
-    rows.push(`<div class="pl-travel">เดินทาง ${travelText(s.end.leg)}</div>`);
+    rows.push(`<div class="pl-travel">${legSummary(s.end.leg)}</div>`);
     rows.push(`<div class="pl-row edge"><span class="t">${s.end.arrive != null ? fmtHM(s.end.arrive) : '--:--'}</span><span>${numBadge(undefined, 'จบ')} ถึง <b>${esc(shortName(app.getPlace(d.endPlaceId)))}</b>${s.end.slackMin != null && s.end.slackMin < 0 ? ` <span class="bad-text small">เกิน ${esc(d.endTime ?? '')} ${fmtDur(-s.end.slackMin)}</span>` : ''}</span></div>`);
   }
   return `<div class="pl-day">${rows.join('')}</div>`;
@@ -508,7 +509,7 @@ function step3(s: DaySchedule): string {
     <table class="pl-legs"><tbody>${legs
       .map(
         (l) => `<tr>
-        <td>${esc(shortName(l.from))} → <b>${esc(shortName(l.to))}</b></td>
+        <td>${esc(shortName(l.from))} → <b>${esc(shortName(l.to))}</b><br><span class="muted small">${legSummary(l.leg)}</span></td>
         <td><select class="inp xs" data-pl-change="mode" data-target="${l.target}">${(['TRANSIT', 'WALKING', 'DRIVING'] as TravelMode[]).map((m) => `<option value="${m}" ${mode(l.target).mode === m ? 'selected' : ''}>${{ TRANSIT: 'รถไฟฟ้า/รถเมล์', WALKING: 'เดิน', DRIVING: 'แท็กซี่' }[m]}</option>`).join('')}</select></td>
         <td class="num"><input class="inp xs" type="number" min="0" value="${l.leg.travelMin ?? ''}" data-pl-change="travel" data-target="${l.target}" aria-label="นาที"> นาที ${l.leg.source === 'auto' ? '<span class="muted small">(ประมาณ)</span>' : ''}${mode(l.target).manualMin != null || mode(l.target).mode !== 'TRANSIT' ? resetBtn('reset-leg', l.target, 'กลับเป็นเวลาประมาณ') : ''}</td>
       </tr>`,
@@ -529,11 +530,11 @@ function step4(s: DaySchedule): string {
   for (const t of s.stops) {
     if (t.stop.skipped) continue;
     const isMove = t.stop.kind === 'place' || t.stop.kind === 'dinner';
-    if (isMove && t.leg.fromId !== t.leg.toId && t.leg.travelMin != null) rows.push(`<li class="sum-leg"><span></span><span>เดินทาง ${travelText(t.leg)}</span>${edit(3)}</li>`);
+    if (isMove && t.leg.fromId !== t.leg.toId && t.leg.travelMin != null) rows.push(`<li class="sum-leg"><span></span><span>${legSummary(t.leg)}</span>${edit(3)}</li>`);
     rows.push(`<li class="sum-stop"><span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span><span>${numBadge(nums.get(t.stop.uid))} ${nameLink(t.stop)} · ${fmtDur(t.stop.stayMin)}${t.stop.note ? `<span class="pl-note sum">${esc(t.stop.note)}</span>` : ''}${t.stop.lockedTime ? ' · นัด' : ''}${t.lateMin ? ` <span class="bad-text">สาย ${fmtDur(t.lateMin)}</span>` : ''}</span>${edit(2)}</li>`);
   }
   if (s.end) {
-    rows.push(`<li class="sum-leg"><span></span><span>เดินทาง ${travelText(s.end.leg)}</span>${edit(3)}</li>`);
+    rows.push(`<li class="sum-leg"><span></span><span>${legSummary(s.end.leg)}</span>${edit(3)}</li>`);
     rows.push(`<li class="sum-edge"><span class="t">${s.end.arrive != null ? fmtHM(s.end.arrive) : '--:--'}</span><span>ถึง <b>${esc(shortName(app.getPlace(d.endPlaceId)))}</b></span>${edit(1)}</li>`);
   }
   const ok = b.free != null && b.free >= 0 && !s.stops.some((t) => t.lateMin);
@@ -582,25 +583,36 @@ function drawMap(s: DaySchedule) {
   }
   // หมุดแดง: สถานที่ที่กำลังดูก่อนใส่ + เส้นจากจุดที่จะต่อ
   const pv = st!.step === 2 && st!.preview ? app.getPlace(st!.preview) : undefined;
-  let focus = path;
+  let pvPoint: [number, number] | null = null;
   if (pv?.lat != null) {
     const a = anchorPlace();
-    const pp: [number, number] = [pv.lat, pv.lng!];
-    if (a?.lat != null) {
-      L.polyline([[a.lat, a.lng!], pp], { color: '#e03131', weight: 4, opacity: 0.85, dashArray: '8 8' }).addTo(layer!);
-      focus = [[a.lat, a.lng!], pp];
-    } else focus = [pp];
-    L.marker(pp, { icon: L.divIcon({ className: 'pl-pin preview', html: `<span>${esc(pv.nameTh)}</span>`, iconSize: [0, 0] }), zIndexOffset: 1000 }).addTo(layer!);
+    pvPoint = [pv.lat, pv.lng!];
+    if (a?.lat != null) L.polyline([[a.lat, a.lng!], pvPoint], { color: '#e03131', weight: 4, opacity: 0.85, dashArray: '8 8' }).addTo(layer!);
+    L.marker(pvPoint, { icon: L.divIcon({ className: 'pl-pin preview', html: `<span>${esc(pv.nameTh)}</span>`, iconSize: [0, 0] }), zIndexOffset: 1000 }).addTo(layer!);
   }
+  // ซูมอัตโนมัติเฉพาะตอนเปิด/เปลี่ยนวัน/เปลี่ยนขั้น หรือกด "พอดีจอ" — แก้/เพิ่มแล้วแผนที่ค้างที่เดิม (ไม่เด้งออกไปมุมกว้าง)
+  // ซูมให้พอดีจุดแวะของวัน (ไม่รวมจุดเริ่ม/จบที่อยู่ไกล เช่นสนามบิน)
+  const stopPts = pts.filter((x) => x.label !== 'เริ่ม' && x.label !== 'จบ').map((x) => [x.p.lat!, x.p.lng!] as [number, number]);
+  const focus = stopPts.length ? stopPts : path;
+  const key = `${st!.dayId}|${st!.step}`;
+  const doFit = forceFit || fittedKey !== key;
+  forceFit = false;
   const fit = () => {
     if (!map) return;
     map.invalidateSize(); // กล่องแผนที่ขยายหลังสร้าง → คำนวณขนาดใหม่ ไม่ให้แผนที่โหลดแค่บางส่วน
-    if (focus.length) map.fitBounds(L.latLngBounds(focus), { padding: [48, 48], maxZoom: 15 });
-    else map.setView([37.5665, 126.978], 12);
+    if (doFit) {
+      if (focus.length) map.fitBounds(L.latLngBounds(focus), { padding: [48, 48], maxZoom: 16 });
+      else map.setView([37.5665, 126.978], 12);
+    } else if (pvPoint && !map.getBounds().pad(-0.1).contains(pvPoint)) {
+      map.panTo(pvPoint); // หมุดแดงอยู่นอกจอ → เลื่อนไปหา โดยไม่เปลี่ยนระดับซูม
+    }
   };
+  fittedKey = key;
   fit();
   requestAnimationFrame(fit);
 }
+let fittedKey = '';
+let forceFit = false;
 
 /* ---------------- การแก้ร่าง ---------------- */
 function edit(fn: (d: Day) => Day) {
@@ -673,6 +685,10 @@ function onClick(e: Event) {
       st.draft = v === '__end' ? { ...st.draft, endLeg: { ...st.draft.endLeg, ...clear } } : updateStop(st.draft, v!, { legIn: { ...st.draft.stops.find((y) => y.uid === v)!.legIn, ...clear } });
       break;
     }
+    case 'map-fit':
+      forceFit = true;
+      if (st) drawMap(sched());
+      return;
     case 'own-open':
       st.ownOpen = true;
       break;
