@@ -2,7 +2,7 @@
 export const ZONES = {
   myeongdong: { th: 'เมียงดง · ใจกลางเมือง', keys: ['myeongdong', 'hoehyeon', 'namdaemun', 'euljiro', 'chungmuro', 'city hall', 'namsan', 'jung-gu'] },
   jongno: { th: 'จงโน · อิกซอนดง · ทงแดมุน', keys: ['jongno', 'ikseon', 'hyehwa', 'ihwa', 'dongdaemun', 'seochon', 'gwanghwamun', 'insadong'] },
-  hongdae: { th: 'ฮงแด · ยอนนัม · มังวอน', keys: ['hongdae', 'yeonnam', 'mangwon', 'hapjeong', 'mapo', 'sinchon'] },
+  hongdae: { th: 'ฮงแด · ยอนนัม · ยอนฮี · มังวอน', keys: ['hongdae', 'yeonnam', 'yeonhui', 'seodaemun', 'mangwon', 'hapjeong', 'mapo', 'sinchon'] },
   seongsu: { th: 'ซองซู · ทุกซอม', keys: ['seongsu', 'ttukseom', 'seoul forest'] },
   gangnam: { th: 'คังนัม · ชินซา · อัปกูจอง', keys: ['gangnam', 'sinsa', 'garosu', 'apgujeong', 'cheongdam', 'dosan', 'express bus terminal', 'sinnonhyeon'] },
   coex: { th: 'COEX · ซัมซอง', keys: ['coex', 'samseong', 'bongeunsa'] },

@@ -1,0 +1,157 @@
+[
+  {
+    "id": "allwrite-seochon",
+    "nameTh": "ออลไรต์ ซอชน (ร้านเครื่องเขียน)",
+    "nameEn": "ALLWRITE Seochon",
+    "nameKo": "올라이트 서촌",
+    "branch": "Seochon (main store)",
+    "category": "fashion",
+    "area": "Seochon / Jongno",
+    "address": "1F, 41 Jahamun-ro 5ga-gil, Jongno-gu, Seoul 03040 (서울 종로구 자하문로5가길 41 상가 1층)",
+    "lat": 37.5789482,
+    "lng": 126.9697584,
+    "coordStatus": "unverified",
+    "coordSource": "Single source: VisitSeoul listing 'Allwrite' map pin (lat 37.5789482098363, lng 126.969758388384, same pin on English and Korean pages). OSM has no node/building for the shop or for 자하문로5가길 41 (Nominatim only returns the street; nearest OSM address node 자하문로5가길 24 at 37.57855,126.97070). Kakao Map lookup was blocked by a permission rule.",
+    "reasonTh": "ร้านเครื่องเขียนเล็กๆ สไตล์มินิมอลของแบรนด์ ALLWRITE ในซอชน ขึ้นชื่อเรื่องสมุด/ไดอารีที่แบรนด์ทำเองหลายสี โปสการ์ดเต็มผนัง และปกหนังใส่สมุด เหมาะซื้อของฝากสายจดบันทึก",
+    "suggestedStayMin": 30,
+    "budget": {
+      "textTh": "สมุด/ไดอารี/โปสการ์ด ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+      "krwMin": null,
+      "krwMax": null,
+      "status": "unknown"
+    },
+    "hours": {
+      "text": "Daily 12:30–19:30 (VisitSeoul, edited Aug 2026; Instagram bio; Soul of Seoul updated 13 Nov 2026). Hours change week to week – check Instagram @allwrite_shop before going.",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "verified",
+      "closedWeekdays": []
+    },
+    "openTime": "12:30",
+    "closeTime": "19:30",
+    "indoor": true,
+    "food": null,
+    "fashionTypes": ["stationery", "notebooks", "postcards"],
+    "transit": {
+      "stations": [
+        { "name": "Gyeongbokgung", "nameKo": "경복궁", "lines": ["3"], "exit": "2", "walkMin": 7 }
+      ],
+      "bus": null,
+      "status": "verified",
+      "sources": [
+        { "label": "VisitSeoul – Allwrite (Line 3 Gyeongbokgung Stn exit 2, 441 m)", "url": "https://english.visitseoul.net/shopping/2024-allwrite/ENP0kjpgo" }
+      ]
+    },
+    "sources": [
+      { "label": "VisitSeoul – Allwrite (address, daily 12:30–19:30, edited 8 Aug 2026)", "url": "https://english.visitseoul.net/shopping/2024-allwrite/ENP0kjpgo" },
+      { "label": "The Soul of Seoul – stationery stores (3 Allwrite branches, updated 13 Nov 2026)", "url": "https://thesoulofseoul.net/korean-stationary-stores-art-supply-stores-seoul/" },
+      { "label": "Instagram @allwrite_shop (bio: Seochon everyday 12:30–19:30)", "url": "https://www.instagram.com/allwrite_shop/" },
+      { "label": "Design (디자인) – Allwrite Yeonhui opening, brand background & leather cover (Apr 2024)", "url": "https://design.co.kr/article/13893/" }
+    ],
+    "checkedAt": "2026-11-15",
+    "notes": "No regular closed day in any source (listed as daily), so open on all days 30 Nov–6 Dec 2026 per listings – but the brand says hours vary weekly, check Instagram @allwrite_shop the week before. Phone 010-9223-3484. Address and ~12:30–19:30 hours match the user's notes. Leather notebook cover is confirmed (Design magazine: signature diaries in 1/4/6/12-month formats plus a leather cover); 'Tomoe River notebooks' was NOT confirmed by any source found. VisitSeoul text also calls it 'Olight Seochon' (romanisation of 올라이트). Opens only 12:30 – pair with an afternoon in Seochon."
+  },
+  {
+    "id": "allwrite-yeonhui",
+    "nameTh": "ออลไรต์ ยอนฮี (ร้านเครื่องเขียน)",
+    "nameEn": "ALLWRITE Yeonhui",
+    "nameKo": "올라이트 연희",
+    "branch": "Yeonhui",
+    "category": "fashion",
+    "area": "Yeonhui-dong / Seodaemun",
+    "address": "1F, 57 Yeonhui-ro 11-gil, Seodaemun-gu, Seoul (서울 서대문구 연희로11길 57; lot address 연희동 126-2 1층)",
+    "lat": null,
+    "lng": null,
+    "coordStatus": "unverified",
+    "coordSource": "No coordinates found: no OSM node/building for the shop, for 연희로11길 57 or for lot 연희동 126-2 (Nominatim/Photon/Overpass return only the street; nearest OSM address node is 연희로11길 61 at 37.56897,126.92856). No VisitSeoul page; Kakao Map lookup blocked by a permission rule. Left null rather than guessed.",
+    "reasonTh": "สาขาที่สองของ ALLWRITE ในย่านยอนฮีดงที่เงียบสงบ ตกแต่งด้วยเฟอร์นิเจอร์ไม้ มีโปสการ์ดเต็มผนังและสมุดที่แบรนด์ทำเองเรียงตามสี เหมาะแวะเดินเล่นคู่กับคาเฟ่ย่านยอนฮี",
+    "suggestedStayMin": 30,
+    "budget": {
+      "textTh": "สมุด/ไดอารี/โปสการ์ด ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+      "krwMin": null,
+      "krwMax": null,
+      "status": "unknown"
+    },
+    "hours": {
+      "text": "Daily 12:30–18:30 (Soul of Seoul, updated 13 Nov 2026). 2024 opening articles said 13:00–18:00 with open days announced on Instagram. Hours change week to week – check Instagram @allwrite_shop.",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "unverified",
+      "closedWeekdays": []
+    },
+    "openTime": "12:30",
+    "closeTime": "18:30",
+    "indoor": true,
+    "food": null,
+    "fashionTypes": ["stationery", "notebooks", "postcards"],
+    "transit": {
+      "stations": [
+        { "name": "Hongik University", "nameKo": "홍대입구", "lines": ["2", "AREX", "KORAIL"], "exit": null, "walkMin": null }
+      ],
+      "bus": null,
+      "status": "unverified",
+      "sources": []
+    },
+    "sources": [
+      { "label": "The Soul of Seoul – stationery stores (Yeonhui branch 57 Yeonhui-ro 11-gil, daily 12:30–18:30; updated 13 Nov 2026)", "url": "https://thesoulofseoul.net/korean-stationary-stores-art-supply-stores-seoul/" },
+      { "label": "heyPOP – Allwrite Yeonhui opening (연희동 126-2 1층, opened 10 Apr 2024, no signboard)", "url": "https://heypop.kr/n/95192/" },
+      { "label": "Design (디자인) – Allwrite Yeonhui (연희동 126-2, 13:00–18:00, Apr 2024)", "url": "https://design.co.kr/article/13893/" },
+      { "label": "Instagram @allwrite_shop (bio lists Seochon and Yeonhui branches)", "url": "https://www.instagram.com/allwrite_shop/" }
+    ],
+    "checkedAt": "2026-11-15",
+    "notes": "Store is real and appears current: opened 10 Apr 2024 at 연희동 126-2 1F, still listed in the Instagram bio and on Soul of Seoul (updated 13 Nov 2026) as 57 Yeonhui-ro 11-gil – matches the user's 'Yeonhui-ro 11-gil' (house number 57 added). That 연희동 126-2 and 연희로11길 57 are the same building is inferred from the sources, not confirmed on a map. No regular closed day listed; open days/hours are announced weekly on Instagram, so check before 30 Nov–6 Dec 2026. Shop has NO signboard (heyPOP). Note there is also a THIRD store, 'Allwrite Red' (올라이트 레드), at 102, 17-3 Yeonhuimat-ro, Seodaemun-gu (Marie Claire Korea, 27 Jan 2026; Soul of Seoul: daily 12:30–18:30) – not added as a separate entry. Station is the nearest by map geometry only (no source; roughly 1+ km walk) – a bus/taxi from Hongdae or Sinchon is likely easier. Coordinates missing: place needs a manual pin."
+  },
+  {
+    "id": "hanju-diary-euljiro",
+    "nameTh": "ฮันจู ไดอารี (ร้านไดอารีและสมุด อึลจีโร)",
+    "nameEn": "Hanju Diary",
+    "nameKo": "한주다이어리",
+    "branch": "Euljiro showroom (HANJU Co., Ltd.)",
+    "category": "fashion",
+    "area": "Euljiro / Chungmuro",
+    "address": "1F, 2 Chungmuro 4-gil, Jung-gu, Seoul (서울 중구 충무로4길 2, 1층)",
+    "lat": 37.5649259,
+    "lng": 126.9929541,
+    "coordStatus": "unverified",
+    "coordSource": "Single source: docentpro.com place page '주식회사 한주(한주 다이어리)' embedded coordinates (37.5649259, 126.99295409999999). OSM has no node/building for the shop or for 충무로4길 2 (street way 170403779 centre 37.56502,126.99307 is ~15 m away, consistent). Kakao Map lookup blocked by a permission rule.",
+    "reasonTh": "โชว์รูมของบริษัทผลิตไดอารีและงานพิมพ์ที่ทำมาตั้งแต่ปี 1985 มีไดอารีและสมุดหลายสีหลายขนาดราคาย่อมเยา (ไดอารีอักษรย่อขายดีราว 3,000 วอน) ห่างสถานีอึลจีโรซามกาแค่ 1 นาที",
+    "suggestedStayMin": 45,
+    "budget": {
+      "textTh": "ไดอารีอักษรย่อ (initial diary) ขายดีราว 3,000 วอน ชิ้นอื่นไม่ได้ตรวจสอบราคา",
+      "krwMin": 3000,
+      "krwMax": null,
+      "status": "source"
+    },
+    "hours": {
+      "text": "Mon–Fri 09:30–19:30; Sat–Sun 14:00–19:00 (Trip.com moment post, Mar 2026)",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "unverified",
+      "closedWeekdays": []
+    },
+    "openTime": "09:30",
+    "closeTime": "19:30",
+    "indoor": true,
+    "food": null,
+    "fashionTypes": ["stationery", "diaries", "notebooks"],
+    "transit": {
+      "stations": [
+        { "name": "Euljiro 3(sam)-ga", "nameKo": "을지로3가", "lines": ["2", "3"], "exit": "8", "walkMin": 1 }
+      ],
+      "bus": null,
+      "status": "verified",
+      "sources": [
+        { "label": "HANJU official FAQ (을지로3가 8번 출구 도보 1분)", "url": "https://www.hanju1985.com/guide/%EC%9E%90%EC%A3%BC-%EB%AC%BB%EB%8A%94-%EC%A7%88%EB%AC%B8/" }
+      ]
+    },
+    "sources": [
+      { "label": "HANJU official FAQ (showroom address, Euljiro 3-ga exit 8, custom-order info)", "url": "https://www.hanju1985.com/guide/%EC%9E%90%EC%A3%BC-%EB%AC%BB%EB%8A%94-%EC%A7%88%EB%AC%B8/" },
+      { "label": "Trip.com moment – 한주 다이어리 (address, weekday 09:30–19:30, weekend 14:00–19:00)", "url": "https://kr.trip.com/moments/detail/jung-gu-2016454-142442134" },
+      { "label": "Threads @lookbox._ – Hanju Diary (initial diary 3,000 KRW, 충무로4길 2 1F)", "url": "https://www.threads.com/@lookbox._/post/Daecpf5GFR8" },
+      { "label": "docentpro – 주식회사 한주(한주 다이어리) (coordinates)", "url": "https://docentpro.com/places/%EC%A3%BC%EC%8B%9D%ED%9A%8C%EC%82%AC-%ED%95%9C%EC%A3%BC%ED%95%9C%EC%A3%BC-%EB%8B%A4%EC%9D%B4%EC%96%B4%EB%A6%AC_Njc5OTcy" },
+      { "label": "Instagram @hanju_official", "url": "https://www.instagram.com/hanju_official/" }
+    ],
+    "checkedAt": "2026-11-15",
+    "notes": "Address, 'since 1985' and hours (weekdays 09:30–19:30, weekends 14:00–19:00) match the user's notes; hours come from a single 2026 social post, so unverified. No regular closed day found, so open all days 30 Nov–6 Dec 2026 per that source (weekend 5–6 Dec opens only at 14:00). DIFFERENCES / UNCONFIRMED: the in-store DIY customising (choose cover colour, engraved initials, clips, charms) and the 'renovated' shop were NOT confirmed by any source found – sources confirm ready-made diaries/notebooks/stationery (bestselling initial diary ~3,000 KRW). The official FAQ's 'custom order' service is B2B (foil-stamped corporate diaries, ~250,000–450,000 KRW per design for A5, consultation by email/phone/visit) and it states design-stationery orders are NOT accepted Aug–end Jan (corporate diary season) – i.e. during the trip. If an in-store personalisation bar exists, allow 60+ min; suggestedStayMin 45 assumes browsing/buying ready-made items. Leather covers not confirmed. Check Instagram @hanju_official. Paid on-street public parking nearby (10 min/1,000 KRW)."
+  }
+]
