@@ -1,0 +1,105 @@
+[
+  {
+    "id": "paperian-seochon",
+    "nameTh": "เปเปอร์เรียน ซอชน (ร้านเครื่องเขียน)",
+    "nameEn": "PAPERIAN Seochon",
+    "nameKo": "페이퍼리안 서촌",
+    "branch": "Seochon flagship store",
+    "category": "fashion",
+    "area": "Seochon / Jongno",
+    "address": "2F, 16 Jahamun-ro 7-gil, Jongno-gu, Seoul (서울 종로구 자하문로7길 16, 2층)",
+    "lat": null,
+    "lng": null,
+    "coordStatus": "unverified",
+    "coordSource": "No coordinates found. OSM (Nominatim, Photon, Overpass) has no node/building for Paperian or for 자하문로7길 16 – only the street itself (자하문로7길 runs roughly 37.578–37.581, 126.969–126.972 in Tongin-dong/Chebu-dong). No map pin found on the brand site. Naver/Kakao maps not checked.",
+    "reasonTh": "ร้านแฟล็กชิปของแบรนด์กระดาษเกาหลี PAPERIAN (ก่อตั้งปี 2007) ขายสมุด ไดอารี และเครื่องเขียนโทนสีย้อนยุค เรียบๆ เหมาะแวะต่อจากร้านเครื่องเขียนอื่นในซอชน",
+    "suggestedStayMin": 30,
+    "budget": {
+      "textTh": "สมุด/ไดอารี/เครื่องเขียน ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+      "krwMin": null,
+      "krwMax": null,
+      "status": "unknown"
+    },
+    "hours": {
+      "text": "Tue–Sun 12:00–19:00; closed Mondays (other closures: see Naver Map, per official site)",
+      "closedDays": "Mondays",
+      "lastOrder": null,
+      "status": "verified",
+      "closedWeekdays": [1]
+    },
+    "openTime": "12:00",
+    "closeTime": "19:00",
+    "indoor": true,
+    "food": null,
+    "fashionTypes": ["stationery", "notebooks", "diaries"],
+    "transit": {
+      "stations": [
+        { "name": "Gyeongbokgung", "nameKo": "경복궁", "lines": ["3"], "exit": null, "walkMin": null }
+      ],
+      "bus": null,
+      "status": "unverified",
+      "sources": []
+    },
+    "sources": [
+      { "label": "PAPERIAN official site – help page, '서촌 플래그십 스토어' block (address, Tue–Sun 12–19, Mon closed, tel 02-6228-5600; page shows Nov 2026 event notice)", "url": "https://m.paperian.co.kr/help/" },
+      { "label": "JetPens – Paperian brand (Seoul-based stationery brand)", "url": "https://www.jetpens.com/Paperian/bd/392" },
+      { "label": "The Journal Shop – Paperian (founded 2007, retro palettes)", "url": "https://www.thejournalshop.com/collections/paperian" }
+    ],
+    "checkedAt": "2026-11-15",
+    "notes": "CLOSED Mon 30 Nov 2026 (regular Monday closure); open Tue 1 – Sun 6 Dec per official site, but the site says other holidays are posted on Naver Map – check before going. Only one physical store found: the Seochon flagship. The official stockist page lists no stores; the address 필동로 85 네스트빌라 B101 (Jung-gu) in the site footer is the company's registered/office address, not a shop (customer service 02-2232-5632, weekdays 10–17). The flagship was not found in any third-party article/blog or OSM, so the address rests on the brand site only. Station: Gyeongbokgung (Line 3) is the nearest by geography; exit and walk time not confirmed by any source. Close to ALLWRITE Seochon (자하문로5가길) – easy to pair. Opens at 12:00."
+  },
+  {
+    "id": "29cm-home-seongsu",
+    "nameTh": "29CM โฮม ซองซู (อีกูโฮม – ร้านไลฟ์สไตล์/ของแต่งบ้าน)",
+    "nameEn": "29CM HOME Seongsu",
+    "nameKo": "이구홈 성수",
+    "branch": "Seongsu No.1 (Yeonmujang-gil 57)",
+    "category": "fashion",
+    "area": "Seongsu",
+    "address": "57 Yeonmujang-gil, Seongdong-gu, Seoul (서울 성동구 연무장길 57)",
+    "lat": null,
+    "lng": null,
+    "coordStatus": "unverified",
+    "coordSource": "No coordinates found. OSM (Nominatim, Photon, Overpass) has no node for 29CM HOME / 이구홈 or for 연무장길 57 (nearest tagged address: 연무장길 50, 초이다이닝, 37.54250, 127.05484 – different building, not used). heypop page has only a map-app link without coordinates.",
+    "reasonTh": "ร้านไลฟ์สไตล์ออฟไลน์ของแพลตฟอร์มดีไซน์ 29CM รวมของจาก 147 แบรนด์ ทั้งพวงกุญแจ แม็กเน็ต เครื่องเขียน จานชาม ของแต่งบ้าน และบิวตี้ นักท่องเที่ยวต่างชาตินิยมมาซื้อของฝาก เปิดทุกวันถึงสี่ทุ่ม",
+    "suggestedStayMin": 45,
+    "budget": {
+      "textTh": "ของจุกจิกดีไซน์บางชิ้นไม่ถึง 10,000 วอน ไปจนถึงเฟอร์นิเจอร์/โคมไฟ (Design magazine)",
+      "krwMin": null,
+      "krwMax": null,
+      "status": "unknown"
+    },
+    "hours": {
+      "text": "Daily 11:00–22:00 (heypop; 29CM grand-opening page)",
+      "closedDays": null,
+      "lastOrder": null,
+      "status": "verified",
+      "closedWeekdays": []
+    },
+    "openTime": "11:00",
+    "closeTime": "22:00",
+    "indoor": true,
+    "food": null,
+    "fashionTypes": ["lifestyle select shop", "home goods", "stationery", "accessories"],
+    "transit": {
+      "stations": [
+        { "name": "Seongsu", "nameKo": "성수", "lines": ["2"], "exit": "3", "walkMin": 5 }
+      ],
+      "bus": null,
+      "status": "unverified",
+      "sources": [
+        { "label": "29CM grand-opening page (Seongsu stn exit 3, 5 min) – seen in search snippet only; page now returns 404", "url": "https://www.29cm.co.kr/content/29cmhome-seongsu/2025/06/grandopening" }
+      ]
+    },
+    "sources": [
+      { "label": "heypop – 이구홈 성수 (29CM HOME Seongsu): 연무장길 57, daily 11:00–22:00", "url": "https://heypop.kr/place/130782/" },
+      { "label": "29CM – grand opening page (now 404)", "url": "https://www.29cm.co.kr/content/29cmhome-seongsu/2025/06/grandopening" },
+      { "label": "Design (디자인) – 이구홈 성수 (147 brands, ~6,000 items)", "url": "https://design.co.kr/article/125967/" },
+      { "label": "Korea Times (22 Jun 2026) – why foreign shoppers flock to Iguhome Seongsu (No.1 and No.2)", "url": "https://www.koreatimes.co.kr/business/companies/20260622/why-foreign-shoppers-are-flocking-to-this-seoul-lifestyle-store" },
+      { "label": "heypop – 이구성수 (29CM SEONGSU), 아차산로 78 (former showroom)", "url": "https://heypop.kr/place/73924" },
+      { "label": "29CM – 이구키즈 성수 1st anniversary (아차산로 78, 10:00–21:00, open all year)", "url": "https://www.29cm.co.kr/content/offline/29cm-kids/2026/1st-anniversary" }
+    ],
+    "checkedAt": "2026-11-15",
+    "notes": "IDENTIFICATION UNCERTAIN – user typed '29 choke'. No shop/cafe/bar named '29 choke', '29초크' or 'Choke' was found in Seongsu (web + OSM). Most plausible match is a 29CM store in Seongsu; this entry picks 29CM HOME Seongsu No.1 (이구홈 성수, opened Jun 2025), the 29CM store most popular with foreign tourists. Alternatives for the user to confirm: (a) 29CM HOME Seongsu No.2 (이구홈 성수 2호점), 2–3F, 110 Yeonmujang-gil, opened Jan 2026, adds F&B and a HAY section in the basement; (b) 이구성수 / 29CM SEONGSU at 78 Achasan-ro – the original 2022 showroom; that address is now 이구키즈 성수 (29CM Kids, kids' select shop, 10:00–21:00, open all year, Seongsu stn exit 4, 5 min; OSM node 13758008922 at 37.54517, 127.05244). No regular closed day listed for 29CM HOME, so open every day 30 Nov – 6 Dec 2026 per listings. Hours from heypop + 29CM page (via search snippet); confirm on 29CM app/Instagram."
+  }
+]

@@ -5510,5 +5510,77 @@
   ],
   "checkedAt": "2026-11-15",
   "notes": "Address, 'since 1985' and hours (weekdays 09:30–19:30, weekends 14:00–19:00) match the user's notes; hours come from a single 2026 social post, so unverified. No regular closed day found, so open all days 30 Nov–6 Dec 2026 per that source (weekend 5–6 Dec opens only at 14:00). DIFFERENCES / UNCONFIRMED: the in-store DIY customising (choose cover colour, engraved initials, clips, charms) and the 'renovated' shop were NOT confirmed by any source found – sources confirm ready-made diaries/notebooks/stationery (bestselling initial diary ~3,000 KRW). The official FAQ's 'custom order' service is B2B (foil-stamped corporate diaries, ~250,000–450,000 KRW per design for A5, consultation by email/phone/visit) and it states design-stationery orders are NOT accepted Aug–end Jan (corporate diary season) – i.e. during the trip. If an in-store personalisation bar exists, allow 60+ min; suggestedStayMin 45 assumes browsing/buying ready-made items. Leather covers not confirmed. Check Instagram @hanju_official. Paid on-street public parking nearby (10 min/1,000 KRW)."
+ },
+ {
+  "id": "paperian-seochon",
+  "nameTh": "เปเปอร์เรียน ซอชน (ร้านเครื่องเขียน)",
+  "nameEn": "PAPERIAN Seochon",
+  "nameKo": "페이퍼리안 서촌",
+  "branch": "Seochon flagship store",
+  "category": "fashion",
+  "area": "Seochon / Jongno",
+  "address": "2F, 16 Jahamun-ro 7-gil, Jongno-gu, Seoul (서울 종로구 자하문로7길 16, 2층)",
+  "lat": null,
+  "lng": null,
+  "coordStatus": "unverified",
+  "coordSource": "No coordinates found. OSM (Nominatim, Photon, Overpass) has no node/building for Paperian or for 자하문로7길 16 – only the street itself (자하문로7길 runs roughly 37.578–37.581, 126.969–126.972 in Tongin-dong/Chebu-dong). No map pin found on the brand site. Naver/Kakao maps not checked.",
+  "reasonTh": "ร้านแฟล็กชิปของแบรนด์กระดาษเกาหลี PAPERIAN (ก่อตั้งปี 2007) ขายสมุด ไดอารี และเครื่องเขียนโทนสีย้อนยุค เรียบๆ เหมาะแวะต่อจากร้านเครื่องเขียนอื่นในซอชน",
+  "suggestedStayMin": 30,
+  "budget": {
+   "textTh": "สมุด/ไดอารี/เครื่องเขียน ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "Tue–Sun 12:00–19:00; closed Mondays (other closures: see Naver Map, per official site)",
+   "closedDays": "Mondays",
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": [
+    1
+   ]
+  },
+  "openTime": "12:00",
+  "closeTime": "19:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": [
+   "stationery",
+   "notebooks",
+   "diaries"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Gyeongbokgung",
+     "nameKo": "경복궁",
+     "lines": [
+      "3"
+     ],
+     "exit": null,
+     "walkMin": null
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": []
+  },
+  "sources": [
+   {
+    "label": "PAPERIAN official site – help page, '서촌 플래그십 스토어' block (address, Tue–Sun 12–19, Mon closed, tel 02-6228-5600; page shows Nov 2026 event notice)",
+    "url": "https://m.paperian.co.kr/help/"
+   },
+   {
+    "label": "JetPens – Paperian brand (Seoul-based stationery brand)",
+    "url": "https://www.jetpens.com/Paperian/bd/392"
+   },
+   {
+    "label": "The Journal Shop – Paperian (founded 2007, retro palettes)",
+    "url": "https://www.thejournalshop.com/collections/paperian"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "CLOSED Mon 30 Nov 2026 (regular Monday closure); open Tue 1 – Sun 6 Dec per official site, but the site says other holidays are posted on Naver Map – check before going. Only one physical store found: the Seochon flagship. The official stockist page lists no stores; the address 필동로 85 네스트빌라 B101 (Jung-gu) in the site footer is the company's registered/office address, not a shop (customer service 02-2232-5632, weekdays 10–17). The flagship was not found in any third-party article/blog or OSM, so the address rests on the brand site only. Station: Gyeongbokgung (Line 3) is the nearest by geography; exit and walk time not confirmed by any source. Close to ALLWRITE Seochon (자하문로5가길) – easy to pair. Opens at 12:00."
  }
 ]
