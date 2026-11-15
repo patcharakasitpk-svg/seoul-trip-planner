@@ -662,3 +662,9 @@ body.planner-open .toast { bottom: 76px; z-index: 90; }
 
 .pl-body.step-4 { grid-template-columns: minmax(340px, 38%) minmax(0, 1fr); }
 .pl-body.step-4 .pl-mapcol { padding-left: 0; }
+
+.pl-sum .sum-stop .t { align-self: start; padding-top: .1rem; }
+.sum-body { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+.sum-name { line-height: 1.5; }
+.sum-meta { font-size: .85rem; color: var(--muted); white-space: nowrap; }
+.pl-sum .pl-meal-tag { vertical-align: 1px; }

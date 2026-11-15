@@ -48,3 +48,26 @@ describe('share & import', () => {
     expect(buildShareUrl(p, 'https://x.y/').ok).toBe(false);
   });
 });
+
+import { describe as d2, it as i2, expect as e2, beforeEach } from 'vitest';
+import { loadPlans } from '../../src/storage/storage';
+d2('ข้อมูลที่อ่านไม่ได้ ไม่ถูกทับทิ้ง', () => {
+  const store = new Map<string, string>();
+  beforeEach(() => {
+    store.clear();
+    (globalThis as any).localStorage = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+      key: (i: number) => [...store.keys()][i] ?? null,
+      get length() { return store.size; },
+    };
+  });
+  i2('อ่านไม่ได้ → เก็บสำเนาข้อมูลดิบไว้ในกุญแจสำรองก่อน', () => {
+    store.set('stp.v1.plans', '{"plans":[{"version":99}]}');
+    e2(loadPlans()).toBeNull();
+    const backups = [...store.keys()].filter((k) => k.startsWith('stp.v1.plans.backup-'));
+    e2(backups).toHaveLength(1);
+    e2(store.get(backups[0])).toBe('{"plans":[{"version":99}]}');
+  });
+});

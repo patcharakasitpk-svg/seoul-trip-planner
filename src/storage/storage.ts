@@ -32,9 +32,20 @@ export function safeSet(key: string, value: string): boolean {
   }
 }
 
+/** ข้อมูลเดิมอ่านไม่ได้ → เก็บสำเนาไว้ก่อน (แอปจะสร้างแผนใหม่ทับกุญแจหลัก) */
+function backupRaw(raw: string) {
+  safeSet(`${KEY}.backup-${new Date().toISOString().replace(/[:.]/g, '-')}`, raw);
+}
+
 export function loadPlans(): StoredData | null {
   const raw = safeGet(KEY);
   if (!raw) return null;
+  const result = parsePlans(raw);
+  if (!result) backupRaw(raw);
+  return result;
+}
+
+function parsePlans(raw: string): StoredData | null {
   try {
     const data = JSON.parse(raw);
     const plans: Plan[] = [];

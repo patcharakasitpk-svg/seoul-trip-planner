@@ -637,6 +637,10 @@ test('โน้ต "จะไปทำอะไร": เพิ่ม/บัน�
   await pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' }).locator('[data-pl="note-save"]').click();
   await pl.locator('.pl-steps [data-pl="goto"][data-v="4"]').click();
   await expect(pl.locator('.pl-sum')).toContainText('กินคัลกุกซุ');
+  // หน้าสรุป: ป้ายมื้อ + เวลาอยู่บรรทัดแยก
+  const sumKyoja = pl.locator('.pl-sum .sum-stop', { hasText: 'Myeongdong Kyoja' });
+  await expect(sumKyoja.locator('.pl-meal-tag')).toContainText('มื้อกลางวัน');
+  await expect(sumKyoja.locator('.sum-meta')).toContainText('อยู่');
   await pl.locator('[data-pl="confirm"]').click();
   // หน้าแผน: โน้ตแสดงใต้ชื่อ · แก้ใน ⓘ แล้วกดบันทึก
   await page.locator('[data-act="tab"][data-tab="plan"]').filter({ visible: true }).first().click();

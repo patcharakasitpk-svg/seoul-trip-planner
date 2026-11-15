@@ -550,7 +550,11 @@ function step4(s: DaySchedule): string {
     if (t.stop.skipped) continue;
     const isMove = t.stop.kind === 'place' || t.stop.kind === 'dinner';
     if (isMove && t.leg.fromId !== t.leg.toId && t.leg.travelMin != null) rows.push(`<li class="sum-leg"><span></span><span>${legSummary(t.leg)}</span>${edit(3)}</li>`);
-    rows.push(`<li class="sum-stop"><span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span><span>${numBadge(nums.get(t.stop.uid))} ${nameLink(t.stop)} · ${fmtDur(t.stop.stayMin)}${t.stop.note ? `<span class="pl-note sum">${esc(t.stop.note)}</span>` : ''}${t.stop.lockedTime ? ' · นัด' : ''}${t.lateMin ? ` <span class="bad-text">สาย ${fmtDur(t.lateMin)}</span>` : ''}</span>${edit(2)}</li>`);
+    rows.push(`<li class="sum-stop"><span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span><span class="sum-body">
+      <span class="sum-name">${numBadge(nums.get(t.stop.uid))} ${nameLink(t.stop)}${t.stop.kind === 'dinner' && t.stop.placeId ? ` <span class="pl-meal-tag">${esc(mealName(t.stop))}</span>` : ''}</span>
+      <span class="sum-meta">อยู่ ${fmtDur(t.stop.stayMin)}${t.depart != null ? ` · ถึง ${fmtHM(t.depart)}` : ''}${t.stop.lockedTime ? ` · นัด ${esc(t.stop.lockedTime)}` : ''}${t.lateMin ? ` · <span class="bad-text">สาย ${fmtDur(t.lateMin)}</span>` : ''}</span>
+      ${t.stop.note ? `<span class="pl-note sum">${esc(t.stop.note)}</span>` : ''}
+    </span>${edit(2)}</li>`);
   }
   if (s.end) {
     rows.push(`<li class="sum-leg"><span></span><span>${legSummary(s.end.leg)}</span>${edit(3)}</li>`);
