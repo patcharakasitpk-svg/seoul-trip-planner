@@ -517,12 +517,12 @@ body.planner-open { overflow: hidden; }
 .pl-steps li.done button { color: var(--accent); }
 .pl-budget-wrap:empty { display: none; }
 .pl-budget { padding: .5rem 1rem; background: var(--surface); border-bottom: 1px solid var(--line); }
-.pl-budget.over .pl-budget-text b { color: var(--bad, #c92a2a); }
+
 .pl-bar { display: flex; height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; margin-top: .3rem; }
 .pl-bar i { display: block; height: 100%; }
 .pl-bar .stay { background: var(--accent); }
 .pl-bar .travel { background: #94a3b8; }
-.pl-bar .wait { background: #e2e8f0; }
+.pl-bar .wait { background: #f2c94c; }
 .pl-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 34%); min-height: 0; }
 .pl-main { overflow: auto; padding: 1rem; min-height: 0; }
 .pl-mapcol { display: flex; flex-direction: column; padding: 1rem 1rem 1rem 0; min-height: 0; }
@@ -670,3 +670,17 @@ body.planner-open .toast { bottom: 76px; z-index: 90; }
 .pl-sum .pl-meal-tag { vertical-align: 1px; }
 
 .pl-restore { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .8rem; padding: .6rem .8rem; border-radius: 12px; background: #fff7e6; border: 1.5px solid #f59e0b; color: #92400e; }
+
+/* แถบเวลาของวัน (ตัวจัดแผน) */
+.pl-budget { padding: .55rem 1rem .6rem; }
+.pl-budget-top { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
+.pl-budget-range b { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.pl-budget-free { flex: none; font-weight: 700; padding: .2rem .7rem; border-radius: 999px; font-variant-numeric: tabular-nums; }
+.pl-budget.ok .pl-budget-free { background: #e9f7f0; color: #0e8a5f; }
+.pl-budget.tight .pl-budget-free { background: #fff7e6; color: #b45309; }
+.pl-budget.over .pl-budget-free { background: #fdecec; color: #a61e1e; }
+.pl-budget-legend { display: flex; flex-wrap: wrap; gap: .2rem 1rem; margin: .3rem 0 .35rem; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pl-budget-legend .dot { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: .3rem; vertical-align: 0; }
+.dot.stay { background: var(--accent); } .dot.travel { background: #94a3b8; } .dot.wait { background: #f2c94c; } .dot.free { background: var(--line); border: 1px solid var(--line-2); }
+.pl-budget .pl-bar { height: 10px; margin-top: 0; }
+.pl-budget.over .pl-bar { outline: 2px solid #e03131; outline-offset: 1px; }

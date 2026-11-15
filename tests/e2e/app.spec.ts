@@ -560,7 +560,8 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await row.locator('[data-pl-change="stay"]').selectOption('120');
   await row.locator('[data-pl="reset-stay"]').click();
   await expect(pl.locator('.pl-row.stop', { hasText: 'Gwangjang Market' }).locator('[data-pl="reset-stay"]')).toHaveCount(0);
-  await expect(pl.locator('.pl-budget')).toContainText('จาก');
+  await expect(pl.locator('.pl-budget-range')).toContainText('08:00 – 21:00');
+  await expect(pl.locator('.pl-budget-free')).toContainText(/เหลือ|เกินเวลา/);
   // ช่วงเดินทางบอกวิธี + เวลา + ระยะ
   await expect(pl.locator('.pl-travel').first()).toContainText(/(เดิน|รถไฟฟ้า\/รถเมล์|แท็กซี่).*นาที.*ห่าง/);
   await expect(pl.locator('[data-pl="map-fit"]')).toBeVisible();

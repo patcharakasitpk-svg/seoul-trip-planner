@@ -201,10 +201,23 @@ function budget(s: DaySchedule) {
 function budgetBar(s: DaySchedule): string {
   const b = budget(s);
   if (b.total == null) return '<div class="pl-budget muted">ตั้งเวลาเริ่ม–จบในขั้นที่ 1 เพื่อดูเวลาที่เหลือ</div>';
-  const pct = (n: number) => `${Math.max(0, Math.min(100, (n / b.total!) * 100))}%`;
+  // สัดส่วนเทียบกับ "ทั้งวัน" หรือ "ที่ใช้จริง" ถ้าเกินเวลา (แถบไม่ล้น)
+  const base = Math.max(b.total, b.used);
+  const pct = (n: number) => `${Math.max(0, (n / base) * 100)}%`;
   const over = b.free! < 0;
-  return `<div class="pl-budget ${over ? 'over' : ''}">
-    <div class="pl-budget-text"><b>${over ? `เกินเวลา ${fmtDur(-b.free!)}` : `เหลือ ${fmtDur(b.free!)}`}</b> <span class="muted">จาก ${fmtDur(b.total)} · อยู่ ${fmtDur(b.stay)} · เดินทาง ${fmtDur(b.travel)}${b.wait ? ` · รอนัด ${fmtDur(b.wait)}` : ''}</span></div>
+  const level = over ? 'over' : b.free! < 30 ? 'tight' : 'ok';
+  const d = st!.draft;
+  return `<div class="pl-budget ${level}">
+    <div class="pl-budget-top">
+      <span class="pl-budget-range"><b>${esc(d.startTime ?? '--:--')} – ${esc(d.endTime ?? '--:--')}</b> <span class="muted">· ทั้งวัน ${fmtDur(b.total)}</span></span>
+      <span class="pl-budget-free">${over ? `เกินเวลา ${fmtDur(-b.free!)}` : `เหลือ ${fmtDur(b.free!)}`}</span>
+    </div>
+    <div class="pl-budget-legend">
+      <span><i class="dot stay"></i>อยู่ ${fmtDur(b.stay)}</span>
+      <span><i class="dot travel"></i>เดินทาง ${fmtDur(b.travel)}</span>
+      ${b.wait ? `<span><i class="dot wait"></i>รอนัด ${fmtDur(b.wait)}</span>` : ''}
+      ${!over && b.free! > 0 ? `<span><i class="dot free"></i>ว่าง ${fmtDur(b.free!)}</span>` : ''}
+    </div>
     <div class="pl-bar"><i class="stay" style="width:${pct(b.stay)}"></i><i class="travel" style="width:${pct(b.travel)}"></i><i class="wait" style="width:${pct(b.wait)}"></i></div>
   </div>`;
 }
