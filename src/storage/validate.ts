@@ -1,6 +1,7 @@
 import type { Category, Day, Leg, Place, Plan, Stop, TravelMode } from '../core/types';
 import { isValidDate, parseHM } from '../core/time';
 import { uid } from '../core/planOps';
+import { cleanPacking } from '../core/packing';
 
 /** ตรวจและสร้างแผนใหม่จากข้อมูลภายนอก (ลิงก์/JSON) — เก็บเฉพาะฟิลด์ที่รู้จัก */
 export function validatePlan(input: unknown): { ok: true; plan: Plan; warnings: string[] } | { ok: false; error: string } {
@@ -82,6 +83,7 @@ export function validatePlan(input: unknown): { ok: true; plan: Plan; warnings: 
       coldLevel: input.coldLevel === 'low' || input.coldLevel === 'high' ? input.coldLevel : 'normal',
       checklist,
       extraChecklist,
+      ...(cleanPacking(input.packing) ? { packing: cleanPacking(input.packing) } : {}),
       updatedAt: typeof input.updatedAt === 'string' ? input.updatedAt.slice(0, 40) : new Date().toISOString(),
     },
   };

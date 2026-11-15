@@ -1,6 +1,7 @@
 import LZString from 'lz-string';
 import type { Plan } from '../core/types';
 import { validatePlan } from './validate';
+import { mergePackingDone } from '../core/packing';
 
 /** ความยาว fragment สูงสุดที่ยอมสร้างลิงก์ (ส่งผ่าน AirDrop/LINE/คัดลอก — เบราว์เซอร์รับได้สบาย) */
 export const MAX_FRAGMENT = 60000;
@@ -88,6 +89,7 @@ export function keepLocalCheckins(incoming: Plan, local: Plan | undefined): Plan
   const byId = new Map(local.days.map((d) => [d.id, d]));
   return {
     ...incoming,
+    packing: mergePackingDone(incoming.packing, local.packing),
     days: incoming.days.map((d) => {
       const mine = byId.get(d.id)?.actual;
       return d.actual && Object.keys(d.actual).length ? d : mine ? { ...d, actual: mine } : d;

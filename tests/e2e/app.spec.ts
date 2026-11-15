@@ -868,7 +868,52 @@ test('แถบเมนูบน: ตัวอักษรล้วน ไม�
   await page.goto('/');
   await expect(page.locator('.topbar [data-act="open-templates"]')).toHaveCount(0);
   const labels = await page.locator('.main-menu button').allInnerTexts();
-  expect(labels).toEqual(['วันนี้', 'แผนของฉัน', 'จัดแผน', 'เพิ่มสถานที่', 'แปลงเงิน']);
+  expect(labels).toEqual(['วันนี้', 'แผนของฉัน', 'จัดแผน', 'เพิ่มสถานที่', 'สิ่งของที่ต้องใช้', 'แปลงเงิน']);
   await openTemplates(page);
   await expect(page.locator('.modal')).toContainText('เลือกแผนรายวัน');
+});
+
+test('สิ่งของที่ต้องใช้: รายการแนะนำ · แตะทั้งแถวเพื่อติ๊ก · เพิ่มในหมวด · ลบ/เลิกทำ · ซ่อนที่เตรียมแล้ว · เก็บหลังรีโหลด', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-act="tab"][data-tab="packing"]').filter({ visible: true }).first().click();
+  const pk = page.locator('#packing-page');
+  await expect(pk.locator('.pk-group h3').first()).toContainText('เอกสารและเงิน');
+  const total = await pk.locator('.pk-item').count();
+  expect(total).toBeGreaterThan(20);
+  await expect(pk.locator('.pk-count')).toContainText(`0 / ${total}`);
+  // แตะชื่อของ = ติ๊ก
+  const passport = pk.locator('.pk-item', { hasText: 'พาสปอร์ต' });
+  await passport.locator('.pk-text').click();
+  await expect(passport).toHaveClass(/done/);
+  await expect(pk.locator('.pk-count')).toContainText(`1 / ${total}`);
+  // เพิ่มของในหมวด → ช่องยังโฟกัสอยู่ พิมพ์ต่อได้
+  const docs = pk.locator('form[data-pk-group="เอกสารและเงิน"] input');
+  await docs.fill('สำเนาพาสปอร์ต');
+  await docs.press('Enter');
+  await expect(pk.locator('.pk-group').first()).toContainText('สำเนาพาสปอร์ต');
+  await expect(pk.locator('form[data-pk-group="เอกสารและเงิน"] input')).toBeFocused();
+  // ลบ → เลิกทำ
+  await pk.locator('.pk-item', { hasText: 'สำเนาพาสปอร์ต' }).locator('.pk-del').click();
+  await expect(pk.locator('.pk-item', { hasText: 'สำเนาพาสปอร์ต' })).toHaveCount(0);
+  await page.locator('[data-act="toast-undo"]').click();
+  await expect(pk.locator('.pk-item', { hasText: 'สำเนาพาสปอร์ต' })).toHaveCount(1);
+  // ซ่อนที่เตรียมแล้ว
+  await pk.locator('[data-pk="hide-done"]').click();
+  await expect(pk.locator('.pk-item', { hasText: 'พาสปอร์ต (อายุ' })).toHaveCount(0);
+  await pk.locator('[data-pk="hide-done"]').click();
+  // เพิ่มหมวดใหม่
+  await pk.locator('[data-pk="add-group"]').click();
+  await pk.locator('.pk-newgroup [name="group"]').fill('ของฝาก');
+  await pk.locator('.pk-newgroup [name="text"]').fill('ขนมให้ทีม');
+  await pk.locator('.pk-newgroup button.primary').click();
+  await expect(pk.locator('.pk-group', { hasText: 'ของฝาก' })).toContainText('ขนมให้ทีม');
+  // เก็บหลังรีโหลด
+  await page.reload();
+  await page.locator('[data-act="tab"][data-tab="packing"]').filter({ visible: true }).first().click();
+  await expect(pk.locator('.pk-item', { hasText: 'พาสปอร์ต (อายุ' })).toHaveClass(/done/);
+  await expect(pk.locator('.pk-group', { hasText: 'ของฝาก' })).toBeVisible();
+  // ล้างเครื่องหมาย (เช็กขากลับ)
+  await pk.locator('[data-pk="reset"]').click();
+  await expect(pk.locator('.pk-item.done')).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 });

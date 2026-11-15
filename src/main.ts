@@ -3,6 +3,7 @@ import QRCode from 'qrcode';
 import { app, type Tab } from './ui/app';
 import { renderPlanOverview } from './ui/views/overview';
 import { initMyPlaces, renderMyPlaces } from './ui/myPlaces';
+import { initPacking, renderPacking } from './ui/packing';
 import { hydratePlacePhotos } from './ui/views/placeInfo';
 import { renderToday, todayDay } from './ui/views/today';
 import { openPlanner, refreshPlanner, closePlanner, plannerOpen } from './ui/planner';
@@ -47,6 +48,7 @@ document.querySelector('#app')!.innerHTML = `
     <button data-act="tab" data-tab="plan">แผนของฉัน</button>
     <button data-act="nav-planner">จัดแผน</button>
     <button data-act="tab" data-tab="places">เพิ่มสถานที่</button>
+    <button data-act="tab" data-tab="packing">สิ่งของที่ต้องใช้</button>
     <button data-act="tab" data-tab="fx">แปลงเงิน</button>
   </nav>
   <div class="top-actions">
@@ -67,12 +69,14 @@ document.querySelector('#app')!.innerHTML = `
 </main>
 <section id="fx" class="fx" aria-label="แปลงสกุลเงิน"></section>
 <section id="places-page" class="pp-page" aria-label="เพิ่มสถานที่"></section>
+<section id="packing-page" class="pk-page" aria-label="สิ่งของที่ต้องใช้"></section>
 <nav class="bottom-nav" aria-label="เมนูหลัก">
   <button data-act="tab" data-tab="today">${ICON.today}วันนี้</button>
   <button data-act="tab" data-tab="map">${ICON.map}แผนที่</button>
   <button data-act="tab" data-tab="plan">${ICON.plan}แผนของฉัน</button>
   <button data-act="nav-planner" class="nav-planner">${ICON.planner}จัดแผน</button>
   <button data-act="tab" data-tab="places">${ICON.places}เพิ่มสถานที่</button>
+  <button data-act="tab" data-tab="packing">${ICON.packing}ของต้องใช้</button>
   <button data-act="tab" data-tab="fx">${ICON.fx}แปลงเงิน</button>
 </nav>
 <div id="modal-root"></div>
@@ -80,6 +84,7 @@ document.querySelector('#app')!.innerHTML = `
 
 
 initMyPlaces($('#places-page'));
+initPacking($('#packing-page'));
 
 // ความสูงแถบเมนูบน/ล่าง → ตัวจัดแผนวางระหว่างสองแถบ (เมนูเห็นตลอด)
 const barSizes = () => {
@@ -110,6 +115,7 @@ function render() {
   else if (syncState.status === 'error') st.push(`<span class="warn">🔗 ซิงก์ไม่ได้: ${esc(syncState.message)}</span>`);
   $('#status-bar').innerHTML = st.join('');
   if (app.tab === 'places') renderMyPlaces();
+  if (app.tab === 'packing') renderPacking();
   $('#right').innerHTML = app.tab === 'today' ? renderToday() : renderPlanOverview();
   // คงตำแหน่งเลื่อนในหน้าต่าง (เช่นกด ＋ ในแม่แบบหลายครั้ง) ไม่ให้เด้งกลับบนสุด
   const prevModal = document.querySelector('#modal-root .modal-body') as HTMLElement | null;

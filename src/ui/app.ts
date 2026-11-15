@@ -11,7 +11,7 @@ import { liveEstimateMin, straightLineM } from '../core/geo';
 import type { SearchResult } from '../services/placeSearch';
 import { keepLocalCheckins } from '../storage/share';
 
-export type Tab = 'today' | 'map' | 'places' | 'plan' | 'fx';
+export type Tab = 'today' | 'map' | 'places' | 'plan' | 'fx' | 'packing';
 
 export type Modal =
   | { type: 'compare'; title: string; dayId: string; oldDay: Day; newDay: Day; note?: string; afterConfirm?: string }

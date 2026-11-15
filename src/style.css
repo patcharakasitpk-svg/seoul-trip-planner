@@ -857,3 +857,40 @@ body[data-tab="places"] .pp-page { display: grid; gap: 1rem; padding: 1rem; }
 .settings-tpl p { margin: 0; }
 .pp-cat-field { display: grid; gap: .3rem; font-size: .9rem; }
 .pp-cats { display: flex; flex-wrap: wrap; gap: .35rem; }
+
+/* ---------- สิ่งของที่ต้องใช้ (เช็กลิสต์) ---------- */
+.pk-page { display: none; }
+body[data-tab="packing"] .layout { display: none; }
+body[data-tab="packing"] .pk-page { display: block; padding: 1rem 1rem 96px; }
+.pk-wrap { max-width: 680px; margin: 0 auto; display: grid; gap: .9rem; }
+.pk-head { position: sticky; top: var(--topbar-h, 56px); z-index: 5; background: var(--bg, #f5f6f8); padding: .4rem 0 .6rem; display: grid; gap: .45rem; }
+.pk-head h2 { margin: 0; font-size: 1.25rem; }
+.pk-count { margin: 0; color: var(--muted); }
+.pk-count b { color: var(--text); font-size: 1.15rem; }
+.pk-ready { margin-left: .4rem; color: #0e8a5f; font-weight: 700; }
+.pk-bar { height: 8px; border-radius: 999px; background: #e9ecef; overflow: hidden; }
+.pk-bar i { display: block; height: 100%; background: #16a34a; border-radius: 999px; transition: width .2s; }
+.pk-tools { display: flex; flex-wrap: wrap; gap: .4rem; }
+.pk-tool { border: 1px solid var(--line-2); background: var(--surface); border-radius: 999px; padding: .3rem .8rem; font: inherit; font-size: .84rem; color: var(--muted); cursor: pointer; }
+.pk-tool.on { color: var(--text); border-color: var(--text); }
+.pk-group { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: .4rem .4rem .6rem; }
+.pk-group h3 { display: flex; justify-content: space-between; align-items: baseline; margin: .3rem .6rem .2rem; font-size: 1rem; }
+.pk-gcount { font-size: .82rem; font-weight: 500; color: var(--muted); }
+.pk-group.complete .pk-gcount { color: #0e8a5f; font-weight: 700; }
+.pk-list { list-style: none; margin: 0; padding: 0; }
+.pk-item { display: flex; align-items: center; border-radius: 10px; }
+.pk-item:hover { background: #f8f9fa; }
+.pk-check { flex: 1; min-width: 0; display: flex; align-items: center; gap: .75rem; min-height: 48px; padding: .3rem .6rem; border: 0; background: none; font: inherit; text-align: left; cursor: pointer; color: var(--text); }
+.pk-box { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; border: 2px solid var(--line-2); color: #fff; font-size: .85rem; font-weight: 700; }
+.pk-item.done .pk-box { background: #16a34a; border-color: #16a34a; }
+.pk-item.done .pk-text { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--faint); }
+.pk-del { flex: none; width: 40px; height: 40px; border: 0; background: none; color: var(--faint); font-size: 1.3rem; border-radius: 10px; cursor: pointer; }
+.pk-del:hover { color: #c92a2a; background: #fdecec; }
+.pk-add { display: flex; gap: .4rem; padding: .3rem .4rem 0; }
+.pk-add .inp { flex: 1; min-width: 0; }
+.pk-newgroup { flex-wrap: wrap; background: var(--surface); border: 1px dashed var(--line-2); border-radius: 14px; padding: .7rem; }
+.pk-addgroup { justify-self: start; border: 1px dashed var(--line-2); background: none; border-radius: 12px; padding: .6rem 1rem; font: inherit; color: var(--muted); cursor: pointer; }
+.pk-alldone { margin: .2rem .6rem; }
+.pk-foot { text-align: center; }
+.bottom-nav button { line-height: 1.15; text-align: center; white-space: nowrap; padding: 0 2px; min-width: 0; overflow: hidden; }
+@media (max-width: 599px) { .bottom-nav button { font-size: .66rem; letter-spacing: -.01em; } }

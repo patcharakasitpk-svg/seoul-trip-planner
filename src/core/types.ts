@@ -127,6 +127,8 @@ export interface Plan {
   /** dayId -> item key -> checked */
   checklist: Record<string, Record<string, boolean>>;
   extraChecklist: Record<string, string[]>;
+  /** สิ่งของที่ต้องเตรียมไป (ไม่มี = ยังไม่เคยเปิด → ใช้รายการแนะนำ) */
+  packing?: import('./packing').PackItem[];
   updatedAt: string;
 }
 
