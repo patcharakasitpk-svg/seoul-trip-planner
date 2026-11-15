@@ -3,6 +3,8 @@ import { safeGet, safeSet } from '../storage/storage';
 import { authAvailable, authState, onAuth, signInWithGoogle, sendEmailLink, isEmailLinkReturn, rememberedEmail, finishEmailLink, signOutUser, inAppBrowser, type AuthUser } from '../services/auth';
 import { TRIP_DATES } from '../config';
 import { fmtDateTh } from '../core/time';
+import { app } from './app';
+import { tripState, createTripFromLocal, joinTrip, invite, uninvite, removeMember, refreshLists, activate, signedInUser } from '../services/tripSync';
 
 /**
  * หน้าเข้าสู่ระบบ (เต็มจอ) + หน้าบัญชี (เมื่อเข้าสู่ระบบแล้ว)
@@ -28,9 +30,18 @@ export function initLogin(el: HTMLElement, onChange: () => void) {
   root.addEventListener('click', onClick);
   root.addEventListener('input', (e) => {
     const t = e.target as HTMLInputElement;
-    if (t.name === 'email') email = t.value;
+    if (t.id === 'lg-inv') inviteDraft = t.value;
+    else if (t.name === 'email') email = t.value;
   });
   root.addEventListener('submit', onSubmit);
+  root.addEventListener('change', (e) => {
+    const t = e.target as HTMLInputElement | HTMLSelectElement;
+    if (t.hasAttribute('data-lg-send')) sendMail = (t as HTMLInputElement).checked;
+    if (t.hasAttribute('data-lg-trip')) {
+      activate(t.value);
+      render();
+    }
+  });
   onAuth((s) => {
     // เข้าสู่ระบบสำเร็จ → ปิดหน้า (ยกเว้นเปิดดูบัญชีอยู่)
     if (s.status === 'signed-in' && view !== 'start') view = 'start';
@@ -55,11 +66,16 @@ export function openLogin() {
 }
 
 export const loginOpen = () => open;
+/** อัปเดตหน้าบัญชีเมื่อสถานะทริปเปลี่ยน (ถ้าเปิดอยู่) */
+export function refreshLogin() {
+  if (open) render();
+}
 
 function close(skip = false) {
   if (skip) safeSet(SKIP_KEY, '1');
   open = false;
   error = '';
+  note = '';
   view = 'start';
   render();
 }
@@ -70,7 +86,9 @@ export function accountButtonHtml(): string {
   const s = authState();
   if (s.status === 'loading') return '';
   if (s.status !== 'signed-in') return '<button class="top-link account-in" data-act="open-login">เข้าสู่ระบบ</button>';
-  return `<button class="account-btn" data-act="open-login" aria-label="บัญชีของฉัน (${esc(s.user.email ?? '')})" title="${esc(s.user.email ?? '')}">${avatar(s.user, 30)}</button>`;
+  const t = tripState();
+  const dot = !t.trip ? '' : !navigator.onLine ? 'offline' : t.status === 'error' ? 'error' : t.pending ? 'sending' : 'live';
+  return `<button class="account-btn ${dot ? `dot-${dot}` : ''}" data-act="open-login" aria-label="บัญชีของฉัน (${esc(s.user.email ?? '')})" title="${esc(s.user.email ?? '')}">${avatar(s.user, 30)}</button>`;
 }
 
 function avatar(u: AuthUser, size: number): string {
@@ -78,6 +96,53 @@ function avatar(u: AuthUser, size: number): string {
   return u.photo
     ? `<img class="avatar" src="${esc(u.photo)}" alt="" width="${size}" height="${size}" referrerpolicy="no-referrer">`
     : `<span class="avatar" style="width:${size}px;height:${size}px">${esc(initial)}</span>`;
+}
+
+let note = '';
+let inviteDraft = '';
+let sendMail = true;
+
+/** ส่วนทริปที่แชร์ในหน้าบัญชี */
+function tripSection(u: AuthUser): string {
+  const t = tripState();
+  if (t.status === 'loading' && !t.trip) return '<p class="lg-note">กำลังโหลดทริป…</p>';
+  if (t.trip) {
+    const trip = t.trip;
+    const owner = trip.ownerUid === u.uid;
+    const sync = !navigator.onLine ? '<span class="warn-text">ออฟไลน์ — จะส่งเมื่อมีสัญญาณ</span>' : t.status === 'error' ? `<span class="bad-text">${esc(t.error)}</span>` : t.pending ? `<span class="muted">กำลังส่ง ${t.pending} รายการ…</span>` : '<span class="ok-text">● ซิงก์แล้ว</span>';
+    return `<section class="lg-trip">
+      <div class="lg-trip-head"><b>${esc(trip.name)}</b><span class="small">${sync}</span></div>
+      <p class="muted small">${owner ? 'คุณเป็นเจ้าของทริป' : `เจ้าของทริป: ${esc(trip.ownerEmail)}`} · ทุกคนในทริปเห็นและแก้แผน/สถานที่ได้ · สิ่งของที่ต้องใช้และแปลงเงินเป็นของแต่ละคน</p>
+      <ul class="lg-members">${trip.members
+        .map((m) => `<li>${esc(m.name || m.email)} <span class="muted small">${esc(m.email)}${m.uid === trip.ownerUid ? ' · เจ้าของ' : ''}${m.uid === u.uid ? ' · คุณ' : ''}</span>${owner && m.uid !== u.uid ? `<button class="lg-x" data-lg="remove" data-uid="${esc(m.uid)}" aria-label="เอา ${esc(m.email)} ออกจากทริป">เอาออก</button>` : ''}</li>`)
+        .join('')}${trip.invites.map((e) => `<li class="pending">${esc(e)} <span class="muted small">รอเข้าร่วม</span>${owner ? `<button class="lg-x" data-lg="uninvite" data-email="${esc(e)}">ยกเลิก</button>` : ''}</li>`).join('')}</ul>
+      ${
+        owner
+          ? `<form class="lg-form lg-invite" data-lg-form="invite"><label for="lg-inv">เชิญเพื่อนด้วยอีเมล</label><div class="lg-row"><input id="lg-inv" class="inp" type="email" name="email" value="${esc(inviteDraft)}" placeholder="friend@gmail.com" required enterkeyhint="send"><button class="lg-btn primary" ${t.busy ? 'disabled' : ''}>${t.busy === 'invite' ? 'กำลังเชิญ…' : 'เชิญ'}</button></div>
+             <label class="lg-check"><input type="checkbox" name="send" ${sendMail ? 'checked' : ''} data-lg-send> ส่งอีเมลลิงก์เข้าสู่ระบบให้เพื่อนด้วย</label>
+             <p class="muted small">เพื่อนเปิดเว็บแล้วเข้าสู่ระบบด้วยอีเมลที่เชิญ (Google หรือลิงก์อีเมล) จะเห็นปุ่ม “เข้าร่วม” · <button type="button" class="lg-inline" data-lg="copy-site">คัดลอกลิงก์เว็บ</button></p></form>`
+          : '<button class="lg-btn" data-lg="leave">ออกจากทริปนี้</button>'
+      }
+      ${t.myTrips.length > 1 ? `<label class="lg-switch small">ทริปอื่นของฉัน <select class="inp sm" data-lg-trip>${t.myTrips.map((x) => `<option value="${esc(x.id)}" ${x.id === trip.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>` : ''}
+    </section>`;
+  }
+  const inv = t.invited.map((x) => `<div class="lg-invited"><div><b>${esc(x.name)}</b><span class="muted small">เชิญโดย ${esc(x.ownerEmail)}</span></div><button class="lg-btn primary" data-lg="join" data-id="${esc(x.id)}" ${t.busy ? 'disabled' : ''}>${t.busy === 'join' ? 'กำลังเข้าร่วม…' : 'เข้าร่วม'}</button></div>`).join('');
+  const mine = t.myTrips.map((x) => `<button class="lg-btn" data-lg="open-trip" data-id="${esc(x.id)}">เปิดทริป ${esc(x.name)}</button>`).join('');
+  const p = app.store.plans.find((x) => !x.id.startsWith('trip-')) ?? app.plan;
+  const photos = p.customPlaces.reduce((n, c) => n + (c.photos?.length ?? 0), 0);
+  return `<section class="lg-trip">
+    ${inv ? `<p class="lg-sub">คำเชิญเข้าทริป</p>${inv}` : ''}
+    ${mine}
+    ${t.error ? `<p class="lg-error">${esc(t.error)}</p>` : ''}
+    ${inv || mine ? '<details class="lg-create-more"><summary>หรือ สร้างทริปของตัวเองจากแผนในเครื่องนี้</summary>' : ''}
+    <div class="lg-create">
+      ${inv || mine ? '' : '<p class="lg-sub">สร้างทริปจากแผนในเครื่องนี้</p>'}
+      <p class="muted small"><b>${esc(p.name)}</b> · ${p.days.length} วัน · สถานที่ที่เพิ่มเอง ${p.customPlaces.length} แห่ง${photos ? ` · รูป ${photos} รูป` : ''} — แผนในเครื่องยังเก็บไว้เป็นสำรอง แล้วค่อยเชิญเพื่อนด้วยอีเมล</p>
+      <button class="lg-btn ${inv ? '' : 'primary'}" data-lg="create" ${t.busy ? 'disabled' : ''}>${t.busy === 'create' ? 'กำลังสร้างทริป…' : 'สร้างทริปที่แชร์ได้'}</button>
+    </div>
+    ${inv || mine ? '</details>' : ''}
+    ${!inv && !mine ? `<p class="muted small">ถ้าเพื่อนเป็นเจ้าของทริป: แจ้งอีเมล <b>${esc(u.email ?? '')}</b> ให้เพื่อนเชิญ แล้วเปิดหน้านี้อีกครั้ง <button class="lg-inline" data-lg="refresh">ตรวจคำเชิญอีกครั้ง</button></p>` : ''}
+  </section>`;
 }
 
 function render() {
@@ -94,7 +159,8 @@ function render() {
   if (s.status === 'signed-in') {
     body = `
       <div class="lg-account">${avatar(s.user, 56)}<div><b>${esc(s.user.name || s.user.email || '')}</b>${s.user.name ? `<span class="muted">${esc(s.user.email ?? '')}</span>` : ''}</div></div>
-      <p class="lg-note">เข้าสู่ระบบแล้ว · การแชร์ทริปกับเพื่อนจะเปิดในขั้นถัดไป — ตอนนี้แผนยังอยู่ในเครื่องนี้เหมือนเดิม</p>
+      ${tripSection(s.user)}
+      ${note ? `<p class="lg-ok" role="status">${esc(note)}</p>` : ''}
       <button class="lg-btn" data-lg="signout" ${busy ? 'disabled' : ''}>${busy === 'out' ? 'กำลังออก…' : 'ออกจากระบบ'}</button>
       <button class="lg-link" data-lg="close">กลับไปที่แอป</button>`;
   } else if (view === 'sent') {
@@ -123,13 +189,15 @@ function render() {
       </form>
       <button class="lg-link" data-lg="skip">ใช้ต่อแบบไม่เข้าสู่ระบบ <span class="muted">(แผนอยู่ในเครื่องนี้เท่านั้น)</span></button>`;
   }
+  const refocusInvite = document.activeElement?.id === 'lg-inv';
   root.innerHTML = `
     <div class="lg-card" role="dialog" aria-modal="true" aria-label="เข้าสู่ระบบ">
       <header class="lg-brand"><b>Seoul Trip</b><span class="muted">ทริปโซล ${esc(trip)}</span></header>
       ${body}
       ${error ? `<p class="lg-error" role="alert">${esc(error)}</p>` : ''}
     </div>`;
-  (root.querySelector('[data-autofocus]') as HTMLInputElement | null)?.focus();
+  if (refocusInvite) (root.querySelector('#lg-inv') as HTMLInputElement | null)?.focus();
+  else (root.querySelector('[data-autofocus]') as HTMLInputElement | null)?.focus();
 }
 
 async function confirmLink(addr: string) {
@@ -165,6 +233,53 @@ async function onClick(e: Event) {
       error = '';
       render();
       return;
+    case 'create': {
+      note = '';
+      const err = await createTripFromLocal();
+      if (err) error = err;
+      else note = 'สร้างทริปแล้ว — เชิญเพื่อนด้วยอีเมลด้านบนได้เลย';
+      render();
+      return;
+    }
+    case 'join': {
+      const err = await joinTrip(el.dataset.id!);
+      if (err) error = err;
+      else note = 'เข้าร่วมทริปแล้ว';
+      render();
+      return;
+    }
+    case 'open-trip':
+      activate(el.dataset.id!);
+      close();
+      return;
+    case 'refresh':
+      await refreshLists();
+      render();
+      return;
+    case 'uninvite':
+      error = await uninvite(el.dataset.email!);
+      render();
+      return;
+    case 'remove':
+      if (!confirm('เอาสมาชิกคนนี้ออกจากทริป? เขาจะดู/แก้ทริปนี้ไม่ได้อีก')) return;
+      error = await removeMember(el.dataset.uid!);
+      render();
+      return;
+    case 'leave': {
+      const me = signedInUser();
+      if (!me || !confirm('ออกจากทริปนี้? จะกลับไปใช้แผนในเครื่องนี้ (เข้าร่วมใหม่ได้ถ้าเจ้าของเชิญอีกครั้ง)')) return;
+      error = await removeMember(me.uid);
+      note = error ? '' : 'ออกจากทริปแล้ว';
+      render();
+      afterChange();
+      return;
+    }
+    case 'copy-site':
+      void navigator.clipboard?.writeText(`${location.origin}${location.pathname}`).then(() => {
+        note = 'คัดลอกลิงก์เว็บแล้ว — ส่งให้เพื่อน';
+        render();
+      });
+      return;
     case 'signout':
       busy = 'out';
       render();
@@ -181,6 +296,19 @@ async function onSubmit(e: Event) {
   const kind = f.dataset.lgForm;
   if (!kind) return;
   e.preventDefault();
+  if (kind === 'invite') {
+    const addr = String(new FormData(f).get('email') ?? '').trim();
+    error = '';
+    note = '';
+    const err = await invite(addr, sendMail);
+    if (err) error = err;
+    else {
+      inviteDraft = '';
+      note = sendMail ? `เชิญ ${addr} แล้ว และส่งอีเมลลิงก์เข้าสู่ระบบให้แล้ว` : `เชิญ ${addr} แล้ว — บอกเพื่อนให้เข้าสู่ระบบด้วยอีเมลนี้`;
+    }
+    render();
+    return;
+  }
   email = String(new FormData(f).get('email') ?? '').trim();
   error = '';
   if (kind === 'email') {

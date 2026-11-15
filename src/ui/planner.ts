@@ -21,6 +21,7 @@ import type { DaySchedule } from '../core/schedule';
 import { fmtDist, straightLineM } from '../core/geo';
 import { ZONES, zoneOf, type Zone } from '../core/zones';
 import { hasOwnInfo, placeInfoHtml, hydratePlacePhotos } from './views/placeInfo';
+import { inTrip, tripState } from '../services/tripSync';
 import { searchPlaces, placeFromResult, findExisting, resultMapsUrl, type SearchResult } from '../services/placeSearch';
 import { uid } from '../core/planOps';
 import { safeGet, safeSet } from '../storage/storage';
@@ -899,6 +900,13 @@ function onClick(e: Event) {
     case 'confirm': {
       const dayId = st.dayId;
       const before = clone(app.findDay(dayId)!);
+      // ทริปที่แชร์: เพื่อนแก้วันนี้ระหว่างที่จัดแผนอยู่ → ถามก่อนบันทึกทับ (เวลาเช็กอินใช้ของล่าสุดเสมอ)
+      const strip = (d: Day) => JSON.stringify({ ...d, actual: undefined });
+      if (inTrip() && strip(before) !== strip(st.orig)) {
+        const who = tripState().dayMeta[dayId]?.name || 'เพื่อน';
+        if (!confirm(`${who} แก้วันนี้ไปแล้วระหว่างที่คุณจัดแผนอยู่\n\nตกลง = บันทึกทับด้วยแผนของคุณ\nยกเลิก = กลับไปดูก่อน (ปิดแล้วเปิดตัวจัดแผนใหม่จะเห็นฉบับของ${who})`)) return;
+      }
+      st.draft = { ...st.draft, actual: before.actual };
       app.setDay(dayId, st.draft);
       clearDraft(dayId);
       app.showToast('บันทึกแผนวันนี้แล้ว · ส่งไปมือถือ: กด “แชร์”', () => app.setDay(dayId, before, 'เลิกทำแล้ว'));

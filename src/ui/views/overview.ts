@@ -5,6 +5,7 @@ import { dayColor, dayDate, esc } from '../util';
 import { mealName } from '../../core/meals';
 import { fmtDur, fmtHM, seoulNow } from '../../core/time';
 import { tripIssues } from '../../core/planOps';
+import { inTrip, tripState, signedInUser } from '../../services/tripSync';
 
 /**
  * หน้า "แผนของฉัน": ดูอย่างเดียว — ทุกวันเรียงกัน แต่ละวันมีสีของตัวเอง (สีเดียวกับหมุดบนแผนที่)
@@ -29,6 +30,16 @@ function stopLine(t: StopTiming): string {
   </li>`;
 }
 
+/** ทริปที่แชร์: ใครแก้วันนี้ล่าสุด (ไม่แสดงถ้าเป็นตัวเอง) */
+function editedBy(dayId: string): string {
+  if (!inTrip()) return '';
+  const m = tripState().dayMeta[dayId];
+  const me = signedInUser();
+  if (!m?.name || (me && (m.name === me.name || m.name === me.email?.split('@')[0]))) return '';
+  const at = m.at ? new Date(m.at).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) : '';
+  return ` · แก้ล่าสุดโดย ${esc(m.name)}${at ? ` ${esc(at)}` : ''}`;
+}
+
 function dayCard(d: Day, i: number): string {
   const s = app.schedule(d);
   const c = dayColor(i);
@@ -45,7 +56,7 @@ function dayCard(d: Day, i: number): string {
     <header class="ov-head">
       <button class="ov-date" data-act="map-day" data-day="${d.id}" aria-label="ดู ${esc(dayDate(d))} บนแผนที่">
         <b>${esc(dayDate(d))}</b>${d.title ? `<span class="ov-title">${esc(d.title)}</span>` : ''}${today ? '<span class="ov-today">วันนี้</span>' : ''}
-        <span class="muted">วัน ${i + 1}${d.startTime ? ` · ${esc(d.startTime)}–${esc(d.endTime ?? '')}` : ''}</span>
+        <span class="muted">วัน ${i + 1}${d.startTime ? ` · ${esc(d.startTime)}–${esc(d.endTime ?? '')}` : ''}${editedBy(d.id)}</span>
       </button>
       <button class="btn sm" data-act="edit-day" data-day="${d.id}">แก้</button>
     </header>

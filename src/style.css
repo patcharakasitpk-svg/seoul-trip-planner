@@ -932,3 +932,34 @@ body.login-open { overflow: hidden; }
 .account-btn:hover { box-shadow: 0 0 0 3px #e7efff; }
 .lg-account .avatar { font-size: 1.4rem; }
 #account-slot { display: contents; }
+/* ทริปที่แชร์ในหน้าบัญชี */
+.lg-card { max-height: calc(100vh - 2rem); overflow-y: auto; }
+.lg-trip { display: grid; gap: .55rem; padding: .8rem; border: 1px solid var(--line); border-radius: 14px; background: #fafbfc; }
+.lg-trip-head { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; }
+.lg-trip-head b { font-size: 1.05rem; }
+.lg-trip p { margin: 0; }
+.lg-members { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
+.lg-members li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .5rem; padding: .35rem .5rem; background: var(--surface, #fff); border-radius: 10px; border: 1px solid var(--line); }
+.lg-members li.pending { border-style: dashed; color: var(--muted); }
+.lg-x { margin-left: auto; border: 0; background: none; color: #c92a2a; font: inherit; font-size: .82rem; cursor: pointer; }
+.lg-row { display: flex; gap: .4rem; }
+.lg-row .inp { flex: 1; min-width: 0; }
+.lg-row .lg-btn { width: auto; padding: 0 1rem; }
+.lg-check { display: flex; align-items: center; gap: .4rem; font-size: .88rem; color: var(--text) !important; }
+.lg-inline { border: 0; background: none; padding: 0; font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline; }
+.lg-sub { font-weight: 600; font-size: .92rem; }
+.lg-invited { display: flex; align-items: center; justify-content: space-between; gap: .6rem; padding: .5rem .6rem; border-radius: 12px; background: #eef4ff; }
+.lg-invited > div { display: grid; }
+.lg-invited .lg-btn { width: auto; padding: 0 1rem; min-height: 40px; }
+.lg-create { display: grid; gap: .4rem; }
+.lg-ok { margin: 0; padding: .55rem .75rem; border-radius: 10px; background: #e9f7f0; color: #0e6b4a; font-size: .9rem; }
+.account-btn { position: relative; }
+.account-btn[class*="dot-"]::after { content: ""; position: absolute; right: 1px; bottom: 1px; width: 9px; height: 9px; border-radius: 50%; border: 2px solid #fff; }
+.account-btn.dot-live::after { background: #16a34a; }
+.account-btn.dot-sending::after { background: #f59e0b; }
+.account-btn.dot-offline::after { background: #94a3b8; }
+.account-btn.dot-error::after { background: #dc2626; }
+.lg-btn.primary:hover:not(:disabled) { background: #1a56d6; }
+.lg-invited .lg-btn, .lg-row .lg-btn { white-space: nowrap; }
+.lg-create-more summary { cursor: pointer; color: var(--muted); font-size: .88rem; padding: .2rem 0; }
+.lg-create-more[open] summary { margin-bottom: .4rem; }

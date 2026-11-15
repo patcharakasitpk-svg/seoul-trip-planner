@@ -241,10 +241,16 @@ class AppState {
 
   /** เรียกหลังบันทึกทุกครั้ง (ใช้ส่งแผนขึ้นห้องซิงก์) */
   onPersist: () => void = () => {};
+  /** ตัวฟังเพิ่มเติมหลังบันทึก (เช่น ซิงก์ทริปที่แชร์) — ไม่ถูกแทนที่เมื่อกำหนด onPersist ใหม่ */
+  private persistHooks: (() => void)[] = [];
+  addPersistHook(fn: () => void) {
+    this.persistHooks.push(fn);
+  }
 
   persist() {
     this.saveOk = savePlans(this.store);
     this.onPersist();
+    for (const f of this.persistHooks) f();
   }
 
   addPlan(plan: Plan, activate = true) {
@@ -263,7 +269,8 @@ class AppState {
     const target = this.store.plans.find((x) => x.id === incoming.id) ?? this.plan;
     const before = { plans: this.store.plans.map((x) => x), activeId: this.store.activeId, dayId: this.activeDayId };
     // ใช้ id ของแผนที่ส่งมา → ส่งครั้งต่อไปจะรู้ว่าเป็นแผนเดียวกัน
-    const next = keepLocalCheckins({ ...incoming, roomId: target.roomId ?? null }, target);
+    // ทริปที่แชร์: คง id ของสำเนาทริป (ไม่หลุดออกจากทริปเมื่อนำเข้าแผน)
+    const next = keepLocalCheckins({ ...incoming, ...(target.id.startsWith('trip-') ? { id: target.id } : {}), roomId: target.roomId ?? null }, target);
     this.store.plans = this.store.plans.map((x) => (x.id === target.id ? next : x));
     this.store.activeId = next.id;
     this.activeDayId = next.days[0].id;

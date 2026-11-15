@@ -2,11 +2,6 @@
  * ช่วงวันเที่ยวตั้งต้นของแผนใหม่ (แก้ได้ตามทริป)
  * ใช้สร้างวันในแผนใหม่ และปุ่ม "ตั้งวันเที่ยวให้ครบ" สำหรับแผนเดิม
  */
-/**
- * ซิงก์สดกับเพื่อน: URL ของ Firebase Realtime Database (ไม่ใช่ความลับ — สิทธิ์คุมด้วย Rules: เข้าได้เฉพาะคนที่มีรหัสห้อง)
- * ว่าง = ปิดฟีเจอร์ซิงก์ · ตั้งตอน build ด้วย VITE_SYNC_DB_URL ได้
- */
-export const SYNC_DB_URL: string = ((import.meta as any).env?.VITE_SYNC_DB_URL as string | undefined) || '';
 
 export const TRIP_DATES = { start: '2026-11-30', end: '2026-12-06' };
 
@@ -37,3 +32,5 @@ export const FIREBASE_CONFIG = env.VITE_FIREBASE_API_KEY
   : null;
 /** ทดสอบในเครื่อง: http://127.0.0.1:9099 (Firebase Auth Emulator) */
 export const FIREBASE_AUTH_EMULATOR = env.VITE_FIREBASE_AUTH_EMULATOR || '';
+/** ทดสอบในเครื่อง: http://127.0.0.1:8080 (Firestore Emulator) */
+export const FIRESTORE_EMULATOR = env.VITE_FIRESTORE_EMULATOR || '';

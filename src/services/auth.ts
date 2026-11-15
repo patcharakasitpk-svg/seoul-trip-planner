@@ -16,6 +16,10 @@ export type AuthState = { status: 'unconfigured' } | { status: 'loading' } | { s
 
 const EMAIL_KEY = 'stp.v1.emailForSignIn';
 let auth: Auth | null = null;
+let fbApp: import('firebase/app').FirebaseApp | null = null;
+/** แอป Firebase ที่เริ่มแล้ว (ใช้ร่วมกับ Firestore) */
+export const firebaseApp = () => fbApp;
+export const currentUid = () => auth?.currentUser?.uid ?? null;
 let mod: typeof import('firebase/auth') | null = null;
 let state: AuthState = FIREBASE_CONFIG ? { status: 'loading' } : { status: 'unconfigured' };
 const listeners = new Set<(s: AuthState) => void>();
@@ -37,6 +41,7 @@ export async function initAuth(): Promise<void> {
   const [{ initializeApp }, m] = await Promise.all([import('firebase/app'), import('firebase/auth')]);
   mod = m;
   const app = initializeApp(FIREBASE_CONFIG);
+  fbApp = app;
   auth = m.initializeAuth(app, { persistence: [m.indexedDBLocalPersistence, m.browserLocalPersistence], popupRedirectResolver: m.browserPopupRedirectResolver });
   auth.languageCode = 'th';
   if (FIREBASE_AUTH_EMULATOR) m.connectAuthEmulator(auth, FIREBASE_AUTH_EMULATOR, { disableWarnings: true });
@@ -72,6 +77,17 @@ export async function signInWithGoogle(): Promise<string> {
 
 /** ลิงก์กลับมาที่หน้าเดิมของเว็บ (ไม่มี # และ query) */
 const continueUrl = () => `${location.origin}${location.pathname}`;
+
+/** ส่งอีเมลเชิญ (ลิงก์เข้าสู่ระบบ) ให้เพื่อน — ไม่จำอีเมลนี้เป็นของเครื่องนี้ */
+export async function sendInviteLink(email: string): Promise<string> {
+  if (!auth || !mod) return 'ยังไม่พร้อม — ลองอีกครั้ง';
+  try {
+    await mod.sendSignInLinkToEmail(auth, email.trim().toLowerCase(), { url: continueUrl(), handleCodeInApp: true });
+    return '';
+  } catch (err) {
+    return authErrorText(codeOf(err));
+  }
+}
 
 export async function sendEmailLink(email: string): Promise<string> {
   if (!auth || !mod) return 'ยังไม่พร้อม — ลองอีกครั้ง';

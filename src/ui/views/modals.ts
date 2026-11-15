@@ -17,8 +17,6 @@ import { placeCard } from './library';
 import { placeInfoHtml } from './placeInfo';
 import { buildShareUrl } from '../../storage/share';
 import { googleStatus } from '../../services/google';
-import { inviteUrl } from '../../services/sync';
-import { SYNC_DB_URL } from '../../config';
 import { peekRoute, routeKey } from '../../services/routes';
 
 export function renderModal(): string {
@@ -349,21 +347,6 @@ function templatesBody(m: Extract<Modal, { type: 'templates' }>): string {
 }
 
 /* ---------- แชร์ ---------- */
-function syncSection(): string {
-  if (!SYNC_DB_URL) return '';
-  const room = app.plan.roomId;
-  if (!room)
-    return `<div class="card sync-card"><h4>👥 วางแผนร่วมกับเพื่อน (ซิงก์สด)</h4>
-      <p class="small">ส่งลิงก์ให้เพื่อน แล้ว<b>แก้ได้ทั้งคู่</b> ใครแก้อีกเครื่องเห็นทันที · ถ้าแก้พร้อมกันจุดเดียวกัน ฉบับที่บันทึกทีหลังจะถูกใช้</p>
-      <button class="btn primary" data-act="sync-start">เริ่มแชร์แผนนี้กับเพื่อน</button></div>`;
-  const url = inviteUrl(location.href, room);
-  return `<div class="card sync-card"><h4>👥 แผนนี้ซิงก์กับเพื่อนอยู่</h4>
-    <p class="small">ส่งลิงก์หรือให้เพื่อนสแกน QR — เปิดแล้วจะเห็นและแก้แผนเดียวกัน · <b>ใครมีลิงก์นี้แก้แผนได้</b> ส่งเฉพาะคนที่ไปด้วย</p>
-    <div class="share-row"><input class="inp" readonly value="${esc(url)}" aria-label="ลิงก์ชวนเพื่อน" id="invite-url"><button class="btn primary" data-act="copy-invite">คัดลอกลิงก์</button></div>
-    <div class="qr-wrap"><canvas id="qr-invite" aria-label="QR code ลิงก์ชวนเพื่อน"></canvas></div>
-    <button class="btn ghost sm danger" data-act="sync-stop">หยุดซิงก์ในเครื่องนี้</button></div>`;
-}
-
 /** ส่งแผนจากโน้ตบุ๊ก/iPad ไปมือถือ: ลิงก์มีแผนทั้งหมด → มือถือเปิดแล้วกด "ใช้แผนนี้ในมือถือ" */
 function phoneSection(r: ReturnType<typeof buildShareUrl>): string {
   if (!r.ok) return `<div class="card phone-card"><h4>📱 ส่งแผนไปมือถือ</h4><p class="warn-text">แผนใหญ่เกินไปสำหรับลิงก์ — ใช้ Export JSON แล้วเปิดไฟล์ในมือถือ</p></div>`;
@@ -385,7 +368,6 @@ function shareBody(): string {
   const r = buildShareUrl(app.plan, location.href);
   return `
     ${phoneSection(r)}
-    ${syncSection()}
     <p class="small">${app.storageOk ? (app.saveOk ? '✓ บันทึกในเครื่องนี้ (localStorage) แล้ว — แต่ไม่ซิงก์ไปเครื่องอื่นเอง' : '⚠ บันทึกในเครื่องไม่สำเร็จ (พื้นที่เต็ม?) — โปรด Export JSON') : '⚠ เบราว์เซอร์นี้บันทึกในเครื่องไม่ได้ (เช่น โหมดส่วนตัว) — โปรด Export JSON ก่อนปิด'}</p>
     <h4>ข้อความ / ไฟล์ (สำรองข้อมูล)</h4>
     <div class="row-btns">
