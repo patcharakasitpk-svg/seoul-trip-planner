@@ -3146,5 +3146,708 @@
   ],
   "checkedAt": "2026-11-14",
   "notes": "Area pin, not a single venue. Fashion strip runs along Itaewon-ro west from Hangangjin toward Itaewon ('Comme des Garçons road', ~650 m); cafe alleys on Itaewon-ro 54-gil/55-ga-gil south of the station. Exit number varies by guide (exit 3 most cited; some say exit 1/2) – unverified. Many shops open late (11:00–12:00); individual shop closures for 29 Nov–7 Dec not checked. Walkable to Itaewon (~15 min)."
+ },
+ {
+  "id": "daiso-hongdae",
+  "nameTh": "ไดโซ สาขาฮงแด 2",
+  "nameEn": "Daiso Hongdae Branch No. 2",
+  "nameKo": "다이소 홍대2호점",
+  "branch": "Hongdae No. 2 (홍대2호점)",
+  "category": "beauty",
+  "area": "Hongdae",
+  "address": "182 Yanghwa-ro, Mapo-gu, Seoul 04051 (서울 마포구 양화로 182, 동교동)",
+  "lat": 37.557761,
+  "lng": 126.9255878,
+  "coordStatus": "verified",
+  "coordSource": "Daiso store finder coords (37.5577610, 126.9255878) match OSM node 6164095438 (다이소, 37.5577585, 126.9255542) within ~3 m",
+  "reasonTh": "ของใช้จำเป็นราคาถูก สกินแคร์ เครื่องเขียน ของฝาก ร้านใหญ่ทั้งตึก 7 ชั้น มีลิฟต์ ใกล้ทางออก 4 สถานีฮงอิกแด",
+  "suggestedStayMin": 30,
+  "budget": {
+   "textTh": "สินค้าส่วนใหญ่ราคาเดียว 6 ระดับ 500–5,000 วอน",
+   "krwMin": 500,
+   "krwMax": 5000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:00–22:00 daily",
+   "closedDays": "Seollal & Chuseok holidays (per KTripTips)",
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Hongik Univ.",
+     "nameKo": "홍대입구",
+     "lines": [
+      "2",
+      "AREX",
+      "GJ"
+     ],
+     "exit": "4",
+     "walkMin": 1
+    }
+   ],
+   "bus": null,
+   "status": "verified",
+   "sources": [
+    {
+     "label": "Insight (2018) – store at Hongik Univ. stn exit 4, 7-floor whole building",
+     "url": "https://www.insight.co.kr/news/200481"
+    },
+    {
+     "label": "OSM subway_entrance node 3404932005 (exit 4) ~48 m from store",
+     "url": "https://www.openstreetmap.org/node/3404932005"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Daiso official store finder (daisomall.co.kr, /api/ms/msg/selStr) – address, hours, coords",
+    "url": "https://www.daisomall.co.kr/ms/msg/SCR_MSG_0015"
+   },
+   {
+    "label": "KTripTips (KTO) – Daiso Hongdae Branch No. 2 (address, hours, holidays)",
+    "url": "https://www.ktriptips.com/eng/shopping/2960566"
+   },
+   {
+    "label": "Insight – Hongdae 2nd branch opening, 7 floors",
+    "url": "https://www.insight.co.kr/news/200481"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/6164095438"
+   },
+   {
+    "label": "Insight – Daiso 6-tier fixed prices ₩500–5,000 (Gangnam Station opening article)",
+    "url": "https://www.insight.co.kr/news/520889"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Tax refund shop. 7 floors with elevator (Insight 2018; funliday/Creatrip also say 7 floors). Alternative nearby: 홍대입구점, 25 Hongik-ro (Daiso finder). Exit 4 per Insight; OSM entrance geometry agrees (~50 m). Holiday closures don't fall in trip dates."
+ },
+ {
+  "id": "daiso-seongsu",
+  "nameTh": "ไดโซ สาขาสถานีทุกซอม (ซองซู)",
+  "nameEn": "Daiso Ttukseom Station Branch",
+  "nameKo": "다이소 뚝섬역점",
+  "branch": "Ttukseom Station (뚝섬역점)",
+  "category": "beauty",
+  "area": "Seongsu",
+  "address": "B1, 6 Achasan-ro, Seongdong-gu, Seoul 04778 (서울 성동구 아차산로 6 지하1층, 성수동1가)",
+  "lat": 37.5476939,
+  "lng": 127.0451244,
+  "coordStatus": "unverified",
+  "coordSource": "Daiso store finder coords (37.5476939, 127.0451244). OSM address node 13946958923 (아차산로 6) has identical coords to 7 decimals, so likely not independent; no OSM Daiso node",
+  "reasonTh": "ของใช้จำเป็นราคาถูก สาขาใกล้ย่านคาเฟ่ซองซู/ป่าซออุลซุบ อยู่ชั้นใต้ดิน B1 ติดสถานีทุกซอม",
+  "suggestedStayMin": 20,
+  "budget": {
+   "textTh": "สินค้าส่วนใหญ่ราคาเดียว 6 ระดับ 500–5,000 วอน",
+   "krwMin": 500,
+   "krwMax": 5000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:00–22:00 daily",
+   "closedDays": "Seollal & Chuseok holidays (per KTripTips)",
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Ttukseom",
+     "nameKo": "뚝섬",
+     "lines": [
+      "2"
+     ],
+     "exit": "8 or 1 (nearest per OSM, ~110 m)",
+     "walkMin": 2
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "OSM-derived: straight-line distance from store coords to OSM railway=subway_entrance nodes (Overpass, 2026-11-15); walkMin ≈ distance/80 m per min",
+     "url": "https://www.openstreetmap.org/node/3408545514"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Daiso official store finder (daisomall.co.kr, /api/ms/msg/selStr) – address, hours, coords",
+    "url": "https://www.daisomall.co.kr/ms/msg/SCR_MSG_0015"
+   },
+   {
+    "label": "KTripTips (KTO) – DAISO Ttukseom Station Branch (B1 address, hours)",
+    "url": "https://www.ktriptips.com/eng/shopping/4031144"
+   },
+   {
+    "label": "Insight – Daiso 6-tier fixed prices ₩500–5,000 (Gangnam Station opening article)",
+    "url": "https://www.insight.co.kr/news/520889"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Daiso finder has no store literally named 성수/성수역 except small franchise 성수2가점 (성덕정길 106, not tax-free); Ttukseom stn branch is the nearest direct-run store to Seongsu cafe streets. Size/floor count beyond B1 not found. No restroom (KTripTips). Exit number derived from OSM geometry only."
+ },
+ {
+  "id": "daiso-garosugil",
+  "nameTh": "ไดโซ สาขาซินซา คาโรซูกิล",
+  "nameEn": "Daiso Sinsa Garosu-gil Branch",
+  "nameKo": "다이소 신사가로수길점",
+  "branch": "Sinsa Garosu-gil (신사가로수길점)",
+  "category": "beauty",
+  "area": "Sinsa / Garosu-gil",
+  "address": "25 Garosu-gil, Gangnam-gu, Seoul (서울 강남구 가로수길 25, 신사동)",
+  "lat": 37.5196025,
+  "lng": 127.0229094,
+  "coordStatus": "unverified",
+  "coordSource": "Daiso store finder coords only (37.5196025, 127.0229094); Nominatim could not resolve 가로수길 25 and OSM has no node for this new store",
+  "reasonTh": "ของใช้จำเป็นราคาถูก สาขาใหม่ (เปิด ก.ค. 2026) กลางถนนคาโรซูกิล มีลิฟต์ เดินช้อปต่อได้เลย",
+  "suggestedStayMin": 25,
+  "budget": {
+   "textTh": "สินค้าส่วนใหญ่ราคาเดียว 6 ระดับ 500–5,000 วอน",
+   "krwMin": 500,
+   "krwMax": 5000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:00–22:00 daily",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Sinsa",
+     "nameKo": "신사",
+     "lines": [
+      "3",
+      "SB"
+     ],
+     "exit": "8 (nearest per OSM, ~370 m)",
+     "walkMin": 5
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "OSM-derived: straight-line distance from store coords to OSM railway=subway_entrance nodes (Overpass, 2026-11-15); walkMin ≈ distance/80 m per min",
+     "url": "https://www.openstreetmap.org/node/3403630034"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Daiso official store finder (daisomall.co.kr, /api/ms/msg/selStr) – address, hours, coords",
+    "url": "https://www.daisomall.co.kr/ms/msg/SCR_MSG_0015"
+   },
+   {
+    "label": "Hankyung – Daiso opens Sinsa Garosu-gil store from 31 Jul 2026",
+    "url": "https://www.hankyung.com/article/202607281378i"
+   },
+   {
+    "label": "Daum/news – Daiso enters Garosu-gil",
+    "url": "https://v.daum.net/v/20260729050104186"
+   },
+   {
+    "label": "foxcg – Daiso store list (가로수길 25, 10:00–22:00)",
+    "url": "https://foxcg.com/daiso-hours-info/"
+   },
+   {
+    "label": "Insight – Daiso 6-tier fixed prices ₩500–5,000 (Gangnam Station opening article)",
+    "url": "https://www.insight.co.kr/news/520889"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Opened 31 Jul 2026 'in the middle of Garosu-gil' (Hankyung). Daiso finder flags elevator + tax refund; floor count not found. Holiday closures not yet listed. Alternative right at the station: 신사역점, 1F 606 Gangnam-daero (OSM node 13696948013 + Daiso finder, KTripTips 4030679). Apgujeong option: 압구정역점, 878 Nonhyeon-ro."
+ },
+ {
+  "id": "daiso-coex",
+  "nameTh": "ไดโซ สาขาโคเอ็กซ์มอลล์",
+  "nameEn": "Daiso COEX Mall Branch",
+  "nameKo": "다이소 코엑스몰점",
+  "branch": "COEX Mall (코엑스몰점)",
+  "category": "beauty",
+  "area": "COEX / Samseong",
+  "address": "B1 Starfield COEX Mall, 524 Bongeunsa-ro, Gangnam-gu, Seoul (서울 강남구 봉은사로 524 코엑스몰 B1, 삼성동)",
+  "lat": 37.5128321,
+  "lng": 127.0572509,
+  "coordStatus": "unverified",
+  "coordSource": "Daiso store finder coords only (37.5128321, 127.0572509) — building-level within COEX/Parnas complex (Nominatim address 봉은사로 524 ~1 m away); exact in-mall position not confirmed, no OSM Daiso node",
+  "reasonTh": "ของใช้จำเป็นราคาถูก อยู่ชั้น B1 ในโคเอ็กซ์มอลล์ ใกล้ห้องสมุดสตาร์ฟิลด์ เดินในร่มจากสถานีได้",
+  "suggestedStayMin": 20,
+  "budget": {
+   "textTh": "สินค้าส่วนใหญ่ราคาเดียว 6 ระดับ 500–5,000 วอน",
+   "krwMin": 500,
+   "krwMax": 5000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:00–22:00 daily",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Bongeunsa",
+     "nameKo": "봉은사",
+     "lines": [
+      "9"
+     ],
+     "exit": "7",
+     "walkMin": 7
+    },
+    {
+     "name": "Samseong",
+     "nameKo": "삼성",
+     "lines": [
+      "2"
+     ],
+     "exit": "5 or 6 (underground)",
+     "walkMin": 7
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "Taste Korean Food – Daiso COEX Mall guide (exits & walk times)",
+     "url": "https://www.tastekoreanfood.com/ktrend/forgot-your-adapter-why-daiso-coex-mall-is-a-life-saver-for-travelers"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Daiso official store finder (daisomall.co.kr, /api/ms/msg/selStr) – address, hours, coords",
+    "url": "https://www.daisomall.co.kr/ms/msg/SCR_MSG_0015"
+   },
+   {
+    "label": "Taste Korean Food – Daiso COEX Mall (B1, near Starfield Library, 10:00–22:00)",
+    "url": "https://www.tastekoreanfood.com/ktrend/forgot-your-adapter-why-daiso-coex-mall-is-a-life-saver-for-travelers"
+   },
+   {
+    "label": "foxcg – Daiso Seoul list (코엑스몰 B1 C1 14)",
+    "url": "https://foxcg.com/seoul-daiso-hours-address-phone/"
+   },
+   {
+    "label": "Insight – Daiso 6-tier fixed prices ₩500–5,000 (Gangnam Station opening article)",
+    "url": "https://www.insight.co.kr/news/520889"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Daiso finder: not a tax-refund store, elevator yes. foxcg lists unit 'B1 C1 14'. Taste Korean Food gives address as 513 Yeongdong-daero (COEX's other street address). Holiday schedule not confirmed; mall stores may follow COEX hours."
+ },
+ {
+  "id": "daiso-jongno",
+  "nameTh": "ไดโซ สาขาจงโน (สาขาหลัก)",
+  "nameEn": "Daiso Jongno Main Branch",
+  "nameKo": "다이소 종로본점",
+  "branch": "Jongno Main (종로본점)",
+  "category": "beauty",
+  "area": "Jongno",
+  "address": "1F, 395 Samil-daero, Jongno-gu, Seoul 03190 (서울 종로구 삼일대로 395, 종로2가)",
+  "lat": 37.5699036,
+  "lng": 126.9873599,
+  "coordStatus": "verified",
+  "coordSource": "Daiso store finder coords (37.5699036, 126.9873599) match OSM node 10080157032 (다이소, 37.5699623, 126.9873777) ~7 m and OSM building way 355906410 (삼일대로 395)",
+  "reasonTh": "ของใช้จำเป็นราคาถูก สาขาหลักย่านจงโน ใกล้สวนทัปกอล/อินซาดง ระหว่างทางไปตลาดควังจัง",
+  "suggestedStayMin": 25,
+  "budget": {
+   "textTh": "สินค้าส่วนใหญ่ราคาเดียว 6 ระดับ 500–5,000 วอน",
+   "krwMin": 500,
+   "krwMax": 5000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:00–22:00 daily",
+   "closedDays": "Seollal & Chuseok holidays (per KTripTips)",
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Jonggak",
+     "nameKo": "종각",
+     "lines": [
+      "1"
+     ],
+     "exit": "12 or 11 (nearest per OSM, ~140 m)",
+     "walkMin": 2
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "OSM-derived: straight-line distance from store coords to OSM railway=subway_entrance nodes (Overpass, 2026-11-15); walkMin ≈ distance/80 m per min; entrance matched to nearest station node",
+     "url": "https://www.openstreetmap.org/node/3647165355"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Daiso official store finder (daisomall.co.kr, /api/ms/msg/selStr) – address, hours, coords",
+    "url": "https://www.daisomall.co.kr/ms/msg/SCR_MSG_0015"
+   },
+   {
+    "label": "KTripTips (KTO) – DAISO Jongno Main Branch (1F, hours, holidays)",
+    "url": "https://www.ktriptips.com/eng/shopping/4031341"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/10080157032"
+   },
+   {
+    "label": "Insight – Daiso 6-tier fixed prices ₩500–5,000 (Gangnam Station opening article)",
+    "url": "https://www.insight.co.kr/news/520889"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Tax refund shop; OSM opening_hours Mo-Su 10:00-22:00. ~1.1 km west of Gwangjang Market (Jongno 3-ga stn also ~5–7 min walk). Alternative east of the market: 동대문점, 율곡로/종로 309 at Dongdaemun stn (OSM node 7093405372, level -1; KTripTips 4031357). Floor count not found."
+ },
+ {
+  "id": "daiso-yeouido",
+  "nameTh": "ไดโซ สาขายออีโด",
+  "nameEn": "Daiso Yeouido Branch",
+  "nameKo": "다이소 여의도점",
+  "branch": "Yeouido (여의도점)",
+  "category": "beauty",
+  "area": "Yeouido",
+  "address": "B1 Kokem Bldg, 61 Yeouinaru-ro, Yeongdeungpo-gu, Seoul 07327 (서울 영등포구 여의나루로 61 지하1층, 여의도동)",
+  "lat": 37.5232244,
+  "lng": 126.9260155,
+  "coordStatus": "verified",
+  "coordSource": "Daiso store finder coords (37.5232244, 126.9260155) match OSM node 9446001641 (다이소, 여의나루로 61, 37.5232998, 126.9262770) ~25 m",
+  "reasonTh": "ของใช้จำเป็นราคาถูก ชั้นใต้ดิน B1 ใกล้สถานียออีโด แวะก่อนไปเดอะฮย็อนแด/สวนยออีโดได้",
+  "suggestedStayMin": 20,
+  "budget": {
+   "textTh": "สินค้าส่วนใหญ่ราคาเดียว 6 ระดับ 500–5,000 วอน",
+   "krwMin": 500,
+   "krwMax": 5000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:00–22:00 daily",
+   "closedDays": "Seollal & Chuseok holidays (per KTripTips)",
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Yeouido",
+     "nameKo": "여의도",
+     "lines": [
+      "5",
+      "9"
+     ],
+     "exit": "4 or 5 (nearest per OSM, ~190 m)",
+     "walkMin": 3
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "OSM-derived: straight-line distance from store coords to OSM railway=subway_entrance nodes (Overpass, 2026-11-15); walkMin ≈ distance/80 m per min",
+     "url": "https://www.openstreetmap.org/node/3396415982"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Daiso official store finder (daisomall.co.kr, /api/ms/msg/selStr) – address, hours, coords",
+    "url": "https://www.daisomall.co.kr/ms/msg/SCR_MSG_0015"
+   },
+   {
+    "label": "KTripTips (KTO) – DAISO Yeouido Branch (B1 Kokem Bldg)",
+    "url": "https://www.ktriptips.com/eng/shopping/4031216"
+   },
+   {
+    "label": "OSM node (opening_hours Mo-Su 10:00-22:00)",
+    "url": "https://www.openstreetmap.org/node/9446001641"
+   },
+   {
+    "label": "Insight – Daiso 6-tier fixed prices ₩500–5,000 (Gangnam Station opening article)",
+    "url": "https://www.insight.co.kr/news/520889"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Tax refund shop; no restroom (KTripTips). Size not found. Yeongdeungpo alternative: 영등포역점, 18 Yeongjung-ro (Daiso finder; OSM node 11897245968)."
+ },
+ {
+  "id": "daiso-itaewon",
+  "nameTh": "ไดโซ สาขาอิแทวอน",
+  "nameEn": "Daiso Itaewon Branch",
+  "nameKo": "다이소 이태원점",
+  "branch": "Itaewon (이태원점)",
+  "category": "beauty",
+  "area": "Itaewon",
+  "address": "1 Itaewon-ro 15-gil, Yongsan-gu, Seoul 04351 (서울 용산구 이태원로15길 1, 이태원동)",
+  "lat": 37.5346186,
+  "lng": 126.9901929,
+  "coordStatus": "verified",
+  "coordSource": "Daiso store finder coords (37.5346186, 126.9901929) match OSM node 14105205621 (다이소, 37.5346323, 126.9902263) ~3 m",
+  "reasonTh": "ของใช้จำเป็นราคาถูก อยู่กลางระหว่างสถานีอิแทวอนกับนกซาพยอง เดินต่อไปแฮบังชน/ฮันนัมได้",
+  "suggestedStayMin": 20,
+  "budget": {
+   "textTh": "สินค้าส่วนใหญ่ราคาเดียว 6 ระดับ 500–5,000 วอน",
+   "krwMin": 500,
+   "krwMax": 5000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:00–22:00 daily",
+   "closedDays": "Seollal & Chuseok holidays (per KTripTips)",
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Noksapyeong",
+     "nameKo": "녹사평",
+     "lines": [
+      "6"
+     ],
+     "exit": "3 (nearest per OSM, ~300 m)",
+     "walkMin": 4
+    },
+    {
+     "name": "Itaewon",
+     "nameKo": "이태원",
+     "lines": [
+      "6"
+     ],
+     "exit": "1 or 4 (nearest per OSM, ~305 m)",
+     "walkMin": 4
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "OSM-derived: straight-line distance from store coords to OSM railway=subway_entrance nodes (Overpass, 2026-11-15); walkMin ≈ distance/80 m per min",
+     "url": "https://www.openstreetmap.org/node/2384911744"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Daiso official store finder (daisomall.co.kr, /api/ms/msg/selStr) – address, hours, coords",
+    "url": "https://www.daisomall.co.kr/ms/msg/SCR_MSG_0015"
+   },
+   {
+    "label": "KTripTips (KTO) – DAISO Itaewon Branch (address, hours, holidays)",
+    "url": "https://www.ktriptips.com/eng/shopping/4031255"
+   },
+   {
+    "label": "OSM node",
+    "url": "https://www.openstreetmap.org/node/14105205621"
+   },
+   {
+    "label": "Insight – Daiso 6-tier fixed prices ₩500–5,000 (Gangnam Station opening article)",
+    "url": "https://www.insight.co.kr/news/520889"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Tax refund shop; Olive Young Itaewon within 22 m (KTripTips). No elevator per Daiso finder; floor/size not found. Only Daiso found for Itaewon/Hannam/Haebangchon keywords."
+ },
+ {
+  "id": "daiso-suwon-station",
+  "nameTh": "ไดโซ สาขาสถานีซูวอน",
+  "nameEn": "Daiso Suwon Station Branch",
+  "nameKo": "다이소 수원역점",
+  "branch": "Suwon Station (수원역점)",
+  "category": "beauty",
+  "area": "Suwon",
+  "address": "909 Deogyeong-daero, Paldal-gu, Suwon-si, Gyeonggi-do (경기 수원시 팔달구 덕영대로 909, 매산로1가)",
+  "lat": 37.2676861,
+  "lng": 127.0007215,
+  "coordStatus": "unverified",
+  "coordSource": "Daiso store finder coords only (37.2676861, 127.0007215); no OSM Daiso node; ~170 m straight-line from Novotel Ambassador Suwon (OSM way 617564356, 902 Deogyeong-daero)",
+  "reasonTh": "ของใช้จำเป็นราคาถูก ใกล้โรงแรมโนโวเทลซูวอนที่สุด (~170 ม.) ติดสถานีซูวอน ซื้อของก่อนกลับโรงแรมได้",
+  "suggestedStayMin": 20,
+  "budget": {
+   "textTh": "สินค้าส่วนใหญ่ราคาเดียว 6 ระดับ 500–5,000 วอน",
+   "krwMin": 500,
+   "krwMax": 5000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:00–22:00 daily",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Suwon",
+     "nameKo": "수원",
+     "lines": [
+      "1",
+      "SB"
+     ],
+     "exit": "12 (nearest per OSM, ~20 m)",
+     "walkMin": 1
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "OSM-derived: straight-line distance from store coords to OSM railway=subway_entrance nodes (Overpass, 2026-11-15); walkMin ≈ distance/80 m per min",
+     "url": "https://www.openstreetmap.org/node/7213601777"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Daiso official store finder (daisomall.co.kr, /api/ms/msg/selStr) – address, hours, coords",
+    "url": "https://www.daisomall.co.kr/ms/msg/SCR_MSG_0015"
+   },
+   {
+    "label": "OSM – Novotel Ambassador Suwon (902 Deogyeong-daero)",
+    "url": "https://www.openstreetmap.org/way/617564356"
+   },
+   {
+    "label": "Insight – Daiso 6-tier fixed prices ₩500–5,000 (Gangnam Station opening article)",
+    "url": "https://www.insight.co.kr/news/520889"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Direct-run, not tax-free, no elevator (Daiso finder); floor/size not found. A web result places Artbox Suwon Station at the same 909 address — likely same building. Alternative inside the station complex: AK플라자수원점, 924 Deogyeong-daero (franchise, elevator, 10:00–22:00 per finder, ~330 m from hotel). Hours from Daiso finder only."
+ },
+ {
+  "id": "daiso-gangnam",
+  "nameTh": "ไดโซ สาขาสถานีคังนัม",
+  "nameEn": "Daiso Gangnam Station Branch",
+  "nameKo": "다이소 강남역점",
+  "branch": "Gangnam Station (강남역점)",
+  "category": "beauty",
+  "area": "Gangnam",
+  "address": "422 Gangnam-daero, Gangnam-gu, Seoul 06129 (서울 강남구 강남대로 422, 역삼동)",
+  "lat": 37.5003941,
+  "lng": 127.0269849,
+  "coordStatus": "unverified",
+  "coordSource": "Daiso store finder coords only (37.5003941, 127.0269849); consistent with OSM POIs tagged 강남대로 422 (e.g. node 12074643171, ~7 m) but no OSM Daiso node",
+  "reasonTh": "ของใช้จำเป็นราคาถูก ร้านใหญ่มาก ~1,600 ตร.ม. (เปิดปี 2025) มีลิฟต์ กลางถนนคังนัมแดโร",
+  "suggestedStayMin": 30,
+  "budget": {
+   "textTh": "สินค้าส่วนใหญ่ราคาเดียว 6 ระดับ 500–5,000 วอน",
+   "krwMin": 500,
+   "krwMax": 5000,
+   "status": "source"
+  },
+  "hours": {
+   "text": "10:00–22:00 daily",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:00",
+  "closeTime": "22:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": null,
+  "transit": {
+   "stations": [
+    {
+     "name": "Gangnam",
+     "nameKo": "강남",
+     "lines": [
+      "2",
+      "SB"
+     ],
+     "exit": "11 or 10 (nearest per OSM, ~190 m)",
+     "walkMin": 3
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "OSM-derived: straight-line distance from store coords to OSM railway=subway_entrance nodes (Overpass, 2026-11-15); walkMin ≈ distance/80 m per min",
+     "url": "https://www.openstreetmap.org/node/1925407863"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Daiso official store finder (daisomall.co.kr, /api/ms/msg/selStr) – address, hours, coords",
+    "url": "https://www.daisomall.co.kr/ms/msg/SCR_MSG_0015"
+   },
+   {
+    "label": "Insight – Daiso Gangnam Station store opens 30 Sep 2025, ~1,600㎡",
+    "url": "https://www.insight.co.kr/news/520889"
+   },
+   {
+    "label": "Seoulpi/Cityfolio – Gangnam stn store relocated from Sinnonhyeon, 500-pyeong",
+    "url": "https://seoulpi.io/cityfolio/article/00584286262900858880"
+   },
+   {
+    "label": "Insight – Daiso 6-tier fixed prices ₩500–5,000 (Gangnam Station opening article)",
+    "url": "https://www.insight.co.kr/news/520889"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Optional. Tax refund + elevator (Daiso finder). Floor count not found. Older alternative: 강남역2호점, B1 109 Teheran-ro (OSM node 12464855600; KTripTips 4030880). KTripTips also lists a '강남본점' at 1F 372 Gangnam-daero which no longer appears in the Daiso finder search for 강남 — possibly closed/relocated."
  }
 ]
