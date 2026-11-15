@@ -23,3 +23,14 @@ describe('ย่าน', () => {
     for (const z of Object.values(ZONES)) expect(z.th.length).toBeGreaterThan(1);
   });
 });
+
+import { ZONES as Z2, ZONE_AREA, zoneOf as zo2, type Zone } from '../../src/core/zones';
+import { describe as d3, it as i3, expect as e3 } from 'vitest';
+d3('ย่านที่เลือกเองตอนเพิ่มสถานที่', () => {
+  i3('ทุกย่านที่เลือกได้ กรองในตัวจัดแผนเจอย่านเดิม', () => {
+    for (const z of Object.keys(Z2) as Zone[]) e3(zo2(ZONE_AREA[z])).toBe(z);
+  });
+  i3('ล็อตเต้เวิลด์/จัมซิลเป็นย่านของตัวเอง', () => {
+    e3(zo2('Jamsil / Songpa')).toBe('jamsil');
+  });
+});

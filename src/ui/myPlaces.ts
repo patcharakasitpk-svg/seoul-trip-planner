@@ -8,6 +8,7 @@ import { coordError, parseLatLng } from '../core/coords';
 import { cleanLinks } from '../storage/validate';
 import { placePhotos, resizeImage } from '../services/shopPhotos';
 import { placeInfoHtml, hydratePlacePhotos } from './views/placeInfo';
+import { ZONES, ZONE_AREA, zoneOf, zoneShort, type Zone } from '../core/zones';
 import { shareCardHtml, createPlacesRoom, leavePlacesRoom, inviteLink, setMyName } from './placesShare';
 
 /**
@@ -24,6 +25,8 @@ interface FormState {
   category: OwnCategory;
   coord: string;
   stay: number;
+  /** ย่านที่เลือกเอง ('' = เดาจากตำแหน่ง) */
+  zone: Zone | '';
   note: string;
   links: string;
   error: string;
@@ -103,11 +106,25 @@ function formHtml(): string {
     <label>ตำแหน่ง <span class="muted small">— วางพิกัด, Plus Code (เช่น HX7M+HQ8) หรือลิงก์ Google Maps แบบเต็ม</span>
       <span class="pp-coord"><input class="inp" data-pp-field="coord" value="${esc(f.coord)}" placeholder="37.5639, 126.9844" inputmode="text"><button type="button" class="btn sm ${picking ? 'primary' : ''}" data-pp="pick">${picking ? 'กำลังเลือก… แตะบนแผนที่' : '📍 แตะบนแผนที่'}</button></span></label>
     <p class="pp-coord-msg ${f.error ? 'bad-text' : 'muted'} small">${f.error ? esc(f.error) : pt ? `✓ ได้ตำแหน่งแล้ว (${pt.lat.toFixed(5)}, ${pt.lng.toFixed(5)}) — ดูหมุดแดงบนแผนที่ แล้วเช็กใน <a href="https://www.google.com/maps/search/?api=1&query=${pt.lat},${pt.lng}" target="_blank" rel="noopener">Google Maps ↗</a>` : 'ยังไม่มีตำแหน่งก็บันทึกได้ (จะยังไม่ปักหมุด)'}</p>
+    <label>ย่าน <span class="muted small">— ใช้กรองในหน้า “จัดแผน”</span><select class="inp" data-pp-field="zone">${zoneOptions(f)}</select></label>
     <label>โน้ต <span class="muted small">(ไม่บังคับ)</span><textarea class="inp" data-pp-field="note" rows="2" maxlength="500" placeholder="เช่น ร้านคาเฟ่ในบ้านเก่า สั่งขนมปังเกลือ">${esc(f.note)}</textarea></label>
     <label>ลิงก์ <span class="muted small">— บรรทัดละ 1 ลิงก์ (Google Maps, IG, รีวิว)</span><textarea class="inp" data-pp-field="links" rows="2" placeholder="https://…">${esc(f.links)}</textarea></label>
     <p class="muted small">เพิ่มรูปได้หลังบันทึก (ปุ่ม 📷 บนการ์ด)</p>
     <div class="row-btns"><button class="btn primary">บันทึก</button><button type="button" class="btn" data-pp="cancel">ยกเลิก</button></div>
   </form>`;
+}
+
+/** ย่านที่เดาได้จากตำแหน่งในฟอร์ม (สถานที่ใกล้สุดในรายการ ≤ 2 กม.) */
+function autoZone(): Zone {
+  if (!form) return 'other';
+  const r = buildOwnPlace({ id: 'x', name: 'x', category: form.category, coord: form.coord, stay: 45 }, app.places());
+  return r.ok ? zoneOf(r.place.area) : 'other';
+}
+
+function zoneOptions(f: FormState): string {
+  const auto = autoZone();
+  const zones = (Object.keys(ZONES) as Zone[]).filter((z) => z !== 'airport' && z !== 'other');
+  return `<option value="" ${f.zone === '' ? 'selected' : ''}>${auto === 'other' ? 'เดาจากตำแหน่ง (ยังไม่รู้ย่าน)' : `เดาจากตำแหน่ง: ${esc(zoneShort(auto))}`}</option>${zones.map((z) => `<option value="${z}" ${f.zone === z ? 'selected' : ''}>${esc(ZONES[z].th)}</option>`).join('')}<option value="other" ${f.zone === 'other' ? 'selected' : ''}>อื่น ๆ (ไม่อยู่ในย่านไหน)</option>`;
 }
 
 function card(p: Place): string {
@@ -117,7 +134,7 @@ function card(p: Place): string {
   return `<article class="pp-card ${sel === p.id ? 'sel' : ''}" data-pp-card="${esc(p.id)}">
     <div class="pp-card-head">
       <button class="pp-name" data-pp="select" data-place="${esc(p.id)}">${esc(p.nameTh)}</button>
-      <span class="muted small">${esc(OWN_CATEGORY_LABEL[ownCat(p)])}${p.area && p.area !== 'เพิ่มเอง' ? ` · ${esc(p.area)}` : ''}${p.addedBy ? ` · เพิ่มโดย ${esc(p.addedBy)}` : ''}</span>
+      <span class="muted small">${esc(OWN_CATEGORY_LABEL[ownCat(p)])}${zoneOf(p.area) !== 'other' ? ` · ${esc(zoneShort(zoneOf(p.area)))}` : ''}${p.addedBy ? ` · เพิ่มโดย ${esc(p.addedBy)}` : ''}</span>
     </div>
     ${p.lat == null ? '<p class="warn-text small">ยังไม่มีตำแหน่ง — กด “แก้” เพื่อใส่พิกัดหรือแตะบนแผนที่</p>' : ''}
     ${used.length ? `<p class="small pp-used">อยู่ในแผน: <b>${used.map(esc).join(', ')}</b></p>` : ''}
@@ -196,8 +213,8 @@ function select(id: string, pan = true) {
 /* ---------------- เหตุการณ์ ---------------- */
 function openForm(p: Place | null) {
   form = p
-    ? { id: p.id, name: p.nameTh, category: ownCat(p), coord: p.lat != null ? `${p.lat}, ${p.lng}` : '', stay: p.suggestedStayMin, note: p.notes ?? '', links: (p.links ?? []).join('\n'), error: '' }
-    : { id: null, name: '', category: 'food', coord: '', stay: 45, note: '', links: '', error: '' };
+    ? { id: p.id, name: p.nameTh, category: ownCat(p), coord: p.lat != null ? `${p.lat}, ${p.lng}` : '', stay: p.suggestedStayMin, zone: zoneOf(p.area) === 'other' ? '' : zoneOf(p.area), note: p.notes ?? '', links: (p.links ?? []).join('\n'), error: '' }
+    : { id: null, name: '', category: 'food', coord: '', stay: 45, zone: '', note: '', links: '', error: '' };
   picking = false;
 }
 
@@ -284,6 +301,12 @@ function onInput(e: Event) {
     }
     drawMap();
     if (pt && map) map.setView([pt.lat, pt.lng], Math.max(map.getZoom(), 16));
+    const zsel = root?.querySelector('[data-pp-field="zone"]') as HTMLSelectElement | null;
+    if (zsel) {
+      const keep = zsel.value;
+      zsel.innerHTML = zoneOptions(form);
+      zsel.value = keep;
+    }
   }
 }
 
@@ -314,7 +337,7 @@ function onSubmit(e: Event) {
     renderMyPlaces();
     return;
   }
-  const place: Place = { ...r.place, notes: form.note.trim().slice(0, 500) || null, links: cleanLinks(form.links.split(/\s+/)), photos: old?.photos ?? null, addedBy: old ? old.addedBy ?? null : app.settings.myName ?? null };
+  const place: Place = { ...r.place, ...(form.zone ? { area: ZONE_AREA[form.zone] } : {}), notes: form.note.trim().slice(0, 500) || null, links: cleanLinks(form.links.split(/\s+/)), photos: old?.photos ?? null, addedBy: old ? old.addedBy ?? null : app.settings.myName ?? null };
   const badLinks = form.links.split(/\s+/).filter(Boolean).length - (place.links?.length ?? 0);
   app.commit((p) => {
     p.customPlaces = old ? p.customPlaces.map((x) => (x.id === old.id ? place : x)) : [...p.customPlaces, place];

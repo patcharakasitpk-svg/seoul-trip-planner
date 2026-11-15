@@ -8,6 +8,7 @@ export const ZONES = {
   coex: { th: 'COEX · ซัมซอง', keys: ['coex', 'samseong', 'bongeunsa'] },
   yongsan: { th: 'ยงซาน · อิแทวอน · ฮันนัม', keys: ['yongsan', 'itaewon', 'hannam', 'haebangchon', 'noksapyeong'] },
   yeouido: { th: 'ยออีโด · ยองดึงโพ', keys: ['yeouido', 'yeongdeungpo', 'dangsan'] },
+  jamsil: { th: 'จัมซิล · ล็อตเต้เวิลด์ · ซงพา', keys: ['jamsil', 'songpa', 'lotte world'] },
   suwon: { th: 'ซูวอน', keys: ['suwon'] },
   airport: { th: 'สนามบินอินชอน', keys: ['incheon'] },
   other: { th: 'อื่น ๆ', keys: [] as string[] },
@@ -22,3 +23,22 @@ export function zoneOf(area: string | null | undefined): Zone {
   }
   return 'other';
 }
+
+/** ชื่อย่านที่เก็บใน area เมื่อผู้ใช้เลือกย่านเอง — zoneOf(ค่านี้) ได้ย่านเดิมเสมอ */
+export const ZONE_AREA: Record<Zone, string> = {
+  myeongdong: 'Myeongdong',
+  jongno: 'Jongno',
+  hongdae: 'Hongdae',
+  seongsu: 'Seongsu',
+  gangnam: 'Gangnam',
+  coex: 'COEX / Samseong',
+  yongsan: 'Yongsan / Itaewon',
+  yeouido: 'Yeouido',
+  jamsil: 'Jamsil / Songpa',
+  suwon: 'Suwon',
+  airport: 'Incheon',
+  other: 'เพิ่มเอง',
+};
+
+/** ชื่อย่านภาษาไทยสั้น ๆ (คำแรก) เช่น "เมียงดง" */
+export const zoneShort = (z: Zone) => ZONES[z].th.split(' · ')[0];

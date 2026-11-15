@@ -917,3 +917,34 @@ test('สิ่งของที่ต้องใช้: รายการแ
   await expect(pk.locator('.pk-item.done')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 });
+
+test('เพิ่มสถานที่: เลือกย่านเอง → กรองย่านในตัวจัดแผนเจอ · ไม่เลือก = เดาจากตำแหน่ง', async ({ page }) => {
+  test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
+  await page.goto('/');
+  await page.locator('.main-menu [data-tab="places"]').click();
+  const pp = page.locator('#places-page');
+  // ไม่เลือกย่าน: วางพิกัดกลางเมียงดง → เดาได้
+  await pp.locator('[data-pp="add"]').click();
+  await pp.locator('[data-pp-field="name"]').fill('ร้านในเมียงดง');
+  await pp.locator('[data-pp-field="coord"]').fill('37.563913, 126.984453');
+  await expect(pp.locator('[data-pp-field="zone"] option').first()).toContainText('เดาจากตำแหน่ง: เมียงดง');
+  await pp.locator('.pp-form button.primary').click();
+  await expect(pp.locator('.pp-card', { hasText: 'ร้านในเมียงดง' })).toContainText('เมียงดง');
+  // เลือกย่านเอง: ตลาดคริสต์มาสที่จัมซิล
+  await pp.locator('[data-pp="add"]').click();
+  await pp.locator('[data-pp-field="name"]').fill('Lotte Town Christmas Market');
+  await pp.locator('[data-pp-cat="sight"]').click();
+  await pp.locator('[data-pp-field="coord"]').fill('37.5121875, 127.0993125');
+  await pp.locator('[data-pp-field="zone"]').selectOption('jamsil');
+  await pp.locator('.pp-form button.primary').click();
+  await expect(pp.locator('.pp-card', { hasText: 'Lotte Town' })).toContainText('จัมซิล');
+  // ตัวจัดแผน: กรองย่าน จัมซิล → เจอ
+  await openPlanner(page);
+  const pl = page.locator('#planner');
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('[data-pl="lane"][data-v="search"]').click();
+  await pl.locator('[data-pl-change="zone"]').selectOption('jamsil');
+  await expect(pl.locator('.pl-item', { hasText: 'Lotte Town Christmas Market' })).toHaveCount(1);
+  await pl.locator('[data-pl-change="zone"]').selectOption('myeongdong');
+  await expect(pl.locator('.pl-item', { hasText: 'ร้านในเมียงดง' })).toHaveCount(1);
+});
