@@ -519,11 +519,10 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await pl.locator('[data-pl="reset-field"][data-v="startTime"]').click();
   await expect(pl.locator('[data-pl-change="startTime"]')).toHaveValue('08:00');
   await expect(pl.locator('.pl-hours')).toContainText('วันนี้มีเวลา');
-  // ปุ่มด้านล่างขนาดปกติ
-  const box = await pl.locator('.pl-foot .pl-btn.primary').boundingBox();
-  expect(box!.height).toBeLessThanOrEqual(48);
+  // ไม่มีแถบปุ่มด้านล่าง — เปลี่ยนขั้นด้วยแถบขั้นตอนด้านบน
+  await expect(pl.locator('.pl-foot')).toHaveCount(0);
   // ขั้น 2: ค้นหาทั้งหมดมีสถานที่หลัก · ใส่โรงแรมและร้าน · เปลี่ยนเวลาอยู่แล้ว ↺
-  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="clear-stops"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
   // ตัวกรองหมวด "จุดหลัก" → มีโรงแรม/COEX/สนามบิน
@@ -576,7 +575,7 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await expect(pl.locator('.pl-travel').first()).toContainText(/(เดิน|รถไฟฟ้า\/รถเมล์|แท็กซี่).*นาที.*ห่าง/);
   await expect(pl.locator('[data-pl="map-fit"]')).toBeVisible();
   // ขั้น 3: แก้เวลาเดินทาง แล้ว ↺
-  await pl.locator('.pl-foot [data-pl="goto"][data-v="3"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="3"]').click();
   const t = pl.locator('[data-pl-change="travel"]').first();
   await t.fill('70');
   await t.dispatchEvent('change');
@@ -584,11 +583,11 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await pl.locator('[data-pl="reset-step"][data-v="3"]').click();
   await expect(pl.locator('[data-pl="reset-leg"]')).toHaveCount(0);
   // ขั้น 4: สรุป · แก้ → กลับขั้น 2 → กลับหน้าสรุป · ยืนยัน → ไปหน้า วันนี้
-  await pl.locator('.pl-foot [data-pl="goto"][data-v="4"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="4"]').click();
   await expect(pl.locator('.pl-sum')).toContainText('Gwangjang Market');
   await pl.locator('[data-pl="edit"][data-v="2"]').first().click();
   await expect(pl.locator('.pl-steps li.on')).toContainText('เลือกสถานที่');
-  await pl.locator('.pl-foot [data-pl="goto"][data-v="4"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="4"]').click();
   await pl.locator('[data-pl="confirm"]').click();
   await expect(pl).toBeHidden();
   await expect(page.locator('#toast')).toContainText('บันทึกแผนวันนี้แล้ว');
@@ -604,7 +603,7 @@ test('จัดแผนแบบขั้นตอน: ค้นไม่เจ
   await page.goto('/');
   await page.locator('[data-act="open-planner"]').click();
   const pl = page.locator('#planner');
-  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
   await pl.locator('[data-pl-input="q"]').fill('test select');
   await expect(pl.locator('.pl-lane-list')).toContainText('ไม่พบในรายการที่เตรียมไว้');
@@ -629,7 +628,7 @@ test('โน้ต "จะไปทำอะไร": เพิ่ม/บัน�
   await page.locator('[data-act="confirm-ok"]').click();
   await page.locator('[data-act="open-planner"]').click();
   const pl = page.locator('#planner');
-  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   const row = pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' });
   // ร้านอาหาร: เลือกมื้อได้ (กลางวัน) → ป้ายมื้อข้างชื่อ · กดซ้ำ = ยกเลิก
   const mealSel = () => pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' }).locator('[data-pl-change="meal"]');
@@ -670,7 +669,7 @@ test('ร้านที่ยังไม่มีพิกัด: แตะแ
   await page.goto('/');
   await page.locator('[data-act="open-planner"]').click();
   const pl = page.locator('#planner');
-  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
   await pl.locator('[data-pl-input="q"]').fill('29cm');
   await pl.locator('[data-pl="preview"][data-place="29cm-home-seongsu"]').click();
@@ -691,7 +690,7 @@ test('เพิ่มสถานที่เองในตัวจัดแ�
   await page.goto('/');
   await page.locator('[data-act="open-planner"]').click();
   const pl = page.locator('#planner');
-  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
   await pl.locator('[data-pl-input="q"]').fill('Nudake Seongsu');
   await pl.locator('[data-pl="own-open"]').click();
@@ -716,7 +715,7 @@ test('เพิ่มสถานที่เอง: ลิงก์ย่อ �
   await page.goto('/');
   await page.locator('[data-act="open-planner"]').click();
   const pl = page.locator('#planner');
-  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
   await pl.locator('[data-pl-input="q"]').fill('My Cafe');
   await pl.locator('[data-pl="own-open"]').click();
@@ -752,7 +751,7 @@ test('ตัวจัดแผน: แก้แล้วรายการไม
   await page.locator('[data-act="confirm-ok"]').click();
   await page.locator('[data-act="open-planner"]').click();
   const pl = page.locator('#planner');
-  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await page.evaluate(() => (document.querySelector('.pl-day')!.scrollTop = 400));
   const last = () => pl.locator('.pl-row.stop').last();
   await last().locator('[data-pl-change="stay"]').selectOption('120');
@@ -779,7 +778,7 @@ test('ตัวจัดแผน: ร่างที่ยังไม่ยื
   await page.goto('/');
   await page.locator('[data-act="open-planner"]').click();
   const pl = page.locator('#planner');
-  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
   await pl.locator('[data-pl-input="q"]').fill('กวางจัง');
   await pl.locator('[data-pl="add"][data-place="gwangjang"]').click();

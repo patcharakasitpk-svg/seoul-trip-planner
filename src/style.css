@@ -715,3 +715,14 @@ body.planner-open .main-menu [data-act="nav-planner"] { background: var(--surfac
 @media (max-width: 599px) { .bottom-nav .nav-planner { display: none; } }
 .pl-home { flex: none; }
 body.planner-open .toast { bottom: calc(var(--bnav-h, 0px) + 76px); }
+
+/* ไม่มีแถบล่างในตัวจัดแผน — เปลี่ยนขั้นที่แถบขั้นตอนด้านบน */
+.pl-head-act { min-width: 0; display: flex; justify-content: flex-end; }
+.pl-head-act:empty { display: none; }
+.pl-steps li:not(.on) button:hover { background: #eef3ff; color: var(--accent); }
+.pl-steps li.done button span { background: #e7efff; }
+@media (min-width: 900px) {
+  .pl-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); }
+  .pl-head .pl-steps { margin: 0; }
+  .pl-head-act:empty { display: flex; }
+}

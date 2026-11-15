@@ -239,15 +239,14 @@ function render(resetMap = false) {
     map?.remove();
     map = null;
     root.innerHTML = `<header class="pl-head"></header><div class="pl-budget-wrap"></div>
-      <div class="pl-body"><div class="pl-main"></div><div class="pl-mapcol"><div class="pl-mapwrap"><div id="pl-map"></div><button class="pl-btn sm pl-mapfit" data-pl="map-fit" title="ซูมให้เห็นทุกจุดของวัน">พอดีจอ</button></div><p class="muted small">ตัวเลขบนหมุด = ลำดับ · เส้นประ = ลำดับการเดินทาง (ไม่ใช่เส้นทางจริง)</p></div></div>
-      <footer class="pl-foot"></footer>`;
+      <div class="pl-body"><div class="pl-main"></div><div class="pl-mapcol"><div class="pl-mapwrap"><div id="pl-map"></div><button class="pl-btn sm pl-mapfit" data-pl="map-fit" title="ซูมให้เห็นทุกจุดของวัน">พอดีจอ</button></div><p class="muted small">ตัวเลขบนหมุด = ลำดับ · เส้นประ = ลำดับการเดินทาง (ไม่ใช่เส้นทางจริง)</p></div></div>`;
   }
   const $ = (sel: string) => root!.querySelector(sel) as HTMLElement;
   $('.pl-head').innerHTML = `
       <button class="pl-btn ghost sm pl-home" data-pl="cancel" title="ร่างที่ยังไม่ยืนยันเก็บไว้ในเครื่อง เปิดใหม่แล้วใช้ต่อได้">← หน้าหลัก</button>
-      <div class="pl-title"><b style="color:${dayColor(idx)}">วัน ${idx + 1}</b> ${d.date ? esc(fmtDateTh(d.date)) : ''} <span class="muted small">· ${hasUnsaved() ? 'ร่างเก็บในเครื่องแล้ว · กด “ยืนยันแผนวันนี้” เพื่อบันทึกลงแผน' : 'ยังไม่มีการแก้'}</span></div>
-      <ol class="pl-steps">${STEPS.map(([n, t]) => `<li class="${st!.step === n ? 'on' : n < st!.step ? 'done' : ''}"><button data-pl="goto" data-v="${n}"><span>${n}</span>${t}</button></li>`).join('')}</ol>
-`;
+      <div class="pl-title"><b style="color:${dayColor(idx)}">วัน ${idx + 1}</b> ${d.date ? esc(fmtDateTh(d.date)) : ''} <span class="muted small">· ${hasUnsaved() ? 'ร่างเก็บในเครื่องแล้ว · ยังไม่ยืนยัน' : 'ยังไม่มีการแก้'}</span></div>
+      <ol class="pl-steps" aria-label="ขั้นตอน — กดเพื่อไปขั้นนั้น">${STEPS.map(([n, t]) => `<li class="${st!.step === n ? 'on' : n < st!.step ? 'done' : ''}"><button data-pl="goto" data-v="${n}" ${st!.step === n ? 'aria-current="step"' : ''}><span>${n}</span>${t}</button></li>`).join('')}</ol>
+      <div class="pl-head-act">${headAction()}</div>`;
   $('.pl-budget-wrap').innerHTML = st.step === 2 || st.step === 3 ? budgetBar(s) : '';
   $('.pl-body').className = `pl-body step-${st.step}`;
   const main = $('.pl-main');
@@ -265,18 +264,16 @@ function render(resetMap = false) {
       const el = root!.querySelector(sel) as HTMLElement | null;
       if (el) el.scrollTop = keep[i];
     });
-  $('.pl-foot').innerHTML = footer();
   autosaveDraft();
   drawMap(s);
   (root.querySelector('[data-autofocus]') as HTMLInputElement | null)?.focus();
 }
 
-function footer(): string {
-  const n = st!.step;
-  const back = n > 1 && !st!.backToSummary ? `<button class="pl-btn ghost" data-pl="goto" data-v="${n - 1}">← ${STEPS[n - 2][1]}</button>` : '<span></span>';
-  const mid = `<span class="pl-foot-mid">ขั้นที่ ${n} จาก 4</span>`;
-  if (st!.backToSummary && n !== 4) return `${back}${mid}<button class="pl-btn primary" data-pl="goto" data-v="4">กลับไปหน้าสรุป</button>`;
-  return `${back}${mid}${n < 4 ? `<button class="pl-btn primary" data-pl="goto" data-v="${n + 1}">${STEPS[n][1]} →</button>` : '<button class="pl-btn primary confirm" data-pl="confirm">ยืนยันแผนวันนี้</button>'}`;
+/** ปุ่มขวาบน: ขั้นสรุป = ยืนยัน · แก้จากหน้าสรุป = กลับไปสรุป (เปลี่ยนขั้นใช้แถบขั้นตอนด้านบน) */
+function headAction(): string {
+  if (st!.step === 4) return '<button class="pl-btn primary confirm" data-pl="confirm">✓ ยืนยันแผนวันนี้</button>';
+  if (st!.backToSummary) return '<button class="pl-btn primary" data-pl="goto" data-v="4">กลับไปหน้าสรุป</button>';
+  return '';
 }
 
 /* ---------- ขั้น 1: ตั้งวัน ---------- */
