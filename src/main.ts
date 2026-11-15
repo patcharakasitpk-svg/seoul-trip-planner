@@ -1,14 +1,13 @@
 import './style.css';
 import QRCode from 'qrcode';
 import { app, type Tab } from './ui/app';
-import { renderLibraryControls, renderLibraryList } from './ui/views/library';
-import { renderDayPanel, renderDayTabs } from './ui/views/day';
+import { renderPlanOverview } from './ui/views/overview';
 import { renderToday, todayDay } from './ui/views/today';
 import { openPlanner, refreshPlanner, closePlanner, plannerOpen } from './ui/planner';
 import { renderModal } from './ui/views/modals';
-import { esc, MODE_LABEL } from './ui/util';
+import { esc, MODE_LABEL, dayColor, dayDate } from './ui/util';
 import { loadGoogle, googleStatus, onGoogleStatus } from './services/google';
-import { startOsm, switchToGoogle, onMapMarkerClick, mapViewReady, syncMapView, focusMapView, refreshMapSize, mapProvider } from './services/mapView';
+import { startOsm, switchToGoogle, onMapMarkerClick, mapViewReady, syncMapView, focusMapView, refreshMapSize } from './services/mapView';
 import { buildMapSpecs } from './ui/mapSpecs';
 import { onRoutesChange } from './services/routes';
 import { onWeatherChange, ensureWeather } from './services/weather';
@@ -63,7 +62,6 @@ document.querySelector('#app')!.innerHTML = `
 <nav class="bottom-nav" aria-label="เมนูหลัก">
   <button data-act="tab" data-tab="today"><span aria-hidden="true">◷</span>วันนี้</button>
   <button data-act="tab" data-tab="map"><span aria-hidden="true">⌖</span>แผนที่</button>
-  <button data-act="tab" data-tab="places"><span aria-hidden="true">☰</span>สถานที่</button>
   <button data-act="tab" data-tab="plan"><span aria-hidden="true">▤</span>แผนของฉัน</button>
   <button data-act="nav-planner" class="nav-planner"><span aria-hidden="true">🗓</span>จัดแผน</button>
   <button data-act="tab" data-tab="fx"><span aria-hidden="true">₩</span>แปลงเงิน</button>
@@ -71,7 +69,6 @@ document.querySelector('#app')!.innerHTML = `
 <div id="modal-root"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>`;
 
-let lastLibControlsSig = '';
 
 // ความสูงแถบเมนูบน/ล่าง → ตัวจัดแผนวางระหว่างสองแถบ (เมนูเห็นตลอด)
 const barSizes = () => {
@@ -101,17 +98,8 @@ function render() {
   else if (syncState.status === 'pending') st.push('<span class="warn">🔗 ยังส่งการแก้ให้เพื่อนไม่ได้ (ออฟไลน์?) — จะส่งเองเมื่อออนไลน์</span>');
   else if (syncState.status === 'error') st.push(`<span class="warn">🔗 ซิงก์ไม่ได้: ${esc(syncState.message)}</span>`);
   $('#status-bar').innerHTML = st.join('');
-  $('#day-tabs-wrap').innerHTML = renderDayTabs();
-
-  const sig = JSON.stringify([app.expanded.has('filters'), app.filters.cat, app.filters.area, app.filters.budget, app.filters.stay, app.filters.zone, app.filters.fashion, app.refPoint, app.plan.customPlaces.length, app.activeDayId, app.day.stops.length]);
-  if (sig !== lastLibControlsSig || !$('#lib-controls').innerHTML) {
-    const active = document.activeElement as HTMLElement | null;
-    const typing = active?.dataset?.filter === 'q';
-    if (!typing) $('#lib-controls').innerHTML = renderLibraryControls();
-    lastLibControlsSig = sig;
-  }
-  $('#lib-list').innerHTML = renderLibraryList();
-  $('#right').innerHTML = app.tab === 'today' ? renderToday() : renderDayPanel(app.day);
+  if (app.tab === 'places') app.tab = 'plan'; // หน้าค้นหาสถานที่ย้ายไปอยู่ในตัวจัดแผนแล้ว
+  $('#right').innerHTML = app.tab === 'today' ? renderToday() : renderPlanOverview();
   // คงตำแหน่งเลื่อนในหน้าต่าง (เช่นกด ＋ ในแม่แบบหลายครั้ง) ไม่ให้เด้งกลับบนสุด
   const prevModal = document.querySelector('#modal-root .modal-body') as HTMLElement | null;
   const keepScroll = prevModal && app.modal ? { type: app.modal.type, top: prevModal.scrollTop } : null;
@@ -132,11 +120,22 @@ app.renderFn = render;
 
 /* ---------------- แผนที่ ---------------- */
 function renderMapTools() {
+  // เลือกวันด้วยวันที่จริง · สีชิป = สีหมุดของวันนั้น
   $('#map-tools').innerHTML = `
-    <div class="seg"><button class="${app.mapFilter === 'day' ? 'on' : ''}" data-act="map-filter" data-v="day">วันที่เลือก</button><button class="${app.mapFilter === 'all' ? 'on' : ''}" data-act="map-filter" data-v="all">ทุกวัน</button></div>
-    <label class="small"><input type="checkbox" data-act-change="lib-pins" ${app.showLibPins ? 'checked' : ''}> แสดงสถานที่ทั้งหมด</label>
-    <button class="btn ghost xs" data-act="map-fit">พอดีจอ</button>
-    <span class="muted small map-src">${mapProvider() === 'google' ? 'Google Maps' : 'OpenStreetMap (ฟรี)'}</span>`;
+    <div class="date-chips" role="tablist" aria-label="เลือกวันบนแผนที่">
+      <button class="date-chip all ${app.mapFilter === 'all' ? 'on' : ''}" data-act="map-filter" data-v="all" role="tab" aria-selected="${app.mapFilter === 'all'}">ทุกวัน</button>
+      ${app.plan.days.map((d, i) => `<button class="date-chip ${app.mapFilter === 'day' && d.id === app.activeDayId ? 'on' : ''}" style="--c:${dayColor(i)}" data-act="map-day" data-day="${d.id}" role="tab" aria-selected="${app.mapFilter === 'day' && d.id === app.activeDayId}">${esc(dayDate(d, i))}</button>`).join('')}
+    </div>
+    <button class="btn ghost xs" data-act="map-fit">พอดีจอ</button>`;
+}
+
+/** ยืนยันในตัวจัดแผนแล้ว → กลับหน้าแผนของฉัน เห็นวันนั้นบนแผนที่ */
+function plannerDone(id: string) {
+  app.activeDayId = id;
+  app.mapFilter = 'day';
+  app.fitNext = true;
+  app.tab = 'plan';
+  app.requestRender();
 }
 
 function syncMapNow() {
@@ -559,13 +558,13 @@ function applyWithUndo(dayId: string, nd: Day, msg: string) {
 /** แตะสถานที่ = เพิ่มเข้าวันที่เลือก (หรือเอาออกถ้ามีอยู่แล้ว) — ไม่ต้องยืนยัน มีปุ่มเลิกทำ */
 function quickToggle(placeId: string) {
   const day = app.day;
-  const n = app.dayIndex(day.id) + 1;
+  const n = dayDate(day, app.dayIndex(day.id));
   const p = app.getPlace(placeId);
   if (!p) return;
   const existing = day.stops.find((s) => s.placeId === placeId);
   if (existing) {
     const nd = existing.kind === 'dinner' ? updateStop(day, existing.uid, { placeId: null, stayMin: 60 }) : removeStop(day, existing.uid);
-    applyWithUndo(day.id, nd, `เอา ${p.nameTh} ออกจากวัน ${n}`);
+    applyWithUndo(day.id, nd, `เอา ${p.nameTh} ออกจาก ${n}`);
     return;
   }
   // คาเฟ่เติมได้เฉพาะช่องมื้อกินเล่น (ไม่ไปแทนมื้อหลัก)
@@ -574,7 +573,7 @@ function quickToggle(placeId: string) {
     ? updateStop(day, emptyDinner.uid, { placeId, stayMin: app.stayFor(placeId) })
     : insertStop(day, defaultInsertIndex(day), stopForPlace(placeId));
   app.focusPlaceId = placeId;
-  applyWithUndo(day.id, nd, emptyDinner ? `ตั้ง ${p.nameTh} เป็น${mealName(emptyDinner)}วัน ${n}` : `เพิ่ม ${p.nameTh} เข้าวัน ${n}`);
+  applyWithUndo(day.id, nd, emptyDinner ? `ตั้ง ${p.nameTh} เป็น${mealName(emptyDinner)} ${n}` : `เพิ่ม ${p.nameTh} เข้า${n}`);
 }
 
 function stopForPlace(placeId: string, kind: Stop['kind'] = 'place'): Stop {
@@ -586,7 +585,7 @@ function planAsText(plan: Plan): string {
   const lines = [`แผนเที่ยวโซล — ${plan.name}`, '(เวลาทั้งหมดเป็นเวลาเกาหลี Asia/Seoul)', ''];
   plan.days.forEach((d, i) => {
     const s = app.schedule(d);
-    lines.push(`วัน ${i + 1} · ${fmtDateTh(d.date)}`);
+    lines.push(`${fmtDateTh(d.date)} (วัน ${i + 1})`);
     lines.push(`  ออกจาก ${app.getPlace(d.startPlaceId)?.nameTh ?? '?'} ${d.startTime ?? '(ยังไม่กำหนดเวลา)'}`);
     s.stops.forEach((t, j) => {
       const p = app.getPlace(t.stop.placeId);
@@ -672,7 +671,7 @@ document.addEventListener('click', (ev) => {
       return;
     case 'remove-day':
       if (app.plan.days.length <= 1) return;
-      confirmThen(`ลบวัน ${app.dayIndex(dayId) + 1} และรายการทั้งหมดในวันนั้น?`, 'ลบวัน', () => app.commit((p) => (p.days = p.days.filter((x) => x.id !== dayId)), 'ลบวันแล้ว'));
+      confirmThen(`ลบ ${dayDate(app.findDay(dayId)!, app.dayIndex(dayId))} และรายการทั้งหมดในวันนั้น?`, 'ลบวัน', () => app.commit((p) => (p.days = p.days.filter((x) => x.id !== dayId)), 'ลบวันแล้ว'));
       return;
     case 'quick':
       if (day) app.updateDay(dayId, (x) => ({ ...x, [d.field!]: d.v }));
@@ -695,12 +694,10 @@ document.addEventListener('click', (ev) => {
     case 'toggle-wx': {
       const key = act === 'toggle-filters' ? 'filters' : act === 'toggle-card' ? `card:${d.place}` : act === 'toggle-leg' ? `leg:${d.stop}` : act === 'toggle-settings' ? `set:${d.day}` : act === 'toggle-setmore' ? `setmore:${d.day}` : `wx:${d.day}`;
       app.expanded.has(key) ? app.expanded.delete(key) : app.expanded.add(key);
-      if (act === 'toggle-filters') lastLibControlsSig = '';
       break;
     }
     case 'clear-filters':
       Object.assign(app.filters, { area: '', budget: '', stay: '', zone: '', fashion: '' });
-      lastLibControlsSig = '';
       break;
     case 'toggle-expand':
       app.expanded.has(d.stop!) ? app.expanded.delete(d.stop!) : app.expanded.add(d.stop!);
@@ -818,9 +815,12 @@ document.addEventListener('click', (ev) => {
       app.requestRender();
       return;
     }
-    case 'apply-trip-dates':
-      app.commit((p) => applyTripDates(p), 'ตั้งวันเที่ยวแล้ว');
+    case 'apply-trip-dates': {
+      const before = clone(app.plan.days);
+      app.commit((p) => applyTripDates(p));
+      app.showToast('แก้ให้ตรงทริปแล้ว', () => app.commit((p) => (p.days = before), 'เลิกทำแล้ว'));
       return;
+    }
     case 'dinner-options':
       app.modal = { type: 'dinner', dayId, stopUid: d.stop!, zone: null };
       break;
@@ -910,12 +910,12 @@ document.addEventListener('click', (ev) => {
       const tpl = TEMPLATES.find((t) => t.id === d.tpl)!;
       const i = Number(d.i);
       const targetId = tplTargetDay(m, tpl, i);
-      const n = app.dayIndex(targetId) + 1;
+      const n = dayDate(app.findDay(targetId)!, app.dayIndex(targetId));
       const target = app.findDay(targetId)!;
       const mode = d.mode === 'replace' ? 'replace' : 'append';
       const nd = { ...target, stops: mergeDayStops(target.stops, templateDayStops(tpl.days[i], (id) => app.stayFor(id)), mode) };
       app.activeDayId = targetId;
-      applyWithUndo(targetId, nd, mode === 'replace' ? `ใช้ “${tpl.days[i].title}” เป็นวัน ${n} แล้ว` : `เพิ่ม “${tpl.days[i].title}” ต่อท้ายวัน ${n} แล้ว`);
+      applyWithUndo(targetId, nd, mode === 'replace' ? `ใช้ “${tpl.days[i].title}” เป็น ${n} แล้ว` : `เพิ่ม “${tpl.days[i].title}” ต่อท้าย ${n} แล้ว`);
       return;
     }
     case 'tpl-add-place': {
@@ -926,11 +926,11 @@ document.addEventListener('click', (ev) => {
       const target = app.findDay(targetId)!;
       const p = app.getPlace(d.place);
       if (!p) return;
-      const n = app.dayIndex(targetId) + 1;
+      const n = dayDate(app.findDay(targetId)!, app.dayIndex(targetId));
       const existing = target.stops.find((s) => s.placeId === p.id);
       const before = clone(target);
       app.setDay(targetId, existing ? removeStop(target, existing.uid) : insertStop(target, defaultInsertIndex(target), stopForPlace(p.id)));
-      app.showToast(existing ? `เอา ${p.nameTh} ออกจากวัน ${n}` : `เพิ่ม ${p.nameTh} เข้าวัน ${n}`, () => app.setDay(targetId, before, 'เลิกทำแล้ว'));
+      app.showToast(existing ? `เอา ${p.nameTh} ออกจาก ${n}` : `เพิ่ม ${p.nameTh} เข้า ${n}`, () => app.setDay(targetId, before, 'เลิกทำแล้ว'));
       return;
     }
     case 'tpl-blank':
@@ -944,11 +944,7 @@ document.addEventListener('click', (ev) => {
       break;
     case 'nav-planner':
     case 'open-planner':
-      openPlanner(dayId, (id) => {
-        app.todayDayId = app.plan.days.find((x) => x.id === id)?.date === seoulNow().date ? null : id;
-        app.tab = 'today';
-        app.requestRender();
-      });
+      openPlanner(dayId, plannerDone);
       return;
     case 'leg-info':
       app.modal = { type: 'leg', dayId, target: d.stop! };
@@ -1191,6 +1187,14 @@ document.addEventListener('click', (ev) => {
         p.extraChecklist[dayId] = (p.extraChecklist[dayId] ?? []).filter((_, i) => i !== Number(d.i));
       });
       return;
+    case 'map-day':
+      app.activeDayId = d.day!;
+      app.mapFilter = 'day';
+      app.fitNext = true;
+      break;
+    case 'edit-day':
+      openPlanner(d.day!, plannerDone);
+      return;
     case 'map-filter':
       app.mapFilter = d.v as 'all' | 'day';
       app.fitNext = true;
@@ -1288,7 +1292,7 @@ document.addEventListener('change', (ev) => {
         return st ? (app.getPlace(st.placeId)?.nameTh ?? st.title ?? 'รายการ') : 'รายการ';
       })();
       app.commit((p) => Object.assign(p, moveStopToDay(p, dayId, d.stop!, to)));
-      app.showToast(`ย้าย ${name} ไปวัน ${app.dayIndex(to) + 1} แล้ว`, () => app.commit((p) => Object.assign(p, { days: before.days }), 'เลิกทำแล้ว'));
+      app.showToast(`ย้าย ${name} ไป ${dayDate(app.findDay(to)!, app.dayIndex(to))} แล้ว`, () => app.commit((p) => Object.assign(p, { days: before.days }), 'เลิกทำแล้ว'));
       return;
     }
     case 'stop-field': {
@@ -1361,10 +1365,6 @@ document.addEventListener('input', (ev) => {
     if (f !== el.value) el.value = f;
     setFxAmount(f);
     return;
-  }
-  if (el.dataset.filter === 'q') {
-    app.filters.q = el.value;
-    $('#lib-list').innerHTML = renderLibraryList();
   }
 });
 

@@ -1,6 +1,6 @@
 import type { Day, Leg, Plan, Stop, TravelMode } from './types';
 import { TRIP_DATES, TRIP_FLIGHTS, TRIP_STAYS } from '../config';
-import { addDays, diffDays } from './time';
+import { addDays, diffDays, fmtDateTh } from './time';
 
 let counter = 0;
 export function uid(prefix = 's'): string {
@@ -161,14 +161,26 @@ export function applyStays(plan: Plan): void {
   }
 }
 
+/** สิ่งที่แผนยังไม่ตรงกับทริป (วันเที่ยว เที่ยวบิน ที่พัก) — ข้อความสั้นพร้อมวันที่จริง */
+export function tripIssues(plan: Plan): string[] {
+  const out: string[] = [];
+  const dd = (date: string) => fmtDateTh(date).replace(/ \d{4}$/, '');
+  const missing = tripDates().filter((t) => !plan.days.some((d) => d.date === t));
+  if (missing.length) out.push(`ยังไม่มีวัน ${missing.map(dd).join(', ')} ในแผน`);
+  const a = plan.days.find((d) => d.date === TRIP_FLIGHTS.arrive.date);
+  if (a && a.startPlaceId !== TRIP_FLIGHTS.arrive.placeId) out.push(`${dd(a.date!)} วันเครื่องลง — ควรเริ่มที่สนามบินอินชอน T1`);
+  const z = plan.days.find((d) => d.date === TRIP_FLIGHTS.depart.date);
+  if (z && z.endPlaceId !== TRIP_FLIGHTS.depart.placeId) out.push(`${dd(z.date!)} วันบินกลับ — ควรจบที่สนามบินอินชอน T1 ภายใน ${TRIP_FLIGHTS.depart.arriveBy} (เครื่องออก 17:00)`);
+  for (const st of TRIP_STAYS) {
+    const i = plan.days.findIndex((d) => d.date === st.date);
+    if (i < 0) continue;
+    if (plan.days[i].endPlaceId !== st.hotelId) out.push(`${dd(st.date)} คืนนี้นอนที่พักนอกโซล — ควรจบวันที่นั่น`);
+    if (plan.days[i + 1] && plan.days[i + 1].startPlaceId !== st.hotelId) out.push(`${dd(plan.days[i + 1].date ?? st.date)} ควรเริ่มจากที่พักเมื่อคืน`);
+  }
+  return out;
+}
+
 /** แผนยังไม่ตรงกับช่วงวันเที่ยว/ที่พักใน config หรือไม่ */
 export function tripSetupNeeded(plan: Plan): boolean {
-  if (tripDates().some((t) => !plan.days.some((d) => d.date === t))) return true;
-  const a = plan.days.find((d) => d.date === TRIP_FLIGHTS.arrive.date);
-  const z = plan.days.find((d) => d.date === TRIP_FLIGHTS.depart.date);
-  if ((a && a.startPlaceId !== TRIP_FLIGHTS.arrive.placeId) || (z && z.endPlaceId !== TRIP_FLIGHTS.depart.placeId)) return true;
-  return TRIP_STAYS.some((st) => {
-    const i = plan.days.findIndex((d) => d.date === st.date);
-    return i >= 0 && (plan.days[i].endPlaceId !== st.hotelId || (plan.days[i + 1] && plan.days[i + 1].startPlaceId !== st.hotelId));
-  });
+  return tripIssues(plan).length > 0;
 }

@@ -1,5 +1,5 @@
 import { app } from '../app';
-import { esc, gmapsDirUrl, MODE_ICON, photosUrl, naverBtn, naverRouteUrl, dayColor, naverLabel, googleLabel } from '../util';
+import { esc, gmapsDirUrl, MODE_ICON, photosUrl, naverBtn, naverRouteUrl, dayColor, naverLabel, googleLabel, dayDate } from '../util';
 import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from '../../core/time';
 import { renderWeather } from './weather';
 import { livePhase, type DaySchedule, type LegInfo, type StopTiming } from '../../core/schedule';
@@ -206,7 +206,7 @@ export function renderToday(): string {
         <p class="muted small">${isToday ? `ตอนนี้ ${fmtHM(now.mins)} (เวลาโซล)` : 'ดูล่วงหน้า — ปุ่มเช็กอินใช้ได้ในวันเดินทางจริง'}</p>
       </div>
       <select class="inp sm day-pick" data-act-change="today-day" aria-label="เลือกวัน" style="--c:${dayColor(idx)}">
-        ${app.plan.days.map((d, k) => `<option value="${d.id}" ${d.id === day.id ? 'selected' : ''}>วัน ${k + 1}${d.date ? ` · ${esc(fmtDateTh(d.date).replace(/ \d{4}$/, ''))}` : ''}${d.date === now.date ? ' (วันนี้)' : ''}</option>`).join('')}
+        ${app.plan.days.map((d, k) => `<option value="${d.id}" ${d.id === day.id ? 'selected' : ''}>${esc(dayDate(d, k))}${d.date === now.date ? ' · วันนี้' : ` (วัน ${k + 1})`}</option>`).join('')}
       </select>
     </div>
     ${!app.online ? '<p class="notice warn">ออฟไลน์ — แสดงแผนที่บันทึกไว้ ปุ่มเช็กอินยังใช้ได้</p>' : ''}

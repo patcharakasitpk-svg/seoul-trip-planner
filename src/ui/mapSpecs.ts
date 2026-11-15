@@ -46,7 +46,7 @@ export function buildMapSpecs(inp: MapSpecInput): { markers: MarkerSpec[]; lines
       if (!p) return;
       const m = ensure(p, kindOf(p));
       if (m) m.focus = true;
-      if (m) m.badges.push({ color, text: inp.mode === 'all' ? `${di + 1}-${j + 1}` : `${j + 1}` });
+      if (m) m.badges.push({ color, text: `${j + 1}` });
     });
     const s = inp.schedule(d);
     const legs = [...s.stops.filter((t) => !t.stop.skipped).map((t) => t.leg), ...(s.end ? [s.end.leg] : [])];

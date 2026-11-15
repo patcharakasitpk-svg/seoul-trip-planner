@@ -244,7 +244,7 @@ function render(resetMap = false) {
   const $ = (sel: string) => root!.querySelector(sel) as HTMLElement;
   $('.pl-head').innerHTML = `
       <button class="pl-btn ghost sm pl-home" data-pl="cancel" title="ร่างที่ยังไม่ยืนยันเก็บไว้ในเครื่อง เปิดใหม่แล้วใช้ต่อได้">← หน้าหลัก</button>
-      <div class="pl-title"><b style="color:${dayColor(idx)}">วัน ${idx + 1}</b> ${d.date ? esc(fmtDateTh(d.date)) : ''} <span class="muted small">· ${hasUnsaved() ? 'ร่างเก็บในเครื่องแล้ว · ยังไม่ยืนยัน' : 'ยังไม่มีการแก้'}</span></div>
+      <div class="pl-title"><b style="color:${dayColor(idx)}">${d.date ? esc(fmtDateTh(d.date)) : `วัน ${idx + 1}`}</b> <span class="muted small">${d.date ? `วัน ${idx + 1}` : ''}${hasUnsaved() ? ' · ร่างยังไม่ยืนยัน' : ''}</span></div>
       <ol class="pl-steps" aria-label="ขั้นตอน — กดเพื่อไปขั้นนั้น">${STEPS.map(([n, t]) => `<li class="${st!.step === n ? 'on' : n < st!.step ? 'done' : ''}"><button data-pl="goto" data-v="${n}" ${st!.step === n ? 'aria-current="step"' : ''}><span>${n}</span>${t}</button></li>`).join('')}</ol>
       <div class="pl-head-act">${headAction()}</div>`;
   $('.pl-budget-wrap').innerHTML = st.step === 2 || st.step === 3 ? budgetBar(s) : '';
@@ -288,7 +288,7 @@ function step1(): string {
   return `<section class="pl-card">
     <div class="pl-card-head"><h2>วันนี้เริ่มกี่โมง จบกี่โมง</h2>${changed ? '<button class="pl-btn ghost sm" data-pl="reset-step" data-v="1">↺ คืนค่าเริ่มต้นทั้งหมด</button>' : ''}</div>
     <div class="pl-grid2">
-      <label>วัน<select class="inp" data-pl-change="day">${app.plan.days.map((x, k) => `<option value="${x.id}" ${x.id === st!.dayId ? 'selected' : ''}>วัน ${k + 1}${x.date ? ` · ${esc(fmtDateTh(x.date))}` : ''}</option>`).join('')}</select></label>
+      <label>วัน<select class="inp" data-pl-change="day">${app.plan.days.map((x, k) => `<option value="${x.id}" ${x.id === st!.dayId ? 'selected' : ''}>${x.date ? `${esc(fmtDateTh(x.date))} (วัน ${k + 1})` : `วัน ${k + 1}`}</option>`).join('')}</select></label>
       <label>วันที่<span class="pl-field"><input class="inp" type="date" value="${esc(d.date ?? '')}" data-pl-change="date">${d.date !== st!.orig.date ? resetBtn('reset-field', 'date') : ''}</span></label>
       <label>ออกจาก<span class="pl-field"><select class="inp" data-pl-change="startPlaceId">${placeOptions(d.startPlaceId)}</select>${r('startPlaceId')}</span></label>
       <label>เวลาออก<span class="pl-field"><input class="inp" type="time" value="${esc(d.startTime ?? '')}" data-pl-change="startTime">${r('startTime')}</span></label>

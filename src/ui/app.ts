@@ -59,7 +59,7 @@ class AppState {
   activeDayId: string;
   tab: Tab = 'plan';
   filters: Filters = { q: '', cat: '', area: '', budget: '', stay: '', fashion: '', zone: '' };
-  mapFilter: 'all' | 'day' = 'day';
+  mapFilter: 'all' | 'day' = 'all';
   showLibPins = false;
   modal: Modal | null = null;
   toast: { msg: string; at: number; undo?: () => void } | null = null;

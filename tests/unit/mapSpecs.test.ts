@@ -13,8 +13,8 @@ describe('map specs', () => {
   it('หมุดตรงกับวันและลำดับในรายการ (ดูทุกวัน)', () => {
     const { markers } = buildMapSpecs({ days: [d1, d2], allDays: [d1, d2], mode: 'all', getPlace, schedule: sched, libraryPlaces: null });
     const byId = Object.fromEntries(markers.map((m) => [m.id, m]));
-    expect(byId.a.badges.map((b) => b.text)).toEqual(['1-1']);
-    expect(byId.b.badges.map((b) => b.text)).toEqual(['1-2', '2-1']); // หมุดเดียว หลายวัน
+    expect(byId.a.badges.map((b) => b.text)).toEqual(['1']);
+    expect(byId.b.badges.map((b) => b.text)).toEqual(['2', '1']); // หมุดเดียว หลายวัน (สีต่างกันตามวัน)
     expect(byId.b.badges[0].color).not.toBe(byId.b.badges[1].color);
     expect(byId.nocoord).toBeUndefined(); // ไม่ปักพิกัดที่ไม่มี
     expect(byId.hotel.kind).toBe('hotel');

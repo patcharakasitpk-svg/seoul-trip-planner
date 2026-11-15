@@ -1,4 +1,5 @@
 import type { Place, TravelMode } from '../core/types';
+import { fmtDateTh } from '../core/time';
 import naverIcon from '../assets/naver-map.png';
 import gmapsIcon from '../assets/google-maps.png';
 
@@ -11,7 +12,11 @@ export function esc(s: unknown): string {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 }
 
-export const DAY_COLORS = ['#1f6feb', '#0ea47a', '#d9480f', '#8b5cf6', '#c2255c', '#0b7285', '#a16207', '#495057'];
+/** สีประจำวัน (หมุด/เส้น/การ์ด) — วันแรกเขียว วันที่สองเหลือง … */
+export const DAY_COLORS = ['#16a34a', '#ca8a04', '#2563eb', '#9333ea', '#dc2626', '#0891b2', '#db2777', '#475569'];
+
+/** วันที่ตามปฏิทินแบบสั้น "จ. 30 พ.ย." — ใช้เป็นชื่อวันหลักทุกหน้า (คุยกับเพื่อนด้วยวันจริง) */
+export const dayDate = (d: { date: string | null }, i?: number) => (d.date ? fmtDateTh(d.date).replace(/ \d{4}$/, '') : i != null ? `วัน ${i + 1}` : 'ยังไม่ตั้งวันที่');
 export const dayColor = (i: number) => DAY_COLORS[i % DAY_COLORS.length];
 
 export const MODE_LABEL: Record<TravelMode, string> = { TRANSIT: 'ขนส่งสาธารณะ', WALKING: 'เดิน', DRIVING: 'รถยนต์/แท็กซี่' };

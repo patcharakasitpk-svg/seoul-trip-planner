@@ -22,81 +22,95 @@ async function mockWeather(page: Page, calls: string[] = []) {
 
 const isMobile = (page: Page) => (page.viewportSize()?.width ?? 1000) < 1024;
 async function gotoPlan(page: Page) {
-  if (isMobile(page)) await page.locator('.bottom-nav [data-tab="plan"]').click();
+  await page.locator(isMobile(page) ? '.bottom-nav [data-tab="plan"]' : '.main-menu [data-tab="plan"]').click();
 }
-async function gotoPlaces(page: Page) {
-  if (isMobile(page)) await page.locator('.bottom-nav [data-tab="places"]').click();
+async function gotoToday(page: Page) {
+  await page.locator('[data-act="tab"][data-tab="today"]').filter({ visible: true }).first().click();
 }
-async function setDay(page: Page, date: string, time: string, endTime = '22:00') {
+/** เปิดตัวจัดแผนของวันที่ i ผ่านปุ่ม "แก้" บนการ์ดวันในหน้าแผนของฉัน */
+async function openPlanner(page: Page, i = 0) {
   await gotoPlan(page);
-  // วันที่ตั้งค่าครบแล้ว (เช่นวันแรกที่ตั้งเวลาออกจากสนามบินไว้) จะพับกล่องตั้งค่า → เปิดก่อน
-  if (!(await page.locator('[data-field="date"]').isVisible())) await page.locator('.day-summary[data-act="toggle-settings"]').click();
-  await page.locator('[data-field="date"]').fill(date);
-  await page.locator('[data-field="date"]').dispatchEvent('change');
-  await page.locator('[data-field="startTime"]').fill(time);
-  await page.locator('[data-field="startTime"]').dispatchEvent('change');
-  await page.locator('[data-field="endTime"]').fill(endTime);
-  await page.locator('[data-field="endTime"]').dispatchEvent('change');
+  await page.locator('.ov-day [data-act="edit-day"]').nth(i).click();
+  await expect(page.locator('#planner')).toBeVisible();
+}
+/** ตั้งวันที่/เวลาของวันแรกในตัวจัดแผน แล้วยืนยัน */
+async function setDay(page: Page, date: string, time: string, endTime = '22:00') {
+  await openPlanner(page);
+  const pl = page.locator('#planner');
+  for (const [k, v] of [['date', date], ['startTime', time], ['endTime', endTime]]) {
+    await pl.locator(`[data-pl-change="${k}"]`).fill(v);
+    await pl.locator(`[data-pl-change="${k}"]`).dispatchEvent('change');
+  }
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="4"]').click();
+  await pl.locator('[data-pl="confirm"]').click();
+  await expect(pl).toBeHidden();
+}
+/** ใช้แผนแนะนำทั้งทริป (แม่แบบ T) */
+async function applyTripTemplate(page: Page) {
+  await page.locator('[data-act="open-templates"]').click();
+  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
+  await page.locator('[data-act="tpl-apply-all"]').click();
+  await page.locator('[data-act="confirm-ok"]').click();
 }
 
 test.beforeEach(async ({ page }) => {
   await mockWeather(page);
 });
 
-test('ไม่มี API key: แผนยังใช้ได้ เพิ่มสถานที่ผ่านหน้าเปรียบเทียบ และกรอกเวลาเองได้', async ({ page }) => {
+test('ไม่มี API key: ใช้แผนที่ OpenStreetMap · ตั้งวันในตัวจัดแผนแล้วหน้าแผนของฉันแสดงตาม', async ({ page }) => {
   await page.goto('/');
-  // ไม่มีคีย์ → ใช้แผนที่ OpenStreetMap ฟรีแทน
   if (isMobile(page)) await page.locator('.bottom-nav [data-tab="map"]').click();
   await expect(page.locator('#map .leaflet-container')).toBeVisible();
   await expect(page.locator('.leaflet-control-attribution')).toContainText('OpenStreetMap');
   await setDay(page, '2026-11-20', '18:00');
-  // แตะสถานที่ = เพิ่มเข้าวันทันที (ไม่ต้องยืนยัน) + เลิกทำได้
-  await gotoPlaces(page);
-  await page.locator('[data-filter="q"]').fill('Starfield Library');
-  await page.locator('[data-place-card="library"] .place-main').click();
-  await expect(page.locator('#toast')).toContainText('เพิ่ม');
-  await expect(page.locator('[data-place-card="library"] .add-btn')).toHaveText('✓');
-  await page.locator('[data-act="toast-undo"]').click();
-  await expect(page.locator('[data-place-card="library"] .add-btn')).toHaveText('＋');
-  await page.locator('[data-place-card="library"] .add-btn').click();
-  await gotoPlan(page);
-  await expect(page.locator('.timeline')).toContainText('Starfield Library');
-  // ข้อมูลขาด (มื้อที่ยังไม่เลือกร้าน): ไม่สรุปว่า "ทัน" — บอกว่ายังสรุปไม่ได้ หรือเกินแน่นอนแล้ว
-  await expect(page.locator('.banner')).toContainText(/ยังสรุปไม่ได้ว่าทัน|เกินเวลา/);
-  await expect(page.locator('.banner')).not.toContainText('ทันเวลา');
-  // กรอกเวลาเดินทางเองทุกช่วงที่มีการเคลื่อนที่ (โรงแรม→ห้องสมุด, ห้องสมุด→มื้อเย็น(ยังไม่เลือก), →โรงแรม)
-  await expect(page.locator('.leg .leg-time').first()).toContainText('≈'); // ยังไม่มีข้อมูล → เวลาประมาณจากระยะ
-  await page.locator('[data-act="leg-info"]').first().click();
-  const manual = page.locator('.modal [data-act-change="leg-manual"]');
-  await manual.fill('40');
-  await manual.dispatchEvent('change');
-  await expect(page.locator('.modal .leg-now')).toContainText('กำหนดเอง');
-  await page.locator('.modal [data-act="modal-close"]').last().click();
-  await expect(page.locator('.stop').first()).toContainText('18:45'); // 40 นาที + เวลาเผื่อ 5 นาที (แยกบรรทัด)
-  await expect(page.locator('.leg').first()).toContainText('+ เผื่อ 5 นาที');
-  // เปลี่ยนเวลาเริ่ม → ตารางเลื่อนตาม
-  await page.locator('[data-field="startTime"]').fill('19:00');
-  await page.locator('[data-field="startTime"]').dispatchEvent('change');
-  await expect(page.locator('.stop').first()).toContainText('19:45');
+  await expect(page.locator('#toast')).toContainText('บันทึกแผนวันนี้แล้ว');
+  await expect(page.locator('body')).toHaveAttribute('data-tab', 'plan');
+  const d1 = page.locator('.ov-day').first();
+  await expect(d1.locator('.ov-date b')).toHaveText('ศ. 20 พ.ย.'); // วันที่จริงเด่นกว่า "วัน 1"
+  await expect(d1).toContainText('18:00–22:00');
 });
 
-test('อากาศจับคู่วันที่เกาหลี เน้นช่วงเย็น และวันนอกช่วงไม่แสดงข้อมูลปลอม', async ({ page }) => {
+test('หน้าแผนของฉัน: ดูอย่างเดียว ทุกวันเรียงกัน สีประจำวัน วันที่จริงเด่น · แตะวันที่ = ดูวันนั้นบนแผนที่ · แก้ = เปิดตัวจัดแผน', async ({ page }) => {
   await page.goto('/');
+  await applyTripTemplate(page);
   await gotoPlan(page);
+  const days = page.locator('.ov-day');
+  await expect(days).toHaveCount(7);
+  await expect(days.nth(0).locator('.ov-date b')).toHaveText('จ. 30 พ.ย.');
+  await expect(days.nth(1).locator('.ov-date b')).toHaveText('อ. 1 ธ.ค.');
+  // สีวันแรกเขียว วันที่สองเหลือง
+  await expect(days.nth(0).locator('.ov-date b')).toHaveCSS('color', 'rgb(22, 163, 74)');
+  await expect(days.nth(1).locator('.ov-date b')).toHaveCSS('color', 'rgb(202, 138, 4)');
+  await expect(days.nth(0)).toContainText('Myeongdong Kyoja');
+  await expect(days.nth(0).locator('.ov-meal').first()).toBeVisible();
+  // ไม่มีเครื่องมือแก้/ค้นหาในหน้านี้
+  await expect(page.locator('#library')).toBeHidden();
+  await expect(page.locator('#right [data-act="add-item"], #right [data-act="stop-info"], #right [data-filter="q"]')).toHaveCount(0);
+  // แตะวันที่บนการ์ด → แผนที่แสดงเฉพาะวันนั้น
+  await days.nth(1).locator('.ov-date').click();
+  await expect(days.nth(1)).toHaveClass(/sel/);
+  if (isMobile(page)) await page.locator('.bottom-nav [data-tab="map"]').click();
+  await expect(page.locator('.date-chip.on')).toHaveText('อ. 1 ธ.ค.');
+  await page.locator('.date-chip.all').click();
+  await expect(page.locator('.date-chip.all')).toHaveClass(/on/);
+  // แก้ → ตัวจัดแผนของวันนั้น (หัวเป็นวันที่จริง)
+  await openPlanner(page, 1);
+  await expect(page.locator('#planner .pl-title')).toContainText('1 ธ.ค. 2026');
+});
+
+test('อากาศในหน้า วันนี้: จับคู่วันที่เกาหลี เน้นช่วงที่ออกเที่ยว · วันนอกช่วงไม่แสดงข้อมูลปลอม', async ({ page }) => {
+  await page.goto('/');
+  await gotoToday(page);
   // แผนใหม่มีวันที่ทริป (30 พ.ย.) ซึ่งเกินช่วงพยากรณ์ของข้อมูลจำลอง → ไม่แสดงตัวเลข
   await expect(page.locator('.wx')).toContainText('ยังไม่มีพยากรณ์สำหรับวันนี้');
-  // ลบวันที่ → ขอให้เลือกวันที่ (วันแรกตั้งค่าครบแล้วจึงพับไว้ → เปิดกล่องตั้งค่าก่อน)
-  if (!(await page.locator('[data-field="date"]').isVisible())) await page.locator('.day-summary[data-act="toggle-settings"]').click();
-  await page.locator('[data-field="date"]').fill('');
-  await page.locator('[data-field="date"]').dispatchEvent('change');
-  await expect(page.locator('.wx')).toContainText('เลือกวันที่เพื่อดูพยากรณ์อากาศ');
   await setDay(page, '2026-11-20', '18:00', '22:00');
+  await gotoToday(page);
+  await page.locator('[data-act-change="today-day"]').selectOption({ index: 0 });
   await expect(page.locator('.wx-window')).toContainText('ช่วงที่ออกเที่ยว 18:00');
   await expect(page.locator('.wx-window')).toContainText('รู้สึกจริง -4° ถึง -4°C');
-  await expect(page.locator('.clothes')).toContainText('เสื้อโค้ทหนา');
   await expect(page.locator('.attr').first()).toContainText('Open-Meteo');
-  await page.locator('[data-field="date"]').fill('2027-01-15');
-  await page.locator('[data-field="date"]').dispatchEvent('change');
+  await setDay(page, '2027-01-15', '18:00', '22:00');
+  await gotoToday(page);
   await expect(page.locator('.wx')).toContainText('ยังไม่มีพยากรณ์สำหรับวันนี้ โปรดตรวจอีกครั้งใกล้วันเดินทาง');
   await expect(page.locator('.wx-window')).toHaveCount(0);
 });
@@ -107,7 +121,11 @@ test('ใช้แคชอากาศ ไม่เรียก API ซ้ำ�
   await mockWeather(page, calls);
   await page.goto('/');
   await setDay(page, '2026-11-20', '10:00');
-  for (let i = 0; i < 3; i++) await page.locator('[data-act="add-item"][data-kind="break"]').click();
+  for (let i = 0; i < 3; i++) {
+    await gotoToday(page);
+    await gotoPlan(page);
+  }
+  await gotoToday(page);
   await expect(page.locator('.wx-window')).toBeVisible();
   expect(calls.length).toBe(1);
   expect(calls[0]).toContain('timezone=Asia%2FSeoul');
@@ -116,11 +134,9 @@ test('ใช้แคชอากาศ ไม่เรียก API ซ้ำ�
 test('บันทึก โหลดกลับ และส่งแผนผ่านลิงก์ไปเครื่องใหม่', async ({ page, browser }) => {
   await page.goto('/');
   await setDay(page, '2026-11-21', '09:30');
-  await page.locator('[data-act="add-item"][data-kind="break"]').click();
   await page.reload();
   await gotoPlan(page);
-  await expect(page.locator('.day-summary')).toContainText('09:30');
-  await expect(page.locator('.timeline')).toContainText('พัก');
+  await expect(page.locator('.ov-day').first()).toContainText('09:30');
   await page.locator('[data-act="open-share"]').click();
   const url = await page.locator('#share-url').inputValue();
   expect(url).toContain('#plan=');
@@ -131,9 +147,9 @@ test('บันทึก โหลดกลับ และส่งแผนผ
   await mockWeather(p2);
   await p2.goto(url);
   await p2.locator('.bottom-nav [data-tab="plan"]').click();
-  await expect(p2.locator('.day-summary')).toContainText('09:30');
-  await expect(p2.locator('.day-summary')).toContainText('21 พ.ย. 2026');
-  // เครื่องที่มีแผนเดิม → ถามเปิดเป็นสำเนา/แทนที่
+  await expect(p2.locator('.ov-day').first()).toContainText('09:30');
+  await expect(p2.locator('.ov-day').first().locator('.ov-date b')).toHaveText('ส. 21 พ.ย.');
+  // เครื่องที่มีแผนเดิม → ถามเก็บแยก/ใช้แผนนี้
   await p2.goto('/');
   await p2.goto(url);
   await expect(p2.locator('.modal')).toContainText('ฉบับใหม่ของแผนที่มีในเครื่องนี้');
@@ -146,33 +162,31 @@ test('บันทึก โหลดกลับ และส่งแผนผ
   await expect(p2.locator('.modal')).toHaveCount(0);
   await expect(p2.locator('.toast')).toContainText('ใช้แผนใหม่ในเครื่องนี้แล้ว');
   await p2.locator('.bottom-nav [data-tab="plan"]').click();
-  await expect(p2.locator('.day-summary')).toContainText('09:30');
+  await expect(p2.locator('.ov-day').first()).toContainText('09:30');
   await ctx.close();
 });
 
 test('หน้าจอไม่มีเนื้อหาล้นแนวนอน และปุ่มหลักกดได้สะดวก', async ({ page }) => {
   await page.goto('/');
-  await setDay(page, '2026-11-20', '18:00');
-  const tabs = isMobile(page) ? ['today', 'map', 'places', 'plan'] : ['plan'];
+  await applyTripTemplate(page);
+  const tabs = isMobile(page) ? ['today', 'map', 'plan'] : ['plan', 'today'];
   for (const t of tabs) {
-    if (isMobile(page)) await page.locator(`.bottom-nav [data-tab="${t}"]`).click();
+    await page.locator(`[data-act="tab"][data-tab="${t}"]`).filter({ visible: true }).first().click();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow, `overflow on ${t}`).toBeLessThanOrEqual(0);
   }
   if (isMobile(page)) {
-    // ปุ่ม "จัดแผน" ซ่อนบนมือถือ (ใช้บนคอม/iPad)
+    // ปุ่ม "จัดแผน" ซ่อนบนมือถือ (ใช้บนคอม/iPad) · ไม่มีแท็บค้นหาสถานที่แล้ว
     await expect(page.locator('.bottom-nav .nav-planner')).toBeHidden();
+    await expect(page.locator('.bottom-nav [data-tab="places"]')).toHaveCount(0);
     const heights = await page.locator('.bottom-nav button:visible').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
     for (const h of heights) expect(h).toBeGreaterThanOrEqual(44);
-    await page.locator('.bottom-nav [data-tab="plan"]').click();
-    const moveBtn = await page.locator('[data-act="stop-info"]').first().boundingBox();
-    expect(moveBtn!.height).toBeGreaterThanOrEqual(40);
-    // modal ไม่ล้น
     await page.locator('[data-act="open-templates"]').click();
     const o2 = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(o2).toBeLessThanOrEqual(0);
   } else {
-    await expect(page.locator('#library')).toBeVisible();
+    await gotoPlan(page);
+    await expect(page.locator('#library')).toBeHidden();
     await expect(page.locator('#map-panel')).toBeVisible();
     await expect(page.locator('#right')).toBeVisible();
   }
@@ -181,75 +195,36 @@ test('หน้าจอไม่มีเนื้อหาล้นแนว�
 test('แม่แบบ: ดูไม่ล้างแผน และต้องยืนยันก่อนแทนที่', async ({ page }) => {
   await page.goto('/');
   await setDay(page, '2026-11-20', '10:00');
-  await page.locator('[data-act="add-item"][data-kind="buffer"]').click();
+  await expect(page.locator('.ov-day').first()).toContainText('10:00–22:00');
+  const before = await page.locator('.ov-day').first().innerText();
   await page.locator('[data-act="open-templates"]').click();
   await page.locator('[data-act="tpl-tab"][data-v="B"]').click();
   await page.locator('[data-act="modal-close"]').first().click();
-  await expect(page.locator('.timeline')).toContainText('เวลาสำรอง');
+  expect(await page.locator('.ov-day').first().innerText()).toBe(before);
   await page.locator('[data-act="open-templates"]').click();
   await page.locator('[data-act="tpl-tab"][data-v="A"]').click();
   await page.locator('[data-act="tpl-apply-all"]').click();
   await expect(page.locator('.modal')).toContainText('แทนที่รายการในวัน');
   await page.locator('[data-act="confirm-ok"]').click();
   await gotoPlan(page);
-  await expect(page.locator('.timeline')).toContainText('Namdaemun Market');
-  await expect(page.locator('[data-field="startTime"]')).toHaveValue('10:00'); // เวลาที่ผู้ใช้ตั้งยังอยู่
-});
-
-test('ลบและย้ายจุดได้โดยไม่ต้องลากวาง', async ({ page }) => {
-  await page.goto('/');
-  await page.locator('[data-act="open-templates"]').click();
-  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
-  await page.locator('[data-act="tpl-apply-all"]').click(); // แผนแนะนำแบบลงวันที่
-  await page.locator('[data-act="confirm-ok"]').click();
-  await gotoPlan(page);
-  await expect(page.locator('.timeline')).toContainText('Myeongdong Kyoja');
-  const first = page.locator('.stop .stop-title .t').first();
-  const firstText = await first.textContent();
-  await page.locator('[data-act="stop-info"]').first().click();
-  await page.locator('.modal [data-act="stop-down"]').click();
-  await expect(page.locator('.stop .stop-title .t').nth(1)).toHaveText(firstText!);
-  const count = await page.locator('.stop').count();
-  // หน้าต่างยังเปิดค้างอยู่ → กดลบได้เลย
-  await page.locator('.modal [data-act="stop-remove"]').click();
-  await expect(page.locator('.stop')).toHaveCount(count - 1);
-});
-
-test('ย้ายจุดแวะไปวันอื่น และเลิกทำได้', async ({ page }) => {
-  await page.goto('/');
-  await page.locator('[data-act="open-templates"]').click();
-  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
-  await page.locator('[data-act="tpl-apply-all"]').click();
-  await page.locator('[data-act="confirm-ok"]').click();
-  await gotoPlan(page);
-  await expect(page.locator('.timeline')).toContainText('Myeongdong Kyoja');
-  const card = page.locator('.stop', { hasText: 'Myeongdong Kyoja' });
-  await card.locator('[data-act="stop-info"]').click();
-  const target = await page.locator('.modal [data-act-change="stop-move-day"] option').nth(2).getAttribute('value'); // วัน 3
-  await page.locator('.modal [data-act-change="stop-move-day"]').selectOption(target!);
-  await expect(page.locator('#toast')).toContainText('ไปวัน 3');
-  await expect(page.locator('.timeline')).not.toContainText('Myeongdong Kyoja');
-  await page.locator('[data-act="toast-undo"]').click();
-  await expect(page.locator('.timeline')).toContainText('Myeongdong Kyoja');
+  await expect(page.locator('.ov-day').first()).toContainText('Namdaemun Market');
+  await expect(page.locator('.ov-day').first()).toContainText('10:00–'); // เวลาที่ผู้ใช้ตั้งยังอยู่
 });
 
 test('เลือกแผนรายวัน: ใช้การ์ดกับวันที่เลือก นัดที่ล็อกยังอยู่ และเติมที่ใกล้เคียงเองได้', async ({ page }) => {
   await page.goto('/');
-  // วัน 4 (3 ธ.ค.) มีนัด COEX ที่ล็อกไว้จากแผนแนะนำ
-  await page.locator('[data-act="open-templates"]').click();
-  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
-  await page.locator('[data-act="tpl-apply-all"]').click();
-  await page.locator('[data-act="confirm-ok"]').click();
+  // พฤ. 3 ธ.ค. มีนัด COEX ที่ล็อกไว้จากแผนแนะนำ
+  await applyTripTemplate(page);
   await page.locator('[data-act="open-templates"]').click();
   await expect(page.locator('.modal')).toContainText('เลือกแผนรายวัน');
   const card = page.locator('.tpl-day', { hasText: 'ฮงแด ช็อปตอนเย็น' });
   const day4 = await card.locator('[data-act-change="tpl-target"] option').nth(3).getAttribute('value');
   await card.locator('[data-act-change="tpl-target"]').selectOption(day4!);
   await page.locator('.tpl-day', { hasText: 'ฮงแด ช็อปตอนเย็น' }).locator('[data-act="tpl-copy-day"][data-mode="replace"]').click();
-  await expect(page.locator('#toast')).toContainText('เป็นวัน 4');
+  await expect(page.locator('#toast')).toContainText('เป็น พฤ. 3 ธ.ค.');
   await gotoPlan(page);
-  await expect(page.locator('.timeline')).toContainText('COEX'); // นัดที่ล็อกยังอยู่
-  await expect(page.locator('.timeline')).toContainText('Jangin Dakgalbi');
+  await expect(page.locator('.ov-day').nth(3)).toContainText('COEX'); // นัดที่ล็อกยังอยู่
+  await expect(page.locator('.ov-day').nth(3)).toContainText('Jangin Dakgalbi');
   // เติมที่ใกล้เคียงเองจากการ์ด
   await page.locator('[data-act="open-templates"]').click();
   const c2 = page.locator('.tpl-day', { hasText: 'วันมาถึง' });
@@ -367,16 +342,13 @@ test('ของที่จะซื้อ: สิ่งที่กำลัง
   await expect(page.locator('[data-shop-item]', { hasText: 'B' }).locator('[data-act="shop-bought"]')).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('Naver Map: ปุ่มเส้นทางรถเมล์/รถไฟ และคำแนะนำเมื่อเปิดแอปไม่ได้', async ({ page }) => {
+test('Naver Map: ปุ่มเส้นทางรถเมล์/รถไฟ (โลโก้) และคำแนะนำเมื่อเปิดแอปไม่ได้', async ({ page }) => {
   await page.goto('/');
-  await page.locator('[data-act="open-templates"]').click();
-  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
-  await page.locator('[data-act="tpl-apply-all"]').click();
-  await page.locator('[data-act="confirm-ok"]').click();
-  await gotoPlan(page);
-  await page.locator('.timeline [data-act="leg-info"]').nth(1).click();
-  const btn = page.locator('.modal [data-act="naver"]').first();
+  await applyTripTemplate(page);
+  await gotoToday(page);
+  const btn = page.locator('.hero [data-act="naver"]').first();
   await expect(btn).toBeVisible();
+  await expect(btn.locator('img.app-logo')).toBeVisible();
   expect(await btn.getAttribute('data-href')).toMatch(/^nmap:\/\/route\/public\?.*dlat=/);
   await btn.click(); // ไม่มีแอป → ยังอยู่หน้าเดิม → แนะนำติดตั้ง
   await expect(page.locator('.modal')).toContainText('Naver Map', { timeout: 6000 });
@@ -447,11 +419,8 @@ test('ของที่จะซื้อ: เลือกรูปแล้ว
 test('วันนี้ระหว่างเดินทาง: เริ่มวัน → ถึงแล้ว → อยู่ได้อีก → ออกแล้ว → เวลาที่เหลือคำนวณใหม่ · เลิกทำได้', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-12-01T01:00:00Z')); // 10:00 เวลาโซล วันที่ 1 ธ.ค.
   await page.goto('/');
-  await page.locator('[data-act="open-templates"]').click();
-  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
-  await page.locator('[data-act="tpl-apply-all"]').click();
-  await page.locator('[data-act="confirm-ok"]').click();
-  await page.locator('[data-act="tab"][data-tab="today"]').filter({ visible: true }).first().click();
+  await applyTripTemplate(page);
+  await gotoToday(page);
   const hero = page.locator('.hero');
   await expect(page.locator('.today-head')).toContainText('ตอนนี้ 10:00');
   await expect(hero).toContainText('เริ่มวัน');
@@ -483,34 +452,10 @@ test('วันนี้ระหว่างเดินทาง: เริ่
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
 });
 
-test('มื้ออาหาร: เลือกเช้า/กลางวัน/เย็น/ระหว่างทาง และเปลี่ยนได้ใน ⓘ · แถวแผนแบบย่อ', async ({ page }) => {
-  await page.goto('/');
-  await page.locator('[data-act="open-templates"]').click();
-  await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
-  await page.locator('[data-act="tpl-apply-all"]').click();
-  await page.locator('[data-act="confirm-ok"]').click();
-  await gotoPlan(page);
-  await page.locator('[data-act="add-item"][data-kind="dinner"]').click();
-  await expect(page.locator('.modal')).toContainText('มื้อกลางวัน');
-  await page.locator('.modal [data-act="meal-add"][data-v="lunch"]').click();
-  await expect(page.locator('#toast')).toContainText('เพิ่มมื้อกลางวัน');
-  const lunch = page.locator('.stop', { has: page.locator('.stop-title .t', { hasText: 'มื้อกลางวัน' }) });
-  await expect(lunch).toBeVisible();
-  // ⓘ → เปลี่ยนเป็นมื้อระหว่างทาง
-  await lunch.locator('[data-act="stop-info"]').click();
-  await page.locator('.modal [data-act-change="meal-pick"]').selectOption('snack');
-  await expect(page.locator('.timeline')).toContainText('มื้อกินเล่น');
-  await page.locator('.modal [data-act="modal-close"]').last().click();
-  // แถวเดินทางแบบย่อ: ไม่มีช่องกรอก/ลิงก์ลอย ๆ — มีเวลา + วิธีไป + ⓘ
-  await expect(page.locator('.timeline [data-act-change="leg-manual"]')).toHaveCount(0);
-  await expect(page.locator('.timeline .leg.slim [data-act="leg-info"]').first()).toBeVisible();
-  await expect(page.locator('.timeline')).not.toContainText('≈ 0 ม.');
-});
-
 test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั้งวัน → เลือกสถานที่ → เดินทาง → สรุป → ยืนยัน · ปุ่มคืนค่า ↺', async ({ page }) => {
   test.skip(isMobile(page), 'ออกแบบให้จัดแผนบนคอม/iPad');
   await page.goto('/');
-  await page.locator('[data-act="open-planner"]').click();
+  await openPlanner(page);
   const pl = page.locator('#planner');
   await expect(pl).toBeVisible();
   // ขั้น 1: เปลี่ยนเวลา แล้วกด ↺ กลับค่าที่ระบบตั้งไว้ (วันแรก = ออกจากสนามบิน 08:00)
@@ -591,8 +536,9 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await pl.locator('[data-pl="confirm"]').click();
   await expect(pl).toBeHidden();
   await expect(page.locator('#toast')).toContainText('บันทึกแผนวันนี้แล้ว');
-  await expect(page.locator('body')).toHaveAttribute('data-tab', 'today');
-  await expect(page.locator('.tl-list')).toContainText('Gwangjang Market');
+  await expect(page.locator('body')).toHaveAttribute('data-tab', 'plan');
+  await expect(page.locator('.ov-day').first()).toContainText('Gwangjang Market');
+  await expect(page.locator('.ov-day').first()).toHaveClass(/sel/); // เห็นวันนั้นบนแผนที่
 });
 
 test('จัดแผนแบบขั้นตอน: ค้นไม่เจอในรายการ → ค้นหาบนแผนที่แล้วใส่ลงแผนได้', async ({ page }) => {
@@ -601,7 +547,7 @@ test('จัดแผนแบบขั้นตอน: ค้นไม่เจ
     r.fulfill({ json: [{ lat: '37.5236', lon: '127.0230', name: 'Test Select Shop', display_name: 'Test Select Shop, Sinsa-dong, Gangnam-gu, Seoul', category: 'shop', type: 'clothes' }] }),
   );
   await page.goto('/');
-  await page.locator('[data-act="open-planner"]').click();
+  await openPlanner(page);
   const pl = page.locator('#planner');
   await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
@@ -618,7 +564,7 @@ test('จัดแผนแบบขั้นตอน: ค้นไม่เจ
   expect(await pl.locator('.pl-lane-list .pl-item').count()).toBeGreaterThanOrEqual(4);
 });
 
-test('โน้ต "จะไปทำอะไร": เพิ่ม/บันทึก/แก้ ในตัวจัดแผน และในหน้าแผน (ⓘ) · แสดงในหน้า วันนี้', async ({ page }) => {
+test('โน้ต "จะไปทำอะไร": เพิ่ม/บันทึก/แก้ ในตัวจัดแผน · แสดงในหน้าแผนของฉันและหน้า วันนี้', async ({ page }) => {
   test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
   await page.clock.setFixedTime(new Date('2026-11-30T01:00:00Z')); // 10:00 โซล วันที่ 30 พ.ย.
   await page.goto('/');
@@ -626,7 +572,7 @@ test('โน้ต "จะไปทำอะไร": เพิ่ม/บัน�
   await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
   await page.locator('[data-act="tpl-apply-all"]').click();
   await page.locator('[data-act="confirm-ok"]').click();
-  await page.locator('[data-act="open-planner"]').click();
+  await openPlanner(page);
   const pl = page.locator('#planner');
   await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   const row = pl.locator('.pl-row.stop', { hasText: 'Myeongdong Kyoja' });
@@ -652,22 +598,17 @@ test('โน้ต "จะไปทำอะไร": เพิ่ม/บัน�
   await expect(sumKyoja.locator('.pl-meal-tag')).toContainText('มื้อกลางวัน');
   await expect(sumKyoja.locator('.sum-meta')).toContainText('อยู่');
   await pl.locator('[data-pl="confirm"]').click();
-  // หน้าแผน: โน้ตแสดงใต้ชื่อ · แก้ใน ⓘ แล้วกดบันทึก
-  await page.locator('[data-act="tab"][data-tab="plan"]').filter({ visible: true }).first().click();
-  const stop = page.locator('.stop', { hasText: 'Myeongdong Kyoja' });
-  await expect(stop.locator('.stop-note')).toContainText('กินคัลกุกซุ');
-  await stop.locator('[data-act="stop-info"]').click();
-  await page.locator('.modal form[data-form="stop-note"] textarea').fill('กินคัลกุกซุ แล้วซื้อของฝาก');
-  await page.locator('.modal form[data-form="stop-note"] button').click();
-  await expect(page.locator('#toast')).toContainText('บันทึกโน้ตแล้ว');
-  await page.locator('.modal [data-act="modal-close"]').last().click();
-  await expect(page.locator('.stop', { hasText: 'Myeongdong Kyoja' }).locator('.stop-note')).toContainText('ซื้อของฝาก');
+  // หน้าแผนของฉัน: โน้ตแสดงใต้ชื่อ · หน้า วันนี้ ก็แสดง
+  await gotoPlan(page);
+  await expect(page.locator('.ov-day').first().locator('li', { hasText: 'Myeongdong Kyoja' })).toContainText('กินคัลกุกซุ');
+  await gotoToday(page);
+  await expect(page.locator('#right')).toContainText('กินคัลกุกซุ');
 });
 
 test('ร้านที่ยังไม่มีพิกัด: แตะแล้วบอกชัด · วางพิกัดจาก Google Maps → หมุดแดงขึ้น', async ({ page }) => {
   test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
   await page.goto('/');
-  await page.locator('[data-act="open-planner"]').click();
+  await openPlanner(page);
   const pl = page.locator('#planner');
   await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
@@ -688,7 +629,7 @@ test('ร้านที่ยังไม่มีพิกัด: แตะแ
 test('เพิ่มสถานที่เองในตัวจัดแผน: ชื่อ + หมวด + วางพิกัด → บันทึกแล้วใส่ลงช่อง · ค้นเจอภายหลัง', async ({ page }) => {
   test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
   await page.goto('/');
-  await page.locator('[data-act="open-planner"]').click();
+  await openPlanner(page);
   const pl = page.locator('#planner');
   await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
@@ -713,7 +654,7 @@ test('เพิ่มสถานที่เอง: ลิงก์ย่อ �
   test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
   await page.route('https://tile.openstreetmap.org/**', (r) => r.fulfill({ status: 204, body: '' }));
   await page.goto('/');
-  await page.locator('[data-act="open-planner"]').click();
+  await openPlanner(page);
   const pl = page.locator('#planner');
   await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
@@ -749,7 +690,7 @@ test('ตัวจัดแผน: แก้แล้วรายการไม
   await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
   await page.locator('[data-act="tpl-apply-all"]').click();
   await page.locator('[data-act="confirm-ok"]').click();
-  await page.locator('[data-act="open-planner"]').click();
+  await openPlanner(page);
   const pl = page.locator('#planner');
   await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await page.evaluate(() => (document.querySelector('.pl-day')!.scrollTop = 400));
@@ -776,7 +717,7 @@ test('ตัวจัดแผน: ร่างที่ยังไม่ยื
   test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
   await page.route('https://tile.openstreetmap.org/**', (r) => r.fulfill({ status: 204, body: '' }));
   await page.goto('/');
-  await page.locator('[data-act="open-planner"]').click();
+  await openPlanner(page);
   const pl = page.locator('#planner');
   await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await pl.locator('[data-pl="lane"][data-v="search"]').click();
@@ -789,7 +730,7 @@ test('ตัวจัดแผน: ร่างที่ยังไม่ยื
   // รีเฟรชโดยไม่กดยืนยัน
   page.on('dialog', (d) => d.accept());
   await page.reload();
-  await page.locator('[data-act="open-planner"]').click();
+  await openPlanner(page);
   await expect(pl.locator('.pl-restore')).toContainText('ร่างที่ยังไม่ยืนยัน');
   await pl.locator('[data-pl="draft-restore"]').click();
   await pl.locator('.pl-steps [data-pl="goto"][data-v="4"]').click();
@@ -797,8 +738,7 @@ test('ตัวจัดแผน: ร่างที่ยังไม่ยื
   await expect(pl.locator('.pl-sum')).toContainText('กินบินแดต็อก');
   // ยืนยันแล้ว ร่างถูกล้าง → เปิดใหม่ไม่ถามกู้
   await pl.locator('[data-pl="confirm"]').click();
-  await page.locator('[data-act="tab"][data-tab="plan"]').filter({ visible: true }).first().click();
-  await page.locator('[data-act="open-planner"]').click();
+  await openPlanner(page);
   await expect(pl.locator('.pl-restore')).toHaveCount(0);
 });
 

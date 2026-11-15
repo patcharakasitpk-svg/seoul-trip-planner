@@ -726,3 +726,38 @@ body.planner-open .toast { bottom: calc(var(--bnav-h, 0px) + 76px); }
   .pl-head .pl-steps { margin: 0; }
   .pl-head-act:empty { display: flex; }
 }
+
+/* ---------- หน้าแผนของฉัน: ดูอย่างเดียว ทุกวันเรียงกัน สีประจำวัน ---------- */
+#library, #day-tabs-wrap { display: none !important; }
+@media (min-width: 1024px) {
+  .layout { grid-template-columns: minmax(380px, 500px) minmax(0, 1fr); height: calc(100vh - 70px); padding-top: 1rem; }
+  #right { order: -1; }
+}
+.ov-wrap { display: grid; gap: .8rem; }
+.ov-day { background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--c); border-radius: 14px; padding: .7rem .9rem .8rem; }
+.ov-day.sel { box-shadow: 0 0 0 2px var(--c); }
+.ov-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; }
+.ov-date { border: 0; background: none; padding: 0; font: inherit; text-align: left; cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .5rem; color: var(--text); }
+.ov-date b { font-size: 1.2rem; color: var(--c); }
+.ov-date .muted { font-size: .82rem; width: 100%; }
+.ov-today { font-size: .72rem; font-weight: 700; color: #fff; background: var(--c); border-radius: 999px; padding: .05rem .5rem; }
+.ov-list { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .35rem; }
+.ov-list li { display: grid; grid-template-columns: 3.2rem 1fr; gap: .5rem; align-items: baseline; }
+.ov-t { font-variant-numeric: tabular-nums; font-weight: 600; font-size: .9rem; }
+.ov-n { min-width: 0; }
+.ov-n small { display: block; color: var(--muted); font-size: .8rem; }
+.ov-n small.bad-text { color: #c92a2a; }
+.ov-end .ov-n, .ov-end .ov-t { color: var(--muted); font-weight: 400; font-size: .86rem; }
+.ov-empty .ov-n { color: var(--muted); font-style: italic; }
+.ov-meal { display: inline-block; font-size: .72rem; font-weight: 600; color: #b45309; background: #fff7e6; border: 1px solid #f59e0b; border-radius: 999px; padding: 0 .45rem; margin-right: .35rem; vertical-align: 1px; }
+.ov-lock { font-size: .78rem; color: var(--muted); }
+.ov-none { margin: .4rem 0 0; font-size: .88rem; }
+
+/* ชิปวันที่บนแผนที่ (สี = สีหมุดของวันนั้น) */
+.map-tools { flex-wrap: nowrap; }
+.date-chips { display: flex; gap: .35rem; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; padding: 2px; }
+.date-chips::-webkit-scrollbar { display: none; }
+.date-chip { flex: none; border: 1.5px solid var(--c, var(--line)); background: var(--surface); color: var(--c, var(--text)); border-radius: 999px; padding: .25rem .7rem; font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.date-chip.all { --c: #334155; }
+.date-chip.on { background: var(--c); color: #fff; }
+@media (max-width: 1023px) { body[data-tab="plan"] .layout { padding-top: .75rem; } }

@@ -1,6 +1,6 @@
 import type { Day, Place, TravelMode } from '../../core/types';
 import { app, type Modal } from '../app';
-import { esc, dayColor, MODE_ICON, MODE_LABEL, gmapsDirUrl, kakaoToUrl, photosUrl, naverBtn, naverRouteUrl, naverLabel } from '../util';
+import { esc, dayColor, MODE_ICON, MODE_LABEL, gmapsDirUrl, kakaoToUrl, photosUrl, naverBtn, naverRouteUrl, naverLabel, dayDate } from '../util';
 import { diffDays as diffSchedules } from '../../core/compare';
 import { fmtDur, fmtHM, fmtDateTh, parseHM } from '../../core/time';
 import { routeSummary, stepsText, straightDist } from './leg';
@@ -173,7 +173,7 @@ function addBody(m: Extract<Modal, { type: 'add' }>): string {
   const dinnerFree = day.stops.find((s) => s.kind === 'dinner' && !s.placeId);
   return `
     <p><b>${esc(p.nameTh)}</b> ${p.lat == null ? '<span class="pill warn">ยังไม่มีพิกัด — คำนวณเส้นทางไม่ได้ ต้องกรอกเวลาเอง</span>' : ''}</p>
-    <label class="block">วัน <select class="inp" data-act-change="add-day-select">${app.plan.days.map((d, i) => `<option value="${d.id}" ${d.id === day.id ? 'selected' : ''}>วัน ${i + 1} · ${esc(fmtDateTh(d.date))}</option>`).join('')}</select></label>
+    <label class="block">วัน <select class="inp" data-act-change="add-day-select">${app.plan.days.map((d, i) => `<option value="${d.id}" ${d.id === day.id ? 'selected' : ''}>${esc(dayDate(d, i))} (วัน ${i + 1})</option>`).join('')}</select></label>
     <p class="small muted">เลือกตำแหน่งที่จะแทรก แล้วดูผลต่อเวลาก่อนยืนยัน</p>
     <div class="pos-list">
       ${positions.map((x) => `<button class="btn block-btn" data-act="add-at" data-i="${x.i}">${esc(x.label)}</button>`).join('')}
@@ -338,7 +338,7 @@ function templatesBody(m: Extract<Modal, { type: 'templates' }>): string {
           })
           .join('')}</ol>
         ${near.length ? `<div class="tpl-near"><span class="muted small">ที่ใกล้เคียง (เติมเองได้):</span> ${near.map((n) => `<span class="near-chip">${addBtn(i, n.place, inTarget(n.place.id), ` ${CATEGORY_ICON[n.place.category] ?? ''} ${esc(n.place.nameTh)} <span class="muted">· ${esc(fmtDist(n.distM))}</span>`)}<a class="btn ghost xs" href="${esc(photosUrl(n.place))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(n.place.nameTh)}">📷</a></span>`).join('')}</div>` : ''}
-        <div class="row-btns tpl-actions"><label class="small">ใช้กับ <select class="inp xs" data-act-change="tpl-target" data-i="${i}" aria-label="วันปลายทาง">${app.plan.days.map((dd, k) => `<option value="${dd.id}" ${dd.id === targetId ? 'selected' : ''}>วัน ${k + 1}${dd.date ? ` · ${esc(fmtDateTh(dd.date).replace(/ \d{4}$/, ''))}` : ''}</option>`).join('')}</select></label>
+        <div class="row-btns tpl-actions"><label class="small">ใช้กับ <select class="inp xs" data-act-change="tpl-target" data-i="${i}" aria-label="วันปลายทาง">${app.plan.days.map((dd, k) => `<option value="${dd.id}" ${dd.id === targetId ? 'selected' : ''}>${esc(dayDate(dd, k))}${dd.date ? ` (วัน ${k + 1})` : ''}</option>`).join('')}</select></label>
         <button class="btn sm primary" data-act="tpl-copy-day" data-tpl="${tpl.id}" data-i="${i}" data-mode="replace">ใช้เป็นวันนั้น</button>
         <button class="btn sm" data-act="tpl-copy-day" data-tpl="${tpl.id}" data-i="${i}" data-mode="append">เพิ่มต่อท้าย</button></div></div>`;
         })
@@ -401,7 +401,7 @@ function importBody(m: Extract<Modal, { type: 'import' }>): string {
   const p = m.plan;
   const same = app.store.plans.some((x) => x.id === p.id);
   return `<p>พบแผน <b>${esc(p.name)}</b> (${p.days.length} วัน${p.days[0]?.date ? `, เริ่ม ${esc(fmtDateTh(p.days[0].date))}` : ''}) จาก${m.source === 'link' ? 'ลิงก์' : 'ไฟล์'}${same ? ' · <b>ฉบับใหม่ของแผนที่มีในเครื่องนี้</b>' : ''}</p>
-    <ul class="import-days">${p.days.map((d, i) => `<li><b>วัน ${i + 1}${d.date ? ` · ${esc(fmtDateTh(d.date).replace(/ \d{4}$/, ''))}` : ''}</b> ${d.stops.map((s) => esc(app.getPlace(s.placeId)?.nameTh ?? s.title ?? s.kind)).join(' → ') || '—'}</li>`).join('')}</ul>
+    <ul class="import-days">${p.days.map((d, i) => `<li><b style="color:${dayColor(i)}">${esc(dayDate(d, i))}</b> ${d.stops.map((s) => esc(app.getPlace(s.placeId)?.nameTh ?? s.title ?? s.kind)).join(' → ') || '—'}</li>`).join('')}</ul>
     <p class="muted small">ใช้แผนนี้ = แทนที่แผนในเครื่องนี้ (เวลาที่เช็กอินไว้ในเครื่องนี้ยังอยู่ · กดเลิกทำได้)${m.warnings.length ? ` · คำเตือน: ${esc(m.warnings.join(', '))}` : ''}</p>
     <div class="modal-actions sticky"><button class="btn" data-act="modal-close">ยกเลิก</button><button class="btn" data-act="import-copy">เก็บเป็นแผนแยก</button><button class="btn primary" data-act="import-replace">✓ ใช้แผนนี้ในเครื่องนี้</button></div>`;
 }
