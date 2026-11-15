@@ -4,7 +4,7 @@ import { app, type Tab } from './ui/app';
 import { renderLibraryControls, renderLibraryList } from './ui/views/library';
 import { renderDayPanel, renderDayTabs } from './ui/views/day';
 import { renderToday, todayDay } from './ui/views/today';
-import { openPlanner, refreshPlanner } from './ui/planner';
+import { openPlanner, refreshPlanner, closePlanner, plannerOpen } from './ui/planner';
 import { renderModal } from './ui/views/modals';
 import { esc, MODE_LABEL } from './ui/util';
 import { loadGoogle, googleStatus, onGoogleStatus } from './services/google';
@@ -42,7 +42,7 @@ document.querySelector('#app')!.innerHTML = `
 <header class="topbar">
   <div class="brand"><b>Seoul Trip</b><span class="plan-name" id="plan-name"></span></div>
   <nav class="top-actions">
-    <div class="seg desk-only"><button data-act="tab" data-tab="today">วันนี้</button><button data-act="tab" data-tab="plan">แผน</button><button data-act="tab" data-tab="fx">₩→฿</button></div>
+    <div class="seg desk-only main-menu"><button data-act="tab" data-tab="today">◷ วันนี้</button><button data-act="tab" data-tab="plan">▤ แผนของฉัน</button><button data-act="nav-planner">🗓 จัดแผน</button><button data-act="tab" data-tab="fx">₩ แปลงเงิน</button></div>
     <button class="btn ghost sm" data-act="open-templates" title="แม่แบบ">แม่แบบ</button>
     <button class="btn ghost sm" data-act="open-share" title="ส่งแผนไปมือถือ · แชร์ · สำรอง">📱 แชร์</button>
     <button class="icon-btn" data-act="open-settings" aria-label="ตั้งค่า" title="ตั้งค่า">⚙︎</button>
@@ -65,12 +65,24 @@ document.querySelector('#app')!.innerHTML = `
   <button data-act="tab" data-tab="map"><span aria-hidden="true">⌖</span>แผนที่</button>
   <button data-act="tab" data-tab="places"><span aria-hidden="true">☰</span>สถานที่</button>
   <button data-act="tab" data-tab="plan"><span aria-hidden="true">▤</span>แผนของฉัน</button>
+  <button data-act="nav-planner" class="nav-planner"><span aria-hidden="true">🗓</span>จัดแผน</button>
   <button data-act="tab" data-tab="fx"><span aria-hidden="true">₩</span>แปลงเงิน</button>
 </nav>
 <div id="modal-root"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>`;
 
 let lastLibControlsSig = '';
+
+// ความสูงแถบเมนูบน/ล่าง → ตัวจัดแผนวางระหว่างสองแถบ (เมนูเห็นตลอด)
+const barSizes = () => {
+  const top = ($('.topbar') as HTMLElement).offsetHeight;
+  const nav = $('.bottom-nav') as HTMLElement;
+  document.documentElement.style.setProperty('--topbar-h', `${top}px`);
+  document.documentElement.style.setProperty('--bnav-h', `${nav.offsetParent ? nav.offsetHeight : 0}px`);
+};
+barSizes();
+new ResizeObserver(barSizes).observe($('.topbar'));
+window.addEventListener('resize', barSizes);
 
 function render() {
   $('#plan-name').textContent = app.plan.name;
@@ -625,6 +637,11 @@ document.addEventListener('click', (ev) => {
     if (ev.target === el) closeModal();
     return;
   }
+  // แถบเมนู (บน/ล่าง) ใช้ได้ทุกหน้า: กดระหว่างอยู่ในตัวจัดแผน → ปิดตัวจัดแผนก่อน (ร่างเก็บไว้ในเครื่องแล้ว)
+  if (plannerOpen() && el.closest('.topbar, .bottom-nav')) {
+    if (act === 'nav-planner') return;
+    closePlanner();
+  }
   const dayId = d.day ?? app.activeDayId;
   const day = app.findDay(dayId);
   switch (act) {
@@ -925,6 +942,7 @@ document.addEventListener('click', (ev) => {
     case 'open-share':
       app.modal = { type: 'share' };
       break;
+    case 'nav-planner':
     case 'open-planner':
       openPlanner(dayId, (id) => {
         app.todayDayId = app.plan.days.find((x) => x.id === id)?.date === seoulNow().date ? null : id;

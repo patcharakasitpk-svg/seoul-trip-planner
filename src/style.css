@@ -700,3 +700,18 @@ body.planner-open .toast { bottom: 76px; z-index: 90; }
 .import-days { padding-left: 1.1rem; display: grid; gap: .3rem; font-size: .9rem; }
 .tl-leg { font-size: .82rem; }
 .hero h2 .pl-meal-tag { font-size: .8rem; vertical-align: 4px; }
+
+/* แถบเมนูเดียวกันทุกหน้า (รวมตัวจัดแผน) */
+.planner { top: var(--topbar-h, 52px); bottom: var(--bnav-h, 0px); }
+body.planner-open .topbar { z-index: 85; }
+body.planner-open .bottom-nav { z-index: 85; background: var(--surface, #fff); backdrop-filter: none; }
+.main-menu button { white-space: nowrap; }
+body.planner-open .seg [data-act="tab"].on { color: var(--muted); box-shadow: none; background: transparent; }
+body.planner-open .bottom-nav [data-act="tab"].on { color: var(--faint); font-weight: 400; }
+body.planner-open .bottom-nav [data-act="nav-planner"] { font-weight: 600; }
+body.planner-open [data-act="nav-planner"] { color: var(--accent); }
+body.planner-open .main-menu [data-act="nav-planner"] { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.bottom-nav { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
+@media (max-width: 599px) { .bottom-nav .nav-planner { display: none; } }
+.pl-home { flex: none; }
+body.planner-open .toast { bottom: calc(var(--bnav-h, 0px) + 76px); }

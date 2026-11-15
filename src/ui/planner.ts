@@ -171,6 +171,12 @@ export function refreshPlanner() {
   if (st && root && !root.hidden) render();
 }
 
+export const plannerOpen = () => !!root && !root.hidden;
+/** ปิดจากแถบเมนู — ร่างที่ยังไม่ยืนยันเก็บไว้ในเครื่องแล้ว เปิดใหม่ใช้ต่อได้ */
+export function closePlanner() {
+  if (plannerOpen()) close();
+}
+
 function close() {
   endPick();
   if (!root) return;
@@ -238,9 +244,10 @@ function render(resetMap = false) {
   }
   const $ = (sel: string) => root!.querySelector(sel) as HTMLElement;
   $('.pl-head').innerHTML = `
+      <button class="pl-btn ghost sm pl-home" data-pl="cancel" title="ร่างที่ยังไม่ยืนยันเก็บไว้ในเครื่อง เปิดใหม่แล้วใช้ต่อได้">← หน้าหลัก</button>
       <div class="pl-title"><b style="color:${dayColor(idx)}">วัน ${idx + 1}</b> ${d.date ? esc(fmtDateTh(d.date)) : ''} <span class="muted small">· ${hasUnsaved() ? 'ร่างเก็บในเครื่องแล้ว · กด “ยืนยันแผนวันนี้” เพื่อบันทึกลงแผน' : 'ยังไม่มีการแก้'}</span></div>
       <ol class="pl-steps">${STEPS.map(([n, t]) => `<li class="${st!.step === n ? 'on' : n < st!.step ? 'done' : ''}"><button data-pl="goto" data-v="${n}"><span>${n}</span>${t}</button></li>`).join('')}</ol>
-      <button class="btn ghost sm" data-pl="cancel" title="ร่างจะเก็บไว้ในเครื่อง เปิดใหม่แล้วใช้ต่อได้">ปิด (ยังไม่ยืนยัน)</button>`;
+`;
   $('.pl-budget-wrap').innerHTML = st.step === 2 || st.step === 3 ? budgetBar(s) : '';
   $('.pl-body').className = `pl-body step-${st.step}`;
   const main = $('.pl-main');

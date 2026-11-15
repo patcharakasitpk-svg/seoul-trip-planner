@@ -160,7 +160,9 @@ test('หน้าจอไม่มีเนื้อหาล้นแนว�
     expect(overflow, `overflow on ${t}`).toBeLessThanOrEqual(0);
   }
   if (isMobile(page)) {
-    const heights = await page.locator('.bottom-nav button').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+    // ปุ่ม "จัดแผน" ซ่อนบนมือถือ (ใช้บนคอม/iPad)
+    await expect(page.locator('.bottom-nav .nav-planner')).toBeHidden();
+    const heights = await page.locator('.bottom-nav button:visible').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
     for (const h of heights) expect(h).toBeGreaterThanOrEqual(44);
     await page.locator('.bottom-nav [data-tab="plan"]').click();
     const moveBtn = await page.locator('[data-act="stop-info"]').first().boundingBox();
@@ -799,4 +801,24 @@ test('ตัวจัดแผน: ร่างที่ยังไม่ยื
   await page.locator('[data-act="tab"][data-tab="plan"]').filter({ visible: true }).first().click();
   await page.locator('[data-act="open-planner"]').click();
   await expect(pl.locator('.pl-restore')).toHaveCount(0);
+});
+
+test('แถบเมนูเห็นทุกหน้า รวมในตัวจัดแผน · กดเมนูแล้วออกจากตัวจัดแผนโดยร่างไม่หาย · ปุ่ม ← หน้าหลัก', async ({ page }) => {
+  test.skip(isMobile(page), 'ตัวจัดแผนใช้บนคอม/iPad');
+  await page.goto('/');
+  await page.locator('.main-menu [data-act="nav-planner"]').click();
+  const pl = page.locator('#planner');
+  await expect(pl).toBeVisible();
+  await expect(page.locator('.topbar')).toBeVisible();
+  await expect(page.locator('.main-menu [data-act="nav-planner"]')).toHaveCSS('color', /rgb/);
+  // แก้เวลา → ร่างเก็บไว้
+  await pl.locator('[data-pl-change="startTime"]').fill('07:45');
+  await page.locator('.main-menu [data-tab="today"]').click();
+  await expect(pl).toBeHidden();
+  await expect(page.locator('.today-head')).toBeVisible();
+  // เปิดใหม่ → มีร่างให้ใช้ต่อ
+  await page.locator('.main-menu [data-act="nav-planner"]').click();
+  await expect(pl.locator('.pl-restore')).toBeVisible();
+  await pl.locator('[data-pl="cancel"]').click();
+  await expect(pl).toBeHidden();
 });
