@@ -603,3 +603,6 @@ body.planner-open .toast { bottom: 76px; z-index: 90; }
   .pl-lanes { grid-template-columns: 1fr; }
   .pl-steps { margin: 0; overflow-x: auto; }
 }
+
+.pl-photo { flex: none; font-size: .78rem; font-weight: 500; color: var(--accent); white-space: nowrap; text-decoration: none; }
+.pl-photo:hover { text-decoration: underline; }

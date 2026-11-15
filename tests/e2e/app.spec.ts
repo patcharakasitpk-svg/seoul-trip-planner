@@ -526,6 +526,8 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await expect(pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' })).toHaveCount(0);
   await pl.locator('[data-pl="add"][data-place="gwangjang"]').click();
   await expect(pl.locator('.pl-pin.preview')).toHaveCount(0);
+  // ชื่อสถานที่มีลิงก์ดูรูป (เปิด Google รูปภาพ)
+  await expect(pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' }).locator('.pl-photo')).toHaveAttribute('href', /google\.com\/search\?tbm=isch/);
   // ใส่สถานที่เดิมซ้ำได้ (เช่นแวะกลับโรงแรม) · หมุดเดียวบอกหลายลำดับ
   await pl.locator('[data-pl-input="q"]').fill('');
   await pl.locator('[data-pl-input="q"]').dispatchEvent('input');

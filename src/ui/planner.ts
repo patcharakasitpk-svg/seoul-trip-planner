@@ -5,7 +5,7 @@
  */
 import L from 'leaflet';
 import { app } from './app';
-import { esc, dayColor } from './util';
+import { esc, dayColor, photosUrl } from './util';
 import { clone, insertStop, newStop, removeStop, updateStop, moveStop } from '../core/planOps';
 import { fmtDateTh, fmtDur, fmtHM, parseHM } from '../core/time';
 import { TEMPLATES } from '../data/templates';
@@ -204,6 +204,9 @@ function step1(): string {
 }
 
 /* ---------- ขั้น 2: เลือกสถานที่ (2 เลน) ---------- */
+/** ลิงก์ดูรูปสถานที่ (เปิดแท็บใหม่) — ชื่อแปลก ๆ จะได้นึกออกว่าหน้าตาเป็นยังไง */
+const photoLink = (p: Place | undefined) => (p && p.category !== 'base' ? `<a class="pl-photo" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" title="ดูรูป ${esc(p.nameTh)}">ดูรูป ↗</a>` : '');
+
 /** จุดที่จะต่อจากช่องที่เลือก (หรือจุดสุดท้ายของวัน) — ใช้วัดระยะตอนดูหมุดแดง */
 function anchorPlace(): Place | undefined {
   const d = st!.draft;
@@ -228,6 +231,7 @@ function laneItem(p: Place, _inDay: boolean): string {
   const times = st!.draft.stops.filter((x) => x.placeId === p.id).length;
   return `<div class="pl-item ${times ? 'in' : ''} ${on ? 'preview' : ''}" draggable="true" data-drag-place="${esc(p.id)}">
     <button class="pl-item-text" data-pl="preview" data-place="${esc(p.id)}" aria-pressed="${on}" title="แตะเพื่อดูหมุดบนแผนที่"><b>${esc(p.nameTh)}</b><span class="muted small">${esc(CATEGORY_LABEL[p.category] ?? '')} · ${esc(p.area)}${p.suggestedStayMin ? ` · ราว ${fmtDur(p.suggestedStayMin)}` : ''}</span>${on ? previewInfo(p) : ''}</button>
+    ${photoLink(p)}
     ${times ? `<span class="pl-in-tag">อยู่ในแผนแล้ว${times > 1 ? ` ${times} ครั้ง` : ''}</span>` : ''}
     <button class="btn sm" data-pl="add" data-place="${esc(p.id)}" aria-label="ใส่ ${esc(p.nameTh)} ในช่องที่เลือก${times ? ' (อีกครั้ง)' : ''}">＋</button>
   </div>`;
@@ -296,7 +300,7 @@ function dayLane(s: DaySchedule): string {
       <div class="pl-row stop ${x.lockedTime ? 'locked' : ''}" data-uid="${x.uid}">
         <span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span>
         <div class="pl-row-main">
-          <b>${esc(nameOf(x))}</b>${x.lockedTime ? ` <span class="pill">นัด ${esc(x.lockedTime)}</span>` : ''}
+          <b>${esc(nameOf(x))}</b> ${photoLink(placeOf(x))}${x.lockedTime ? ` <span class="pill">นัด ${esc(x.lockedTime)}</span>` : ''}
           <div class="pl-stay">อยู่ <select class="inp xs" data-pl-change="stay" data-uid="${x.uid}" aria-label="อยู่นานเท่าไร">${[...new Set([...STAY_CHOICES, x.stayMin])].sort((a, b) => a - b).map((m) => `<option value="${m}" ${m === x.stayMin ? 'selected' : ''}>${fmtDur(m)}</option>`).join('')}</select>
             ${defaultStay(x) != null && defaultStay(x) !== x.stayMin ? resetBtn('reset-stay', x.uid, `คืนเวลาที่แนะนำ (${fmtDur(defaultStay(x)!)})`) : ''}
             ${t.depart != null ? `<span class="muted small">ถึง ${fmtHM(t.depart)}</span>` : ''}
@@ -357,7 +361,7 @@ function step4(s: DaySchedule): string {
     if (t.stop.skipped) continue;
     const isMove = t.stop.kind === 'place' || t.stop.kind === 'dinner';
     if (isMove && t.leg.fromId !== t.leg.toId && t.leg.travelMin != null) rows.push(`<li class="sum-leg"><span></span><span>เดินทาง ${travelText(t.leg)}</span>${edit(3)}</li>`);
-    rows.push(`<li class="sum-stop"><span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span><span><b>${esc(nameOf(t.stop))}</b> · ${fmtDur(t.stop.stayMin)}${t.stop.lockedTime ? ' · นัด' : ''}${t.lateMin ? ` <span class="bad-text">สาย ${fmtDur(t.lateMin)}</span>` : ''}</span>${edit(2)}</li>`);
+    rows.push(`<li class="sum-stop"><span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span><span><b>${esc(nameOf(t.stop))}</b> ${photoLink(placeOf(t.stop))} · ${fmtDur(t.stop.stayMin)}${t.stop.lockedTime ? ' · นัด' : ''}${t.lateMin ? ` <span class="bad-text">สาย ${fmtDur(t.lateMin)}</span>` : ''}</span>${edit(2)}</li>`);
   }
   if (s.end) {
     rows.push(`<li class="sum-leg"><span></span><span>เดินทาง ${travelText(s.end.leg)}</span>${edit(3)}</li>`);
