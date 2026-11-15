@@ -21,11 +21,17 @@ describe('สิ่งของที่ต้องใช้', () => {
     expect(out).toEqual([{ id: 'a', text: 'พาสปอร์ต', group: 'เอกสาร', done: true }, { id: 'c', text: 'ร่ม', group: 'อื่น ๆ', done: false }]);
     expect(cleanPacking('x')).toBeUndefined();
   });
-  it('เก็บในแผน ส่งผ่านลิงก์ได้', () => {
+  it('ของส่วนตัวไม่ติดไปกับลิงก์แผน (คนเปิดลิงก์เริ่มจากค่าตั้งต้นของตัวเอง) · ไฟล์ JSON สำรองยังเก็บครบ', () => {
     const p = newPlan();
     p.packing = [{ id: 'a', text: 'พาสปอร์ต', group: 'เอกสาร', done: true }];
+    p.coldLevel = 'high';
+    p.checklist = { d1: { coat: true } };
     const back = decodeFragment('#' + encodePlan(p))!;
-    expect(back.ok && back.plan.packing).toEqual(p.packing);
+    expect(back.ok && back.plan.packing).toBeUndefined();
+    expect(back.ok && back.plan.coldLevel).toBe('normal');
+    expect(back.ok && back.plan.checklist).toEqual({});
+    const json = validatePlan(JSON.parse(JSON.stringify(p)));
+    expect(json.ok && json.plan.packing).toEqual(p.packing);
     expect(validatePlan(JSON.parse(JSON.stringify(newPlan()))).ok && 'packing' in (validatePlan(JSON.parse(JSON.stringify(newPlan()))) as any).plan).toBe(false);
   });
   it('รับแผนใหม่: ของที่ติ๊กในเครื่องนี้ยังติ๊กอยู่ · อีกเครื่องยังไม่มีรายการ = คงของเครื่องนี้', () => {

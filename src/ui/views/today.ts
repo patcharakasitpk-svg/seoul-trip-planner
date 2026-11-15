@@ -7,6 +7,7 @@ import { legTransitHint } from './transit';
 import type { Day, Place } from '../../core/types';
 import { mealName } from '../../core/meals';
 import { legSummary, straightDist } from './leg';
+import { I } from '../icons';
 import { effectiveMode } from '../../core/geo';
 
 /**
@@ -26,7 +27,7 @@ const stopName = (t: StopTiming) => {
 };
 
 /** ป้ายมื้อ (เฉพาะมื้อที่เลือกร้านแล้ว — ยังไม่เลือกร้าน ชื่อบอกมื้ออยู่แล้ว) */
-const mealTag = (t: StopTiming) => (t.stop.kind === 'dinner' && t.stop.placeId ? `<span class="pl-meal-tag">🍽 ${esc(mealName(t.stop))}</span> ` : '');
+const mealTag = (t: StopTiming) => (t.stop.kind === 'dinner' && t.stop.placeId ? `<span class="pl-meal-tag">${I.utensils} ${esc(mealName(t.stop))}</span> ` : '');
 
 const shortName = (p: Place | undefined) => (p ? (p.id === 'hotel' ? 'โรงแรม' : p.nameTh) : '?');
 
@@ -59,7 +60,7 @@ function heroMoving(day: Day, s: DaySchedule, t: StopTiming, live: boolean, eyeb
     <p class="eyebrow">${eyebrow}</p>
     <h2>${mealTag(t)}${esc(stopName(t))}</h2>
     <p class="hero-big">${t.arrive != null ? `ถึงประมาณ <b>${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive)}</b>` : 'ยังไม่มีเวลา'}</p>
-    <p class="hero-facts">${isMove ? `<span>${legIcon(t.leg)} เดินทาง <b>${travelText(t.leg)}</b></span>` : ''}<span>⏱ อยู่ <b>${fmtDur(t.stop.stayMin)}</b></span>${t.stop.lockedTime ? `<span>🔒 นัด <b>${esc(t.stop.lockedTime)}</b></span>` : ''}</p>
+    <p class="hero-facts">${isMove ? `<span>${legIcon(t.leg)} เดินทาง <b>${travelText(t.leg)}</b></span>` : ''}<span>${I.clock} อยู่ <b>${fmtDur(t.stop.stayMin)}</b></span>${t.stop.lockedTime ? `<span>${I.lock} นัด <b>${esc(t.stop.lockedTime)}</b></span>` : ''}</p>
     ${t.stop.note ? `<p class="stop-note">${esc(t.stop.note)}</p>` : ''}
     ${isMove ? navRow(from, to, t.leg.mode) : ''}
     ${live ? `<button class="btn primary huge" data-act="live-arrive" data-stop="${t.uid}">✓ ถึงแล้ว</button>` : ''}
@@ -82,7 +83,7 @@ function heroAt(day: Day, s: DaySchedule, t: StopTiming, now: number | null): st
     <h2>${mealTag(t)}${esc(stopName(t))}</h2>
     <p class="hero-big ${left != null && left < 0 ? 'bad' : ''}">${left == null ? `อยู่ ${fmtDur(t.stop.stayMin)}` : left >= 0 ? `อยู่ได้อีก <b>${fmtDur(left)}</b>` : `เกินเวลา <b>${fmtDur(-left)}</b>`}</p>
     <div class="bar" role="progressbar" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
-    <p class="hero-facts"><span>ควรออก <b>${fmtHM(plannedOut)}</b></span>${t.stop.lockedTime ? `<span>🔒 ${esc(t.stop.lockedTime)}</span>` : ''}</p>
+    <p class="hero-facts"><span>ควรออก <b>${fmtHM(plannedOut)}</b></span>${t.stop.lockedTime ? `<span>${I.lock} ${esc(t.stop.lockedTime)}</span>` : ''}</p>
     ${t.stop.note ? `<p class="stop-note">${esc(t.stop.note)}</p>` : ''}
     <button class="btn primary huge" data-act="live-depart" data-stop="${t.uid}">✓ ออกจากที่นี่</button>
     ${
@@ -136,7 +137,7 @@ function timeline(day: Day, s: DaySchedule, current: string | null): string {
     rows.push(`<li class="tl ${done ? 'done' : ''} ${now ? 'now' : ''}">
       <span class="tl-t">${t.arrive != null ? `${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive)}` : '--:--'}</span>
       <span class="tl-dot">${done ? '✓' : now ? '●' : ''}</span>
-      <span class="tl-n">${t.stop.lockedTime ? '🔒 ' : ''}${mealTag(t)}${esc(stopName(t))}<small>อยู่ ${fmtDur(t.stop.stayMin)}${t.stop.lockedTime ? ` · นัด ${esc(t.stop.lockedTime)}` : ''} ${warn}</small></span>
+      <span class="tl-n">${t.stop.lockedTime ? `${I.lock} ` : ''}${mealTag(t)}${esc(stopName(t))}<small>อยู่ ${fmtDur(t.stop.stayMin)}${t.stop.lockedTime ? ` · นัด ${esc(t.stop.lockedTime)}` : ''} ${warn}</small></span>
     </li>`);
   }
   if (s.end && day.endPlaceId) {
@@ -191,12 +192,12 @@ export function renderToday(): string {
     current = '__end';
     hero = heroReturn(day, s, true);
   } else {
-    hero = `<section class="hero done"><p class="eyebrow">จบวันนี้ 🎉</p><h2>ถึง${esc(shortName(app.getPlace(day.endPlaceId)))}แล้ว</h2><p class="hero-facts"><span>ถึง ${esc(day.actual?.__end?.a ?? '')}</span></p></section>`;
+    hero = `<section class="hero done"><p class="eyebrow">${I.party} จบวันนี้</p><h2>ถึง${esc(shortName(app.getPlace(day.endPlaceId)))}แล้ว</h2><p class="hero-facts"><span>ถึง ${esc(day.actual?.__end?.a ?? '')}</span></p></section>`;
   }
 
   // นัดที่ล็อกไว้ข้างหน้าที่จะไม่ทัน
   const late = active.find((t) => t.lateMin && !day.actual?.[t.uid]?.a);
-  const alert = late ? `<div class="alert-late">⚠ จะไม่ทัน <b>${esc(stopName(late))}</b> นัด ${esc(late.stop.lockedTime ?? '')} (สาย ${fmtDur(late.lateMin!)}) — ลดเวลาที่จุดก่อนหน้า หรือข้ามบางจุด</div>` : '';
+  const alert = late ? `<div class="alert-late">${I.alert} จะไม่ทัน <b>${esc(stopName(late))}</b> นัด ${esc(late.stop.lockedTime ?? '')} (สาย ${fmtDur(late.lateMin!)}) — ลดเวลาที่จุดก่อนหน้า หรือข้ามบางจุด</div>` : '';
   const hasActual = !!day.actual && Object.keys(day.actual).length > 0;
 
   return `

@@ -1,3 +1,4 @@
+import { I } from '../icons';
 import { esc, IC } from '../util';
 import { cheapest, sortItems, summary, verdict, type ShopItem, type ShopStore } from '../../services/shop';
 import { fmtKrw, fmtThb } from '../../services/fx';
@@ -42,7 +43,7 @@ function itemForm(it: ShopItem | null, ui: ShopUi): string {
   return `<form data-form="shop-item" class="shop-form" ${it ? `data-item="${esc(it.id)}"` : ''}>
     <input class="inp" name="name" placeholder="ชื่อของ เช่น กันแดด Round Lab" maxlength="80" required value="${esc(it?.name ?? '')}" data-autofocus aria-label="ชื่อของ" enterkeyhint="done">
     <div class="shop-form-row">
-      <label>🇹🇭 ราคาไทย ฿<input class="inp" name="thb" inputmode="decimal" placeholder="ไม่บังคับ" value="${it?.thb != null ? esc(String(it.thb)) : ''}" aria-label="ราคาไทย (บาท)" enterkeyhint="done"></label>
+      <label>ราคาไทย ฿<input class="inp" name="thb" inputmode="decimal" placeholder="ไม่บังคับ" value="${it?.thb != null ? esc(String(it.thb)) : ''}" aria-label="ราคาไทย (บาท)" enterkeyhint="done"></label>
       <label>จาก<input class="inp" name="thbLabel" placeholder="Shopee" maxlength="30" value="${esc(it?.thbLabel ?? '')}" aria-label="ที่มาของราคาไทย" enterkeyhint="done"></label>
       <label>จำนวน<input class="inp qty" name="qty" type="number" min="1" max="99" value="${it?.qty ?? 1}" aria-label="จำนวนชิ้น" enterkeyhint="done"></label>
     </div>
@@ -89,13 +90,13 @@ function card(it: ShopItem, store: ShopStore, rate: number | null, ui: ShopUi): 
     </div>
     ${
       it.thb != null
-        ? `<button class="shop-price thai" data-act="shop-edit" data-item="${esc(it.id)}"><span>🇹🇭 ไทย${it.thbLabel ? ` (${esc(it.thbLabel)})` : ''}</span><b>฿${fmtThb(it.thb)}</b></button>`
+        ? `<button class="shop-price thai" data-act="shop-edit" data-item="${esc(it.id)}"><span>ไทย${it.thbLabel ? ` (${esc(it.thbLabel)})` : ''}</span><b>฿${fmtThb(it.thb)}</b></button>`
         : `<button class="shop-add-thai" data-act="shop-edit" data-item="${esc(it.id)}">＋ ราคาไทย</button>`
     }
     ${it.prices
       .map((p) => {
         const isBest = multi && best?.id === p.id;
-        return `<button class="shop-price ${isBest ? 'best' : ''}" data-act="shop-price-edit" data-item="${esc(it.id)}" data-price="${esc(p.id)}"><span>${isBest ? '🏆 ' : ''}${esc(p.store)}</span><b>₩${fmtKrw(p.krw)}${thb(p.krw, rate)}</b></button>`;
+        return `<button class="shop-price ${isBest ? 'best' : ''}" data-act="shop-price-edit" data-item="${esc(it.id)}" data-price="${esc(p.id)}"><span>${isBest ? `${I.trophy} ` : ''}${esc(p.store)}</span><b>₩${fmtKrw(p.krw)}${thb(p.krw, rate)}</b></button>`;
       })
       .join('')}
     ${ui.priceFor === it.id ? priceForm(it, ui, store.lastStore) : `<button class="shop-add-price" data-act="shop-price-add" data-item="${esc(it.id)}">＋ ราคาร้าน${it.prices.length ? 'อื่น' : 'ในเกาหลี'}</button>`}

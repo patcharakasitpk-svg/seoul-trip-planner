@@ -3,12 +3,12 @@ import type { Firestore, Unsubscribe } from 'firebase/firestore';
 import { app } from '../ui/app';
 import { clone } from '../core/planOps';
 import { planToTripDocs, planToPersonal, diffTripDocs, tripDocsToPlan, type TripDocs, type PersonalDocs, type RemoteTrip } from '../core/tripDocs';
-import { cleanPacking, mergePackingDone, type PackItem } from '../core/packing';
+import { cleanPacking } from '../core/packing';
 import { firebaseApp, onAuth, authState, sendInviteLink, type AuthUser } from './auth';
 import { placePhotos } from './shopPhotos';
 import { loadShop, saveShop, sanitizeShop } from './shop';
 import { loadFx } from './fx';
-import { saveSettings, safeGet, safeSet } from '../storage/storage';
+import { saveSettings, safeSet } from '../storage/storage';
 import { FIRESTORE_EMULATOR } from '../config';
 
 /**
@@ -409,26 +409,18 @@ export function activate(id: string) {
 }
 
 /** ของส่วนตัวที่จะใช้กับสำเนาทริป: จากบัญชี (ถ้ามี) ไม่งั้นจากสำเนา/แผนในเครื่อง */
-function personalFor(fallback: Plan | undefined): PersonalDocs {
-  const local = fallback ?? app.store.plans.find((p) => !p.id.startsWith('trip-')) ?? app.plan;
-  const lp = planToPersonal(local);
+function personalFor(_fallback: Plan | undefined): PersonalDocs {
+  // ของส่วนตัวมาจากบัญชีเท่านั้น · บัญชีใหม่ (ยังไม่มีข้อมูล) เริ่มจากค่าตั้งต้น ให้เจ้าของบัญชีตั้งเอง
+  // (ไม่ดึงจากแผนในเครื่อง — กันเช็กลิสต์ของคนอื่นที่เคยติดมากับลิงก์แผนเก่า)
   const rp = (remotePersonal.prefs ?? null) as Partial<PersonalDocs['prefs']> | null;
-  let packing: PackItem[] | null = remotePersonal.packing !== undefined ? cleanPacking(remotePersonal.packing) ?? null : lp.packing ?? null;
-  // ครั้งแรกในเครื่องนี้ของบัญชีนี้: รวมรายการในเครื่องเข้าไปด้วย (ไม่ซ้ำชื่อในหมวดเดียวกัน · ติ๊กไว้ที่ไหนก็ยังติ๊ก)
-  const flag = `stp.v1.personalMerged.${user?.uid}`;
-  if (remotePersonal.packing !== undefined && packing && lp.packing?.length && !safeGet(flag)) {
-    const key = (i: PackItem) => `${i.group}|${i.text}`;
-    const local = lp.packing;
-    const byKey = new Map(local.map((i) => [key(i), i]));
-    const merged = mergePackingDone(packing, local)!.map((i) => (byKey.get(key(i))?.done && !i.done ? { ...i, done: true } : i));
-    const have = new Set(merged.map(key));
-    packing = [...merged, ...local.filter((i) => !have.has(key(i)))];
-    safeSet(flag, '1');
-    lastPersonal = null; // ให้ส่งรายการที่รวมแล้วขึ้นบัญชี
-  }
   return {
-    packing,
-    prefs: rp ? { coldLevel: rp.coldLevel ?? lp.prefs.coldLevel, checklist: rp.checklist ?? lp.prefs.checklist, extraChecklist: rp.extraChecklist ?? lp.prefs.extraChecklist, saved: rp.saved ?? lp.prefs.saved } : lp.prefs,
+    packing: remotePersonal.packing !== undefined ? cleanPacking(remotePersonal.packing) ?? null : null,
+    prefs: {
+      coldLevel: rp?.coldLevel === 'low' || rp?.coldLevel === 'high' ? rp.coldLevel : 'normal',
+      checklist: rp?.checklist && typeof rp.checklist === 'object' ? rp.checklist : {},
+      extraChecklist: rp?.extraChecklist && typeof rp.extraChecklist === 'object' ? rp.extraChecklist : {},
+      saved: Array.isArray(rp?.saved) ? rp!.saved!.filter((x): x is string => typeof x === 'string') : [],
+    },
   };
 }
 
@@ -450,7 +442,7 @@ function applyRemote() {
   const samePersonal = current && JSON.stringify(planToPersonal(current)) === JSON.stringify(planToPersonal(plan));
   lastSynced = planToTripDocs(plan);
   // ของส่วนตัวยังไม่เคยขึ้นบัญชี → ส่งของในเครื่องขึ้น (ครั้งแรกในบัญชีนี้)
-  if (remotePersonal.packing === undefined || remotePersonal.prefs === undefined || lastPersonal === null && JSON.stringify(personal.packing) !== JSON.stringify(cleanPacking(remotePersonal.packing) ?? null)) void writePersonal(personal);
+  if (remotePersonal.packing === undefined || remotePersonal.prefs === undefined) void writePersonal(personal);
   else lastPersonal = JSON.stringify(personal);
   if (!sameTrip || !samePersonal) {
     applying = true;

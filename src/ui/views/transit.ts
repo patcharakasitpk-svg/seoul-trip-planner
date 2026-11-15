@@ -1,3 +1,4 @@
+import { I } from '../icons';
 import type { Place } from '../../core/types';
 import { LINES } from '../../data/subway';
 import { esc, gmapsDirUrl } from '../util';
@@ -18,11 +19,11 @@ export function stationBlock(p: Place, from: Place | undefined): string {
         )
         .join('')
     : '';
-  const link = from && from.id !== p.id ? `<a class="btn sm" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(from, p, 'TRANSIT'))}">🚇 วิธีไปจาก${esc(from.id === 'hotel' ? 'โรงแรม' : from.nameTh)} (รถไฟฟ้า/รถเมล์) ↗</a>` : '';
+  const link = from && from.id !== p.id ? `<a class="btn sm" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(from, p, 'TRANSIT'))}">${I.train} วิธีไปจาก${esc(from.id === 'hotel' ? 'โรงแรม' : from.nameTh)} (รถไฟฟ้า/รถเมล์) ↗</a>` : '';
   return `<div class="transit-block">
       <p class="small"><b>รถไฟฟ้า</b></p>
       ${rows ? `<ul class="stations">${rows}</ul>` : '<p class="small muted">ยังไม่มีข้อมูลสถานี</p>'}
-      ${t?.bus ? `<p class="small">🚌 ${esc(t.bus)}</p>` : ''}
+      ${t?.bus ? `<p class="small">${I.bus} ${esc(t.bus)}</p>` : ''}
       ${t && t.status !== 'verified' ? '<p class="small muted">ข้อมูลสถานียังไม่ยืนยัน</p>' : ''}
       ${link}
     </div>`;
@@ -32,12 +33,12 @@ export function stationBlock(p: Place, from: Place | undefined): string {
 export function legTransitHint(a: Place | undefined, b: Place | undefined): string {
   if (!a || !b || a.lat == null || b.lat == null) return '';
   const d = straightLineM({ lat: a.lat, lng: a.lng! }, { lat: b.lat, lng: b.lng! });
-  if (d < 700) return `<div class="transit-hint">🚶 ใกล้กัน เดินได้ (≈ ${fmtDist(d)})</div>`;
+  if (d < 700) return `<div class="transit-hint">${I.walk} ใกล้กัน เดินได้ (≈ ${fmtDist(d)})</div>`;
   const sa = a.transit?.stations?.[0];
   const sb = b.transit?.stations?.[0];
   const link = `<a class="link small" target="_blank" rel="noopener" href="${esc(gmapsDirUrl(a, b, 'TRANSIT'))}">เส้นทางละเอียด ↗</a>`;
-  if (!sa || !sb) return `<div class="transit-hint">🚇 ${link}</div>`;
-  if (sa.name === sb.name) return `<div class="transit-hint">🚶 ใช้สถานีเดียวกัน (${esc(sa.name)}) เดินได้ · ${link}</div>`;
+  if (!sa || !sb) return `<div class="transit-hint">${I.train} ${link}</div>`;
+  if (sa.name === sb.name) return `<div class="transit-hint">${I.walk} ใช้สถานีเดียวกัน (${esc(sa.name)}) เดินได้ · ${link}</div>`;
   const common = sa.lines.filter((l) => sb.lines.includes(l));
   const exitB = sb.exit ? ` ทางออก ${esc(sb.exit)}` : '';
   if (common.length) {

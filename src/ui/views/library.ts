@@ -1,6 +1,7 @@
+import { I, catIcon } from '../icons';
 import type { Place } from '../../core/types';
 import { app } from '../app';
-import { CATEGORY_ICON, CATEGORY_LABEL, DINING_ZONE_LABEL } from '../../data/places';
+import { CATEGORY_LABEL, DINING_ZONE_LABEL } from '../../data/places';
 import { esc, gmapsPlaceUrl, photosUrl, naverBtn, naverPlaceUrl, googleLabel } from '../util';
 import { closedOn, shortHours, weekdayTh } from '../../core/hours';
 import { stationBlock } from './transit';
@@ -11,13 +12,13 @@ import { isGoogleReady } from '../../services/google';
 
 const CATS: [string, string][] = [
   ['', 'ทั้งหมด'],
-  ['food', '🍜 ร้านอาหาร'],
-  ['cafe', '☕ คาเฟ่'],
-  ['fashion', '👕 เสื้อผ้า'],
-  ['beauty', '💄 ความงาม'],
-  ['market', '🍢 ตลาด'],
-  ['sight', '🏛️ เที่ยว'],
-  ['saved', '★ บันทึกไว้'],
+  ['food', 'ร้านอาหาร'],
+  ['cafe', 'คาเฟ่'],
+  ['fashion', 'เสื้อผ้า'],
+  ['beauty', 'ความงาม'],
+  ['market', 'ตลาด'],
+  ['sight', 'เที่ยว'],
+  ['saved', 'บันทึกไว้'],
 ];
 
 export function refPointOptions(): { id: string; label: string; placeId: string | null }[] {
@@ -119,7 +120,7 @@ export function renderWebSearch(): string {
   const q = app.filters.q.trim();
   const s = app.search;
   const src = isGoogleReady() ? 'Google Maps' : 'OpenStreetMap';
-  const btn = q ? `<button class="btn sm web-search-btn" data-act="web-search">🔎 ค้นหา “${esc(q)}” บน ${src}</button>` : '';
+  const btn = q ? `<button class="btn sm web-search-btn" data-act="web-search">${I.search} ค้นหา “${esc(q)}” บน ${src}</button>` : '';
   if (!s) return btn ? `<div class="web-search">${btn}</div>` : '';
   const head = `<div class="web-search-head"><b>ผลค้นหา “${esc(s.q)}”</b>${s.provider ? ` <span class="muted small">จาก ${s.provider === 'google' ? 'Google Maps' : 'OpenStreetMap'}</span>` : ''}<button class="btn ghost xs" data-act="web-search-clear">ปิด</button></div>`;
   const again = q && q !== s.q ? btn : '';
@@ -136,7 +137,7 @@ export function renderWebSearch(): string {
         return `<article class="place search-result ${s.focus === i ? 'focus' : ''}" data-search-card="${i}">
         <div class="place-row">
           <button class="place-main" data-act="web-search-focus" data-i="${i}">
-            <span class="cat-ico" aria-hidden="true">📍</span>
+            <span class="cat-ico" aria-hidden="true">${I.pin}</span>
             <span class="place-text"><span class="place-name">${esc(r.name)}</span><span class="place-meta">${esc(r.address ?? '')}</span></span>
           </button>
           <a class="icon-btn sm info" href="${esc(resultMapsUrl(r))}" target="_blank" rel="noopener" aria-label="เปิด ${esc(r.name)} ใน Google Maps" title="เปิดใน Google Maps">↗</a>
@@ -172,7 +173,7 @@ export function placeCard(p: Place, opts: { open?: boolean } = {}): string {
   <article class="place ${open ? 'open' : ''} ${inDay ? 'in-day' : ''} ${app.focusPlaceId === p.id ? 'focus' : ''}" data-place-card="${esc(p.id)}">
     <div class="place-row">
       <button class="place-main" data-act="quick-toggle" data-place="${esc(p.id)}" aria-pressed="${inDay}">
-        <span class="cat-ico" aria-hidden="true">${CATEGORY_ICON[p.category] ?? '📍'}</span>
+        <span class="cat-ico" aria-hidden="true">${catIcon(p.category, p.food?.type)}</span>
         <span class="place-text">
           <span class="place-name">${esc(p.nameTh)}</span>
           <span class="place-meta">${meta}${closed ? ` · <span class="closed">${esc(closed)}</span>` : ''}${others.length ? ` · <span class="in-plan">วัน ${others.join(', ')}</span>` : ''}</span>
@@ -207,7 +208,7 @@ function placeDetails(p: Place): string {
       ${p.budget && p.budget.textTh ? `<p class="small"><b>งบ</b> ${esc(p.budget.textTh)}${p.budget.status === 'estimate' ? ' (ประมาณ)' : ''}</p>` : ''}
       ${p.lat == null ? coordFixForm(p) : p.coordStatus === 'area-center' ? '<p class="small muted">หมุดกลางย่าน/จุดรวมอาคาร — อาจต้องเดินต่อ</p>' : p.coordStatus === 'approx' ? `<p class="small muted">หมุดเส้นประ = พิกัดจากแหล่งเดียว${p.coordSource ? ` (${esc(p.coordSource)})` : ''} — เช็กใน Google Maps ก่อนไป</p>` : ''}
       <div class="row-btns">
-        <a class="btn sm" href="${esc(photosUrl(p))}" target="_blank" rel="noopener">📷 ดูรูป</a>
+        <a class="btn sm" href="${esc(photosUrl(p))}" target="_blank" rel="noopener">${I.camera} ดูรูป</a>
         <a class="btn sm app-btn google" href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">${googleLabel()}</a>
         ${naverBtn(naverPlaceUrl(p))}
         ${p.lat != null ? `<button class="btn sm" data-act="focus-place" data-place="${esc(p.id)}">ดูบนแผนที่</button>` : ''}

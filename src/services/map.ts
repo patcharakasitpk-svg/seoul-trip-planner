@@ -1,3 +1,4 @@
+import { I } from '../ui/icons';
 import { isGoogleReady } from './google';
 
 export interface MarkerSpec {
@@ -67,10 +68,10 @@ export function markerContent(spec: MarkerSpec): HTMLElement {
   const el = document.createElement('div');
   el.className = `mk mk-${spec.kind}${spec.areaCenter ? ' mk-area' : ''}`;
   el.title = spec.title;
-  if (spec.kind === 'hotel') el.innerHTML = '<span class="mk-ico">🏨</span>';
-  else if (spec.kind === 'venue') el.innerHTML = '<span class="mk-ico">🏢</span>';
+  if (spec.kind === 'hotel') el.innerHTML = `<span class="mk-ico">${I.hotel}</span>`;
+  else if (spec.kind === 'venue') el.innerHTML = `<span class="mk-ico">${I.building}</span>`;
   else if (spec.kind === 'lib') el.innerHTML = '';
-  else if (spec.kind === 'search') el.innerHTML = '<span class="mk-ico">📍</span>';
+  else if (spec.kind === 'search') el.innerHTML = `<span class="mk-ico">${I.pin}</span>`;
   for (const b of spec.badges.slice(0, 4)) {
     const s = document.createElement('span');
     s.className = 'mk-badge';

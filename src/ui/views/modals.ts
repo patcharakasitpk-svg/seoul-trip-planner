@@ -17,6 +17,7 @@ import { placeCard } from './library';
 import { placeInfoHtml } from './placeInfo';
 import { buildShareUrl } from '../../storage/share';
 import { googleStatus } from '../../services/google';
+import { I, catIcon } from '../icons';
 import { signedInUser, tripState } from '../../services/tripSync';
 import { authAvailable } from '../../services/auth';
 import { peekRoute, routeKey } from '../../services/routes';
@@ -79,7 +80,7 @@ export function renderModal(): string {
     case 'meal':
       [title, body] = [
         'เพิ่มมื้ออาหาร',
-        `<div class="meal-pick">${(Object.keys(MEALS) as Meal[]).map((k) => `<button class="btn meal-btn" data-act="meal-add" data-day="${m.dayId}" data-v="${k}"><span>${MEALS[k].icon}</span>${MEALS[k].th}<small>~${MEALS[k].stay} นาที${MEALS[k].at ? ` · ราว ${MEALS[k].at}` : ' · แทรกระหว่างทาง'}</small></button>`).join('')}</div><p class="muted small">วางในวันให้อัตโนมัติตามเวลามื้อ ย้าย/เปลี่ยนมื้อได้ภายหลังใน ⓘ</p>`,
+        `<div class="meal-pick">${(Object.keys(MEALS) as Meal[]).map((k) => `<button class="btn meal-btn" data-act="meal-add" data-day="${m.dayId}" data-v="${k}"><span>${k === 'snack' ? I.coffee : I.utensils}</span>${MEALS[k].th}<small>~${MEALS[k].stay} นาที${MEALS[k].at ? ` · ราว ${MEALS[k].at}` : ' · แทรกระหว่างทาง'}</small></button>`).join('')}</div><p class="muted small">วางในวันให้อัตโนมัติตามเวลามื้อ ย้าย/เปลี่ยนมื้อได้ภายหลังใน ⓘ</p>`,
       ];
       break;
     case 'settings':
@@ -236,7 +237,7 @@ function nearbyBody(m: Extract<Modal, { type: 'nearby' }>): string {
   const want = m.want === 'shop' ? (x: Place) => x.category === 'fashion' || x.category === 'beauty' || x.category === 'market' : (x: Place) => x.category === 'food' || x.category === 'market';
   const list = nearby({ lat: p.lat, lng: p.lng! }, app.places(), want, 1500, 8);
   return `<p class="muted small">เรียงตามระยะเส้นตรงจาก ${esc(p.nameTh)} (ไม่ใช่ระยะเดินจริง) · ดูผลต่อเวลาก่อนเพิ่ม</p>
-    <div class="pick-list">${list.length ? list.map((x) => `<div class="pick"><div>${CATEGORY_ICON[x.place.category]} <b>${esc(x.place.nameTh)}</b><br><span class="muted small">${fmtDist(x.distM)} (เส้นตรง) · แวะ ~${app.stayFor(x.place.id)} นาที</span></div><button class="btn sm primary" data-act="nearby-pick" data-place="${esc(x.place.id)}">ดูผลก่อนเพิ่ม</button></div>`).join('') : '<p class="empty">ไม่พบในระยะ 1.5 กม. (เส้นตรง)</p>'}</div>`;
+    <div class="pick-list">${list.length ? list.map((x) => `<div class="pick"><div>${catIcon(x.place.category, x.place.food?.type)} <b>${esc(x.place.nameTh)}</b><br><span class="muted small">${fmtDist(x.distM)} (เส้นตรง) · แวะ ~${app.stayFor(x.place.id)} นาที</span></div><button class="btn sm primary" data-act="nearby-pick" data-place="${esc(x.place.id)}">ดูผลก่อนเพิ่ม</button></div>`).join('') : '<p class="empty">ไม่พบในระยะ 1.5 กม. (เส้นตรง)</p>'}</div>`;
 }
 
 /* ---------- ทางเลือกในร่ม ---------- */
@@ -332,10 +333,10 @@ function templatesBody(m: Extract<Modal, { type: 'templates' }>): string {
         <ol>${d.stops
           .map((s) => {
             const p = app.getPlace(s.placeId);
-            const lock = s.lockedTime ? `🔒 ${esc(s.lockedTime)} ` : '';
+            const lock = s.lockedTime ? `${I.lock} ${esc(s.lockedTime)} ` : '';
             const tip = s.note ? `<br><span class="muted small">${esc(s.note)}</span>` : '';
-            if (!p) return s.breakTitle ? `<li>☕ ${lock}${esc(s.breakTitle)} <span class="muted small">~${s.stayMin} นาที</span>${tip}</li>` : '';
-            return `<li>${CATEGORY_ICON[p.category] ?? ''} ${lock}${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <a class="btn ghost xs" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(p.nameTh)}" title="ดูรูป">${IC.camera}</a> ${p.category === 'base' ? '' : addBtn(i, p, inTarget(p.id))}${tip}</li>`;
+            if (!p) return s.breakTitle ? `<li>${I.coffee} ${lock}${esc(s.breakTitle)} <span class="muted small">~${s.stayMin} นาที</span>${tip}</li>` : '';
+            return `<li>${catIcon(p.category, p.food?.type)} ${lock}${esc(p.nameTh)} <span class="muted small">~${s.stayMin} นาที${s.dinner ? ' · มื้อเย็น' : ''}</span> <a class="btn ghost xs" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(p.nameTh)}" title="ดูรูป">${IC.camera}</a> ${p.category === 'base' ? '' : addBtn(i, p, inTarget(p.id))}${tip}</li>`;
           })
           .join('')}</ol>
         ${near.length ? `<div class="tpl-near"><span class="muted small">ที่ใกล้เคียง (เติมเองได้):</span> ${near.map((n) => `<span class="near-chip">${addBtn(i, n.place, inTarget(n.place.id), ` ${CATEGORY_ICON[n.place.category] ?? ''} ${esc(n.place.nameTh)} <span class="muted">· ${esc(fmtDist(n.distM))}</span>`)}<a class="btn ghost xs" href="${esc(photosUrl(n.place))}" target="_blank" rel="noopener" aria-label="ดูรูป ${esc(n.place.nameTh)}" title="ดูรูป">${IC.camera}</a></span>`).join('')}</div>` : ''}
@@ -351,16 +352,16 @@ function templatesBody(m: Extract<Modal, { type: 'templates' }>): string {
 /* ---------- แชร์ ---------- */
 /** ส่งแผนจากโน้ตบุ๊ก/iPad ไปมือถือ: ลิงก์มีแผนทั้งหมด → มือถือเปิดแล้วกด "ใช้แผนนี้ในมือถือ" */
 function phoneSection(r: ReturnType<typeof buildShareUrl>): string {
-  if (!r.ok) return `<div class="card phone-card"><h4>📱 ส่งแผนไปมือถือ</h4><p class="warn-text">แผนใหญ่เกินไปสำหรับลิงก์ — ใช้ Export JSON แล้วเปิดไฟล์ในมือถือ</p></div>`;
+  if (!r.ok) return `<div class="card phone-card"><h4>${I.phone} ส่งแผนไปมือถือ</h4><p class="warn-text">แผนใหญ่เกินไปสำหรับลิงก์ — ใช้ Export JSON แล้วเปิดไฟล์ในมือถือ</p></div>`;
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
   return `<div class="card phone-card">
-    <h4>📱 ส่งแผนไปมือถือ</h4>
+    <h4>${I.phone} ส่งแผนไปมือถือ</h4>
     <ol class="phone-steps small">
       <li>กด “ยืนยันแผนวันนี้” ให้ครบทุกวันที่แก้ก่อน</li>
       <li>${canShare ? 'กด <b>ส่งลิงก์</b> → เลือก AirDrop / LINE / ข้อความ ไปที่มือถือ' : 'กด <b>คัดลอกลิงก์</b> แล้วส่งให้ตัวเองทาง LINE / อีเมล'}${r.qr ? ' หรือสแกน QR ด้วยกล้องมือถือ' : ''}</li>
       <li>เปิดลิงก์ในมือถือ → กด <b>ใช้แผนนี้ในมือถือ</b> · หน้า “วันนี้” จะแสดงมื้ออาหารและการเดินทางตามแผน</li>
     </ol>
-    <div class="share-row"><input class="inp" readonly value="${esc(r.url)}" aria-label="ลิงก์แผน" id="share-url">${canShare ? '<button class="btn primary" data-act="share-native">📤 ส่งลิงก์</button>' : ''}<button class="btn ${canShare ? '' : 'primary'}" data-act="copy-link">คัดลอก</button></div>
+    <div class="share-row"><input class="inp" readonly value="${esc(r.url)}" aria-label="ลิงก์แผน" id="share-url">${canShare ? '<button class="btn primary" data-act="share-native">${I.share} ส่งลิงก์</button>' : ''}<button class="btn ${canShare ? '' : 'primary'}" data-act="copy-link">คัดลอก</button></div>
     ${r.qr ? '<div class="qr-wrap"><canvas id="qr" aria-label="QR code ลิงก์แผน"></canvas></div>' : '<p class="muted small">แผนยาวเกินกว่าจะใส่ QR ได้ — ใช้ปุ่มส่งลิงก์แทน</p>'}
     <p class="muted small">ลิงก์คือ<b>สำเนาแผน ณ ตอนนี้</b> — แก้แผนอีกครั้งต้องส่งใหม่ · ข้อมูลอยู่ในส่วน # ของลิงก์ (ไม่ถูกส่งไปเซิร์ฟเวอร์) · การเช็กอินในมือถือไม่หายเมื่อรับแผนใหม่${location.protocol !== 'https:' ? '<br><b class="warn-text">ตอนนี้เปิดจาก ' + esc(location.origin) + ' — มือถืออาจเปิดไม่ได้ ใช้เว็บที่ github.io</b>' : ''}</p>
   </div>`;
@@ -370,7 +371,7 @@ function shareBody(): string {
   const r = buildShareUrl(app.plan, location.href);
   return `
     ${phoneSection(r)}
-    <p class="small">${app.storageOk ? (app.saveOk ? '✓ บันทึกในเครื่องนี้ (localStorage) แล้ว — แต่ไม่ซิงก์ไปเครื่องอื่นเอง' : '⚠ บันทึกในเครื่องไม่สำเร็จ (พื้นที่เต็ม?) — โปรด Export JSON') : '⚠ เบราว์เซอร์นี้บันทึกในเครื่องไม่ได้ (เช่น โหมดส่วนตัว) — โปรด Export JSON ก่อนปิด'}</p>
+    <p class="small">${app.storageOk ? (app.saveOk ? '✓ บันทึกในเครื่องนี้ (localStorage) แล้ว — แต่ไม่ซิงก์ไปเครื่องอื่นเอง' : 'บันทึกในเครื่องไม่สำเร็จ (พื้นที่เต็ม?) — โปรด Export JSON') : 'เบราว์เซอร์นี้บันทึกในเครื่องไม่ได้ (เช่น โหมดส่วนตัว) — โปรด Export JSON ก่อนปิด'}</p>
     <h4>ข้อความ / ไฟล์ (สำรองข้อมูล)</h4>
     <div class="row-btns">
       <button class="btn" data-act="copy-text">คัดลอกแผนเป็นข้อความ</button>

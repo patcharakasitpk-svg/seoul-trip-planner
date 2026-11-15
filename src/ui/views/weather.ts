@@ -1,3 +1,4 @@
+import { I, wxIcon } from '../icons';
 import type { Day } from '../../core/types';
 import type { DaySchedule } from '../../core/schedule';
 import { app } from '../app';
@@ -78,7 +79,7 @@ export function renderWeather(day: Day, s: DaySchedule, opts: { full: boolean })
   return `<section class="card wx">
     ${head(`<button class="link small" data-act="toggle-wx" data-day="${day.id}" aria-expanded="${open}">${open ? 'ย่อ' : 'รายละเอียด'}</button>`)}
     <div class="wx-main">
-      <span class="wx-ico" aria-hidden="true">${ic.icon}</span>
+      <span class="wx-ico" aria-hidden="true">${wxIcon(d.code)}</span>
       <div>
         ${win ? `<div class="wx-window"><b>ช่วงที่ออกเที่ยว ${esc(windowLabel)}</b><br>รู้สึกจริง ${n(win.feelsMin, '°')} ถึง ${n(win.feelsMax, '°')}C · ฝน ${n(win.ppMax, '%')} · ลม ${n(win.windMax, '')} กม./ชม.${win.snowSum != null && win.snowSum > 0 ? ` · หิมะ ${win.snowSum} ซม.` : ''}${ok.windowPartial ? ' <span class="warn-line">(บางชั่วโมงอยู่นอกพยากรณ์)</span>' : ''}</div>` : `<div><b>${ic.th}</b> · ${n(d.tMin, '°')}–${n(d.tMax, '°')}C</div><div class="muted small">ตั้งเวลาออกเพื่อดูอากาศช่วงที่ออกเที่ยวจริง</div>`}
       </div>
@@ -104,7 +105,7 @@ export function renderWeather(day: Day, s: DaySchedule, opts: { full: boolean })
 function hourTable(hours: HourRow[]): string {
   return `<div class="hours" role="table" aria-label="พยากรณ์รายชั่วโมง">${hours
     .map(
-      (h) => `<div class="hr" role="row"><span>${esc(h.label)}</span><span>${wmo(h.code).icon}</span><span>${h.temp == null ? '–' : Math.round(h.temp) + '°'}</span><span class="muted">รู้สึก ${h.feels == null ? '–' : Math.round(h.feels) + '°'}</span><span>☔ ${h.pp == null ? '–' : h.pp + '%'}</span><span class="muted">💨 ${h.wind == null ? '–' : Math.round(h.wind)}</span></div>`,
+      (h) => `<div class="hr" role="row"><span>${esc(h.label)}</span><span>${wxIcon(h.code)}</span><span>${h.temp == null ? '–' : Math.round(h.temp) + '°'}</span><span class="muted">รู้สึก ${h.feels == null ? '–' : Math.round(h.feels) + '°'}</span><span>${I.umbrella} ${h.pp == null ? '–' : h.pp + '%'}</span><span class="muted">${I.wind} ${h.wind == null ? '–' : Math.round(h.wind)}</span></div>`,
     )
     .join('')}</div>`;
 }

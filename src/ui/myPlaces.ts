@@ -1,3 +1,4 @@
+import { I } from './icons';
 import L from 'leaflet';
 import type { Place } from '../core/types';
 import { app } from './app';
@@ -103,12 +104,12 @@ function formHtml(): string {
     <label>ชื่อสถานที่<input class="inp" data-pp-field="name" value="${esc(f.name)}" maxlength="120" placeholder="เช่น Onion Anguk" required ${f.id ? '' : 'data-autofocus'}></label>
     <div class="pp-cat-field"><span>ประเภท</span><div class="chips pp-cats" role="radiogroup" aria-label="ประเภทสถานที่">${(Object.entries(OWN_CATEGORY_LABEL) as [OwnCategory, string][]).map(([k, v]) => `<button type="button" class="chip ${k === f.category ? 'on' : ''}" data-pp="cat" data-pp-cat="${k}" role="radio" aria-checked="${k === f.category}">${esc(v)}</button>`).join('')}</div></div>
     <label>ตำแหน่ง <span class="muted small">— วางพิกัด, Plus Code (เช่น HX7M+HQ8) หรือลิงก์ Google Maps แบบเต็ม</span>
-      <span class="pp-coord"><input class="inp" data-pp-field="coord" value="${esc(f.coord)}" placeholder="37.5639, 126.9844" inputmode="text"><button type="button" class="btn sm ${picking ? 'primary' : ''}" data-pp="pick">${picking ? 'กำลังเลือก… แตะบนแผนที่' : '📍 แตะบนแผนที่'}</button></span></label>
+      <span class="pp-coord"><input class="inp" data-pp-field="coord" value="${esc(f.coord)}" placeholder="37.5639, 126.9844" inputmode="text"><button type="button" class="btn sm ${picking ? 'primary' : ''}" data-pp="pick">${picking ? 'กำลังเลือก… แตะบนแผนที่' : `${I.pin} แตะบนแผนที่`}</button></span></label>
     <p class="pp-coord-msg ${f.error ? 'bad-text' : 'muted'} small">${f.error ? esc(f.error) : pt ? `✓ ได้ตำแหน่งแล้ว (${pt.lat.toFixed(5)}, ${pt.lng.toFixed(5)}) — ดูหมุดแดงบนแผนที่ แล้วเช็กใน <a href="https://www.google.com/maps/search/?api=1&query=${pt.lat},${pt.lng}" target="_blank" rel="noopener">Google Maps ↗</a>` : 'ยังไม่มีตำแหน่งก็บันทึกได้ (จะยังไม่ปักหมุด)'}</p>
     <label>ย่าน <span class="muted small">— ใช้กรองในหน้า “จัดแผน”</span><select class="inp" data-pp-field="zone">${zoneOptions(f)}</select></label>
     <label>โน้ต <span class="muted small">(ไม่บังคับ)</span><textarea class="inp" data-pp-field="note" rows="2" maxlength="500" placeholder="เช่น ร้านคาเฟ่ในบ้านเก่า สั่งขนมปังเกลือ">${esc(f.note)}</textarea></label>
     <label>ลิงก์ <span class="muted small">— บรรทัดละ 1 ลิงก์ (Google Maps, IG, รีวิว)</span><textarea class="inp" data-pp-field="links" rows="2" placeholder="https://…">${esc(f.links)}</textarea></label>
-    <p class="muted small">เพิ่มรูปได้หลังบันทึก (ปุ่ม 📷 บนการ์ด)</p>
+    <p class="muted small">เพิ่มรูปได้หลังบันทึก (ปุ่ม “เพิ่มรูป” บนการ์ด)</p>
     <div class="row-btns"><button class="btn primary">บันทึก</button><button type="button" class="btn" data-pp="cancel">ยกเลิก</button></div>
   </form>`;
 }

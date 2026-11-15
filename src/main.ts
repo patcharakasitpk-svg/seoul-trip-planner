@@ -118,10 +118,11 @@ function tripBanner(): string {
   const s = authState();
   if (s.status !== 'signed-in' || inTrip()) return '';
   const t = tripState();
+  if (t.busy === 'join' || (t.status === 'loading' && t.trip)) return '<div class="trip-banner invite"><span>กำลังโหลดทริปที่แชร์…</span></div>';
   if (t.status === 'loading') return '';
   const inv = t.invited[0];
   if (inv)
-    return `<div class="trip-banner invite"><span>คุณได้รับเชิญเข้าทริป <b>${esc(inv.name)}</b> จาก ${esc(inv.ownerEmail)}</span><button class="btn sm primary" data-act="join-trip" data-v="${esc(inv.id)}" ${t.busy ? 'disabled' : ''}>${t.busy === 'join' ? 'กำลังเข้าร่วม…' : 'เข้าร่วมทริป'}</button></div>`;
+    return `<div class="trip-banner invite"><span>คุณได้รับเชิญเข้าทริป <b>${esc(inv.name)}</b> จาก ${esc(inv.ownerEmail)}</span><button class="btn sm primary" data-act="join-trip" data-v="${esc(inv.id)}" ${t.busy ? 'disabled' : ''}>เข้าร่วมทริป</button></div>`;
   const mine = t.myTrips[0];
   if (mine) return `<div class="trip-banner"><span>ตอนนี้กำลังดูแผนในเครื่องนี้ ไม่ใช่ทริปที่แชร์</span><button class="btn sm primary" data-act="open-trip" data-v="${esc(mine.id)}">เปิดทริป ${esc(mine.name)}</button></div>`;
   return `<div class="trip-banner"><span>แผนนี้อยู่ในเครื่องนี้เท่านั้น — ยังไม่ได้เข้าทริปที่แชร์ · ให้เจ้าของทริปเชิญอีเมล <b>${esc(s.user.email ?? '')}</b></span><button class="btn sm" data-act="open-login">สร้าง/เข้าทริป</button></div>`;

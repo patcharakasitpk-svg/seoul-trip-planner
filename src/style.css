@@ -1042,3 +1042,10 @@ body.planner-open .main-menu [data-act="tab"].on { background: none; box-shadow:
 .trip-banner.invite { background: #eaf1ff; color: #1d3f8a; border-bottom-color: #c9d9ff; }
 .trip-banner .btn { flex: none; }
 .status-bar:has(.trip-banner) { padding: 0; background: none; }
+
+/* ไอคอนเส้นสีเดียว (แทนอีโมจิ) */
+.ico.i { display: inline-block; vertical-align: -0.14em; flex: none; }
+.mk-ico { display: grid; place-items: center; color: #1f3a6b; font-size: 18px; }
+.wx-ico { color: #475569; font-size: 2.2rem; display: inline-grid; }
+.pl-meal-tag .ico.i, .ov-meal .ico.i { vertical-align: -0.12em; }
+.meal-btn span .ico.i { font-size: 1.2rem; }

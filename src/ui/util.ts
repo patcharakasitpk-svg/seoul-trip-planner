@@ -1,5 +1,6 @@
 import type { Place, TravelMode } from '../core/types';
 import { fmtDateTh } from '../core/time';
+import { I } from './icons';
 import naverIcon from '../assets/naver-map.png';
 import gmapsIcon from '../assets/google-maps.png';
 
@@ -20,7 +21,8 @@ export const dayDate = (d: { date: string | null }, i?: number) => (d.date ? fmt
 export const dayColor = (i: number) => DAY_COLORS[i % DAY_COLORS.length];
 
 export const MODE_LABEL: Record<TravelMode, string> = { TRANSIT: 'ขนส่งสาธารณะ', WALKING: 'เดิน', DRIVING: 'รถยนต์/แท็กซี่' };
-export const MODE_ICON: Record<TravelMode, string> = { TRANSIT: '🚇', WALKING: '🚶', DRIVING: '🚕' };
+/** ไอคอนวิธีเดินทาง (เส้นสีเดียว) */
+export const MODE_ICON: Record<TravelMode, string> = { TRANSIT: I.train, WALKING: I.walk, DRIVING: I.car };
 const GM_MODE: Record<TravelMode, string> = { TRANSIT: 'transit', WALKING: 'walking', DRIVING: 'driving' };
 
 export const SOURCE_LABEL: Record<string, string> = {

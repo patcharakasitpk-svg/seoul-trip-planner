@@ -50,8 +50,10 @@ export function compactPlan(plan: Plan): unknown {
       stops: d.stops.map(({ legIn, ...s }) => ({ ...s, ...(isDefaultLeg(legIn) ? {} : { legIn }) })),
     };
   });
-  const { coldLevel, ...rest } = p;
-  return strip({ ...rest, ...(coldLevel !== 'normal' ? { coldLevel } : {}), days });
+  // ของส่วนตัว (สิ่งของที่ต้องใช้ · ระดับความหนาว · เช็กลิสต์เสื้อผ้า · ที่บันทึกไว้) ไม่ส่งไปกับลิงก์แผน
+  // — คนที่เปิดลิงก์เริ่มจากค่าตั้งต้นของตัวเอง (ไฟล์ JSON สำรองยังเก็บครบ)
+  const { coldLevel: _c, packing: _p, checklist: _k, extraChecklist: _e, saved: _s, ...rest } = p;
+  return strip({ ...rest, days });
 }
 
 const isDefaultLeg = (l: Plan['days'][number]['endLeg'] | undefined) => !l || (l.mode === 'TRANSIT' && l.manualMin == null);
