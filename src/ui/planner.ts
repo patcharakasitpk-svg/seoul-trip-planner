@@ -223,11 +223,13 @@ function previewInfo(p: Place): string {
   return `<span class="pl-preview-info">ห่างจาก${esc(a.id === 'hotel' ? 'โรงแรม' : a.nameTh)} ${fmtDist(m)}${est != null ? ` · เดินทาง ≈ ${fmtDur(est)}` : ''}</span>`;
 }
 
-function laneItem(p: Place, inDay: boolean): string {
+function laneItem(p: Place, _inDay: boolean): string {
   const on = st!.preview === p.id;
-  return `<div class="pl-item ${inDay ? 'in' : ''} ${on ? 'preview' : ''}" draggable="${inDay ? 'false' : 'true'}" data-drag-place="${esc(p.id)}">
+  const times = st!.draft.stops.filter((x) => x.placeId === p.id).length;
+  return `<div class="pl-item ${times ? 'in' : ''} ${on ? 'preview' : ''}" draggable="true" data-drag-place="${esc(p.id)}">
     <button class="pl-item-text" data-pl="preview" data-place="${esc(p.id)}" aria-pressed="${on}" title="แตะเพื่อดูหมุดบนแผนที่"><b>${esc(p.nameTh)}</b><span class="muted small">${esc(CATEGORY_LABEL[p.category] ?? '')} · ${esc(p.area)}${p.suggestedStayMin ? ` · ราว ${fmtDur(p.suggestedStayMin)}` : ''}</span>${on ? previewInfo(p) : ''}</button>
-    ${inDay ? '<span class="muted small">อยู่ในแผนแล้ว</span>' : `<button class="btn sm" data-pl="add" data-place="${esc(p.id)}" aria-label="ใส่ ${esc(p.nameTh)} ในช่องที่เลือก">＋</button>`}
+    ${times ? `<span class="pl-in-tag">อยู่ในแผนแล้ว${times > 1 ? ` ${times} ครั้ง` : ''}</span>` : ''}
+    <button class="btn sm" data-pl="add" data-place="${esc(p.id)}" aria-label="ใส่ ${esc(p.nameTh)} ในช่องที่เลือก${times ? ' (อีกครั้ง)' : ''}">＋</button>
   </div>`;
 }
 
@@ -395,10 +397,16 @@ function drawMap(s: DaySchedule) {
   const color = dayColor(app.dayIndex(st!.dayId));
   const path = pts.map((x) => [x.p.lat!, x.p.lng!] as [number, number]);
   if (path.length > 1) L.polyline(path, { color, weight: 3, dashArray: '6 8' }).addTo(layer!);
-  pts.forEach((x, i) => {
-    if (i > 0 && x.p.id === pts[i - 1].p.id) return;
-    L.marker([x.p.lat!, x.p.lng!], { icon: L.divIcon({ className: 'pl-pin', html: `<span style="--c:${color}">${esc(x.label)}</span>`, iconSize: [0, 0] }), title: x.p.nameTh }).addTo(layer!);
-  });
+  // ที่เดียวกันหลายครั้ง (เช่นแวะกลับโรงแรม) = หมุดเดียว บอกหลายลำดับ
+  const byPlace = new Map<string, { p: Place; labels: string[] }>();
+  for (const x of pts) {
+    const g = byPlace.get(x.p.id) ?? { p: x.p, labels: [] };
+    if (!g.labels.includes(x.label)) g.labels.push(x.label);
+    byPlace.set(x.p.id, g);
+  }
+  for (const g of byPlace.values()) {
+    L.marker([g.p.lat!, g.p.lng!], { icon: L.divIcon({ className: 'pl-pin', html: `<span style="--c:${color}">${esc(g.labels.join(', '))}</span>`, iconSize: [0, 0] }), title: g.p.nameTh }).addTo(layer!);
+  }
   // หมุดแดง: สถานที่ที่กำลังดูก่อนใส่ + เส้นจากจุดที่จะต่อ
   const pv = st!.step === 2 && st!.preview ? app.getPlace(st!.preview) : undefined;
   let focus = path;
@@ -431,7 +439,6 @@ function addPlace(placeId: string, at: number | null) {
   const p = app.getPlace(placeId);
   if (!p) return;
   const d = st!.draft;
-  if (d.stops.some((x) => x.placeId === placeId)) return;
   const i = at ?? d.stops.length;
   // ร้านอาหาร → เติมช่องมื้อที่ยังว่างก่อน
   const emptyMeal = p.category === 'food' ? d.stops.find((x) => x.kind === 'dinner' && !x.placeId) : undefined;

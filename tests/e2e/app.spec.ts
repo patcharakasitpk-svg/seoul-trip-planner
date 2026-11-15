@@ -526,6 +526,15 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await expect(pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' })).toHaveCount(0);
   await pl.locator('[data-pl="add"][data-place="gwangjang"]').click();
   await expect(pl.locator('.pl-pin.preview')).toHaveCount(0);
+  // ใส่สถานที่เดิมซ้ำได้ (เช่นแวะกลับโรงแรม) · หมุดเดียวบอกหลายลำดับ
+  await pl.locator('[data-pl-input="q"]').fill('');
+  await pl.locator('[data-pl-input="q"]').dispatchEvent('input');
+  await expect(pl.locator('.pl-item', { hasText: 'โรงแรม Sotetsu' }).first()).toContainText('อยู่ในแผนแล้ว');
+  await pl.locator('[data-pl="add"][data-place="hotel"]').click();
+  await expect(pl.locator('.pl-row.stop', { hasText: 'โรงแรม Sotetsu' })).toHaveCount(2);
+  await expect(pl.locator('.pl-pin span', { hasText: ',' }).first()).toBeVisible();
+  await pl.locator('.pl-row.stop', { hasText: 'โรงแรม Sotetsu' }).last().locator('[data-pl="remove"]').click();
+  await expect(pl.locator('.pl-row.stop', { hasText: 'โรงแรม Sotetsu' })).toHaveCount(1);
   const row = pl.locator('.pl-row.stop', { hasText: 'ตลาดกวางจัง' });
   await expect(row).toBeVisible();
   await row.locator('[data-pl-change="stay"]').selectOption('120');
