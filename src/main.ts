@@ -7,7 +7,7 @@ import { hydratePlacePhotos } from './ui/views/placeInfo';
 import { renderToday, todayDay } from './ui/views/today';
 import { openPlanner, refreshPlanner, closePlanner, plannerOpen } from './ui/planner';
 import { renderModal } from './ui/views/modals';
-import { esc, MODE_LABEL, dayColor, dayDate } from './ui/util';
+import { esc, MODE_LABEL, dayColor, dayDate, ICON } from './ui/util';
 import { loadGoogle, googleStatus, onGoogleStatus } from './services/google';
 import { startOsm, switchToGoogle, onMapMarkerClick, mapViewReady, syncMapView, focusMapView, refreshMapSize } from './services/mapView';
 import { buildMapSpecs } from './ui/mapSpecs';
@@ -42,12 +42,17 @@ const $ = (sel: string) => document.querySelector(sel) as HTMLElement;
 document.querySelector('#app')!.innerHTML = `
 <header class="topbar">
   <div class="brand"><b>Seoul Trip</b><span class="plan-name" id="plan-name"></span></div>
-  <nav class="top-actions">
-    <div class="seg desk-only main-menu"><button data-act="tab" data-tab="today">◷ วันนี้</button><button data-act="tab" data-tab="plan">▤ แผนของฉัน</button><button data-act="nav-planner">🗓 จัดแผน</button><button data-act="tab" data-tab="places">📍 สถานที่</button><button data-act="tab" data-tab="fx">₩ แปลงเงิน</button></div>
-    <button class="btn ghost sm" data-act="open-templates" title="แม่แบบ">แม่แบบ</button>
-    <button class="btn ghost sm" data-act="open-share" title="ส่งแผนไปมือถือ · แชร์ · สำรอง">📱 แชร์</button>
-    <button class="icon-btn" data-act="open-settings" aria-label="ตั้งค่า" title="ตั้งค่า">⚙︎</button>
+  <nav class="main-menu desk-only" aria-label="เมนูหลัก">
+    <button data-act="tab" data-tab="today">วันนี้</button>
+    <button data-act="tab" data-tab="plan">แผนของฉัน</button>
+    <button data-act="nav-planner">จัดแผน</button>
+    <button data-act="tab" data-tab="places">สถานที่</button>
+    <button data-act="tab" data-tab="fx">แปลงเงิน</button>
   </nav>
+  <div class="top-actions">
+    <button class="top-link" data-act="open-share" title="ส่งแผนไปมือถือ · แชร์ · สำรอง">แชร์</button>
+    <button class="icon-btn" data-act="open-settings" aria-label="ตั้งค่า" title="ตั้งค่า">${ICON.gear}</button>
+  </div>
 </header>
 <div id="status-bar" class="status-bar"></div>
 <div id="day-tabs-wrap"></div>
@@ -63,12 +68,12 @@ document.querySelector('#app')!.innerHTML = `
 <section id="fx" class="fx" aria-label="แปลงสกุลเงิน"></section>
 <section id="places-page" class="pp-page" aria-label="สถานที่ของฉัน"></section>
 <nav class="bottom-nav" aria-label="เมนูหลัก">
-  <button data-act="tab" data-tab="today"><span aria-hidden="true">◷</span>วันนี้</button>
-  <button data-act="tab" data-tab="map"><span aria-hidden="true">⌖</span>แผนที่</button>
-  <button data-act="tab" data-tab="plan"><span aria-hidden="true">▤</span>แผนของฉัน</button>
-  <button data-act="nav-planner" class="nav-planner"><span aria-hidden="true">🗓</span>จัดแผน</button>
-  <button data-act="tab" data-tab="places"><span aria-hidden="true">📍</span>สถานที่</button>
-  <button data-act="tab" data-tab="fx"><span aria-hidden="true">₩</span>แปลงเงิน</button>
+  <button data-act="tab" data-tab="today">${ICON.today}วันนี้</button>
+  <button data-act="tab" data-tab="map">${ICON.map}แผนที่</button>
+  <button data-act="tab" data-tab="plan">${ICON.plan}แผนของฉัน</button>
+  <button data-act="nav-planner" class="nav-planner">${ICON.planner}จัดแผน</button>
+  <button data-act="tab" data-tab="places">${ICON.places}สถานที่</button>
+  <button data-act="tab" data-tab="fx">${ICON.fx}แปลงเงิน</button>
 </nav>
 <div id="modal-root"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>`;

@@ -421,7 +421,8 @@ function customBody(): string {
 
 function settingsBody(): string {
   const g = googleStatus();
-  return `<form data-form="settings" class="form">
+  return `<div class="card settings-tpl"><b>แผนแนะนำทั้งทริป</b><p class="muted small">เริ่มใหม่จากแผนตัวอย่าง หรือหยิบแผนรายวันมาใช้ (ปกติเลือกได้ในหน้า “จัดแผน” แท็บแผนแนะนำอยู่แล้ว)</p><button type="button" class="btn sm" data-act="open-templates">เปิดแผนแนะนำ</button></div>
+  <form data-form="settings" class="form">
     <p>สถานะ Google Maps: <b>${{ 'no-key': 'ยังไม่มีคีย์', loading: 'กำลังโหลด', ready: 'พร้อมใช้งาน', error: 'ผิดพลาด' }[g.status]}</b> ${g.error ? `<span class="warn-text small">${esc(g.error)}</span>` : ''}</p>
     <label>Google Maps API Key <input class="inp" name="apiKey" value="${esc(app.settings.apiKey ?? '')}" autocomplete="off" spellcheck="false"></label>
     <label>Map ID (สำหรับหมุดแบบ Advanced) <input class="inp" name="mapId" value="${esc(app.settings.mapId ?? '')}" placeholder="DEMO_MAP_ID"></label>

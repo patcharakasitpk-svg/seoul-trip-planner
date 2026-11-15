@@ -45,9 +45,14 @@ async function setDay(page: Page, date: string, time: string, endTime = '22:00')
   await pl.locator('[data-pl="confirm"]').click();
   await expect(pl).toBeHidden();
 }
+/** แผนแนะนำ (แม่แบบ) อยู่ในหน้าต่างตั้งค่า */
+async function openTemplates(page: Page) {
+  await page.locator('[data-act="open-settings"]').click();
+  await page.locator('.modal [data-act="open-templates"]').click();
+}
 /** ใช้แผนแนะนำทั้งทริป (แม่แบบ T) */
 async function applyTripTemplate(page: Page) {
-  await page.locator('[data-act="open-templates"]').click();
+  await openTemplates(page);
   await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
   await page.locator('[data-act="tpl-apply-all"]').click();
   await page.locator('[data-act="confirm-ok"]').click();
@@ -181,7 +186,7 @@ test('หน้าจอไม่มีเนื้อหาล้นแนว�
     await expect(page.locator('.bottom-nav [data-tab="places"]')).toHaveCount(1); // แท็บ สถานที่ของฉัน (ไม่ใช่หน้าค้นหาเดิม)
     const heights = await page.locator('.bottom-nav button:visible').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
     for (const h of heights) expect(h).toBeGreaterThanOrEqual(44);
-    await page.locator('[data-act="open-templates"]').click();
+    await openTemplates(page);
     const o2 = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(o2).toBeLessThanOrEqual(0);
   } else {
@@ -197,11 +202,11 @@ test('แม่แบบ: ดูไม่ล้างแผน และต้�
   await setDay(page, '2026-11-20', '10:00');
   await expect(page.locator('.ov-day').first()).toContainText('10:00–22:00');
   const before = await page.locator('.ov-day').first().innerText();
-  await page.locator('[data-act="open-templates"]').click();
+  await openTemplates(page);
   await page.locator('[data-act="tpl-tab"][data-v="B"]').click();
   await page.locator('[data-act="modal-close"]').first().click();
   expect(await page.locator('.ov-day').first().innerText()).toBe(before);
-  await page.locator('[data-act="open-templates"]').click();
+  await openTemplates(page);
   await page.locator('[data-act="tpl-tab"][data-v="A"]').click();
   await page.locator('[data-act="tpl-apply-all"]').click();
   await expect(page.locator('.modal')).toContainText('แทนที่รายการในวัน');
@@ -215,7 +220,7 @@ test('เลือกแผนรายวัน: ใช้การ์ดกั
   await page.goto('/');
   // พฤ. 3 ธ.ค. มีนัด COEX ที่ล็อกไว้จากแผนแนะนำ
   await applyTripTemplate(page);
-  await page.locator('[data-act="open-templates"]').click();
+  await openTemplates(page);
   await expect(page.locator('.modal')).toContainText('เลือกแผนรายวัน');
   const card = page.locator('.tpl-day', { hasText: 'ฮงแด ช็อปตอนเย็น' });
   const day4 = await card.locator('[data-act-change="tpl-target"] option').nth(3).getAttribute('value');
@@ -226,7 +231,7 @@ test('เลือกแผนรายวัน: ใช้การ์ดกั
   await expect(page.locator('.ov-day').nth(3)).toContainText('COEX'); // นัดที่ล็อกยังอยู่
   await expect(page.locator('.ov-day').nth(3)).toContainText('Jangin Dakgalbi');
   // เติมที่ใกล้เคียงเองจากการ์ด
-  await page.locator('[data-act="open-templates"]').click();
+  await openTemplates(page);
   const c2 = page.locator('.tpl-day', { hasText: 'วันมาถึง' });
   const nearBtn = c2.locator('.tpl-near [data-act="tpl-add-place"]').first();
   await nearBtn.click();
@@ -568,7 +573,7 @@ test('โน้ต "จะไปทำอะไร": เพิ่ม/บัน�
   test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
   await page.clock.setFixedTime(new Date('2026-11-30T01:00:00Z')); // 10:00 โซล วันที่ 30 พ.ย.
   await page.goto('/');
-  await page.locator('[data-act="open-templates"]').click();
+  await openTemplates(page);
   await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
   await page.locator('[data-act="tpl-apply-all"]').click();
   await page.locator('[data-act="confirm-ok"]').click();
@@ -686,7 +691,7 @@ test('ตัวจัดแผน: แก้แล้วรายการไม
   test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
   await page.route('https://tile.openstreetmap.org/**', (r) => r.fulfill({ status: 204, body: '' }));
   await page.goto('/');
-  await page.locator('[data-act="open-templates"]').click();
+  await openTemplates(page);
   await page.locator('[data-act="tpl-tab"][data-v="T"]').click();
   await page.locator('[data-act="tpl-apply-all"]').click();
   await page.locator('[data-act="confirm-ok"]').click();
@@ -854,4 +859,14 @@ test('สถานที่ที่เพิ่มเองในตัวจ�
   await pp.locator('[data-pp="delete"]').click();
   await expect(page.locator('#toast')).toContainText('ลบไม่ได้');
   await expect(pp.locator('.pp-card')).toHaveCount(1);
+});
+
+test('แถบเมนูบน: ตัวอักษรล้วน ไม่มีปุ่มแม่แบบ · แม่แบบอยู่ในตั้งค่า', async ({ page }) => {
+  test.skip(isMobile(page), 'แถบบนแบบเต็มเฉพาะคอม');
+  await page.goto('/');
+  await expect(page.locator('.topbar [data-act="open-templates"]')).toHaveCount(0);
+  const labels = await page.locator('.main-menu button').allInnerTexts();
+  expect(labels).toEqual(['วันนี้', 'แผนของฉัน', 'จัดแผน', 'สถานที่', 'แปลงเงิน']);
+  await openTemplates(page);
+  await expect(page.locator('.modal')).toContainText('เลือกแผนรายวัน');
 });
