@@ -591,7 +591,7 @@ test('จัดแผนแบบขั้นตอน: ค้นไม่เจ
   await pl.locator('[data-pl-input="q"]').fill('test select');
   await expect(pl.locator('.pl-lane-list')).toContainText('ไม่พบในรายการที่เตรียมไว้');
   await pl.locator('[data-pl="web-search"]').click();
-  await expect(pl.locator('.pl-web')).toContainText('Test Select Shop');
+  await expect(pl.locator('.pl-web:not(.pl-own-wrap)')).toContainText('Test Select Shop');
   await pl.locator('[data-pl="web-add"][data-v="0"]').click();
   await expect(pl.locator('.pl-row.stop', { hasText: 'Test Select Shop' })).toBeVisible();
   // musinsa: ร้านที่ไม่มีพิกัดก็ขึ้นในผลค้นหา
@@ -655,4 +655,28 @@ test('ร้านที่ยังไม่มีพิกัด: แตะแ
   await expect(page.locator('#toast')).toContainText('บันทึกพิกัดแล้ว');
   await expect(pl.locator('.pl-pin.preview')).toContainText('29CM HOME Seongsu');
   await expect(pl.locator('.pl-nocoord')).toHaveCount(0);
+});
+
+test('เพิ่มสถานที่เองในตัวจัดแผน: ชื่อ + หมวด + วางพิกัด → บันทึกแล้วใส่ลงช่อง · ค้นเจอภายหลัง', async ({ page }) => {
+  test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
+  await page.goto('/');
+  await page.locator('[data-act="open-planner"]').click();
+  const pl = page.locator('#planner');
+  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('[data-pl="lane"][data-v="search"]').click();
+  await pl.locator('[data-pl-input="q"]').fill('Nudake Seongsu');
+  await pl.locator('[data-pl="own-open"]').click();
+  const f = pl.locator('form[data-form="own-place"]');
+  await expect(f.locator('[name="name"]')).toHaveValue('Nudake Seongsu');
+  await expect(f.locator('a', { hasText: 'Google Maps' })).toHaveAttribute('href', /Nudake/);
+  await f.locator('[name="category"]').selectOption('cafe');
+  await f.locator('[name="coord"]').fill('37.5446, 127.0561');
+  await f.locator('[name="stay"]').fill('40');
+  await f.locator('button[value="add"]').click();
+  await expect(page.locator('#toast')).toContainText('เพิ่ม Nudake Seongsu');
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Nudake Seongsu' })).toBeVisible();
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Nudake Seongsu' }).locator('[data-pl-change="stay"]')).toHaveValue('40');
+  // ค้นเจอในรายการภายหลัง (หมวดคาเฟ่)
+  await pl.locator('[data-pl="cat"][data-v="cafe"]').click();
+  await expect(pl.locator('.pl-lane-list')).toContainText('Nudake Seongsu');
 });

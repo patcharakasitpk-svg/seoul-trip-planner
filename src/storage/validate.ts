@@ -110,6 +110,8 @@ function customPlace(p: unknown): Place | null {
       .slice(0, 3)
       .filter((x: unknown) => isObj(x) && typeof x.url === 'string' && /^https:\/\/(www\.google\.com\/maps|www\.openstreetmap\.org)\//.test(x.url))
       .map((x: any) => ({ label: str(x.label, 40) || 'แหล่งข้อมูล', url: str(x.url, 500) })),
+    // ประเภทร้านอาหาร (เช่น คาเฟ่) ที่ผู้ใช้เลือก — เก็บเฉพาะชนิด
+    food: isObj(p.food) && (['one-dish', 'noodle', 'bbq', 'market', 'cafe'] as const).includes(p.food.type) ? { type: p.food.type, menu: [], mealMin: 30, minOrder: null, diningZone: 'other' } : null,
     custom: true,
   };
 }

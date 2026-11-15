@@ -12,6 +12,7 @@ import { TEMPLATES, nearbyForTemplateDay, type Template } from '../../data/templ
 import { legInfoBody } from './leg';
 import { stopInfoBody } from './day';
 import { MEALS, mealName, type Meal } from '../../core/meals';
+import { OWN_CATEGORY_LABEL, type OwnCategory } from '../../core/ownPlace';
 import { placeCard } from './library';
 import { buildShareUrl, MAX_FRAGMENT } from '../../storage/share';
 import { googleStatus } from '../../services/google';
@@ -397,13 +398,11 @@ function importBody(m: Extract<Modal, { type: 'import' }>): string {
 /* ---------- เพิ่มสถานที่เอง ---------- */
 function customBody(): string {
   return `<form data-form="custom" class="form">
-    <label>ชื่อ* <input class="inp" name="name" required maxlength="120"></label>
-    <label>ที่อยู่ <input class="inp" name="address" maxlength="200"></label>
-    <div class="grid2"><label>Latitude <input class="inp" name="lat" inputmode="decimal" placeholder="37.56"></label><label>Longitude <input class="inp" name="lng" inputmode="decimal" placeholder="126.98"></label></div>
-    <p class="muted small">ไม่กรอกพิกัด = ยังไม่ปักหมุด (ยังจัดในแผนได้ แต่ต้องกรอกเวลาเดินทางเอง) · คัดลอกพิกัดได้จาก Google Maps โดยกดค้างที่จุด</p>
-    <div class="grid2"><label>หมวด <select class="inp" name="category"><option value="food">ร้านอาหาร</option><option value="fashion">เสื้อผ้า</option><option value="beauty">เครื่องสำอาง</option><option value="market">ตลาด</option><option value="sight" selected>จุดเที่ยว</option></select></label>
-    <label>เวลาแวะ (นาที) <input class="inp" name="stay" type="number" value="60" min="0"></label></div>
-    <label><input type="checkbox" name="indoor"> อยู่ในร่ม</label>
+    <label>ชื่อ* <input class="inp" name="name" required maxlength="120" placeholder="ชื่อร้าน/สถานที่"></label>
+    <label>หมวด <select class="inp" name="category">${(Object.keys(OWN_CATEGORY_LABEL) as OwnCategory[]).map((c) => `<option value="${c}" ${c === 'sight' ? 'selected' : ''}>${OWN_CATEGORY_LABEL[c]}</option>`).join('')}</select></label>
+    <label>พิกัด <input class="inp" name="coord" placeholder="วาง 37.5438, 127.0557 หรือลิงก์ Google Maps (ไม่บังคับ)"></label>
+    <p class="muted small">บนคอม: คลิกขวาที่ร้านใน Google Maps → กดตัวเลขพิกัดบรรทัดแรกเพื่อคัดลอก · ไม่ใส่พิกัด = ยังจัดในแผนได้ แต่ไม่ปักหมุด</p>
+    <label>อยู่ประมาณ (นาที) <input class="inp" name="stay" type="number" value="45" min="5" max="600"></label>
     <div class="modal-actions"><button type="button" class="btn" data-act="modal-close">ยกเลิก</button><button class="btn primary">บันทึก</button></div>
   </form>`;
 }

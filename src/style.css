@@ -635,3 +635,7 @@ body.planner-open .toast { bottom: 76px; z-index: 90; }
 .coord-row { display: flex; gap: .4rem; }
 .coord-row .inp { flex: 1; min-width: 0; }
 .pl-nocoord { margin: -.2rem 0 .3rem; padding: .5rem .6rem; border: 2px solid #e03131; border-top: 0; border-radius: 0 0 10px 10px; background: #fff5f5; }
+
+.pl-own { display: flex; flex-direction: column; gap: .45rem; margin-top: .6rem; padding: .7rem; border: 1.5px solid var(--accent); border-radius: 12px; background: var(--accent-soft); }
+.pl-own label { display: flex; flex-direction: column; gap: .2rem; font-size: .82rem; color: var(--muted); }
+.pl-own .pl-field { flex-direction: row; align-items: center; gap: .4rem; }

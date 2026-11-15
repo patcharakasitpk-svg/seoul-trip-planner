@@ -13,7 +13,7 @@ import { buildMapSpecs } from './ui/mapSpecs';
 import { onRoutesChange } from './services/routes';
 import { onWeatherChange, ensureWeather } from './services/weather';
 import { moveStopToDay, insertStop, moveStop, newDay, newStop, removeStop, updateStop, reorderStops, newPlan, clone, defaultInsertIndex, applyTripDates , uid } from './core/planOps';
-import type { Day, Place, Plan, Stop, TravelMode } from './core/types';
+import type { Day, Plan, Stop, TravelMode } from './core/types';
 import { suggestOrder } from './core/compare';
 import { decodeFragment, parseJsonPlan, buildShareUrl, exportablePlan } from './storage/share';
 import { saveSettings, loadPlans } from './storage/storage';
@@ -23,6 +23,7 @@ import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
 import { stopLocationId } from './core/schedule';
 import { MEALS, mealName, mealOf, newMeal, mealInsertIndex, type Meal } from './core/meals';
 import { parseLatLng } from './core/coords';
+import { buildOwnPlace } from './core/ownPlace';
 import { searchPlaces, placeFromResult, findExisting } from './services/placeSearch';
 import { SEARCH_PREFIX } from './ui/mapSpecs';
 import { RoomSync, inviteUrl, newRoomId, roomFromHash, toRoomDoc, fromRoomDoc, shouldApplyRemote, type RoomDoc, type SyncState } from './services/sync';
@@ -1344,33 +1345,17 @@ document.addEventListener('submit', (ev) => {
     const dayId = form.dataset.day!;
     if (item) app.commit((p) => (p.extraChecklist[dayId] = [...(p.extraChecklist[dayId] ?? []), item]));
   } else if (kind === 'custom') {
-    const name = String(fd.get('name') ?? '').trim();
-    const lat = parseFloat(String(fd.get('lat') ?? ''));
-    const lng = parseFloat(String(fd.get('lng') ?? ''));
-    const hasCoord = Number.isFinite(lat) && Number.isFinite(lng);
-    if (hasCoord && (lat < 33 || lat > 39 || lng < 124 || lng > 132)) {
-      app.showToast('พิกัดไม่อยู่ในเกาหลีใต้ — ตรวจลำดับ lat/lng');
+    const r = buildOwnPlace(
+      { id: `custom-${app.newUid('c')}`, name: String(fd.get('name') ?? ''), category: String(fd.get('category') ?? ''), coord: String(fd.get('coord') ?? ''), stay: Number(fd.get('stay')) },
+      app.places(),
+    );
+    if (!r.ok) {
+      app.showToast(r.error);
       app.requestRender();
       return;
     }
-    const place: Place = {
-      id: `custom-${app.newUid('c')}`,
-      nameTh: name,
-      nameEn: name,
-      category: (String(fd.get('category')) as Place['category']) || 'sight',
-      area: 'เพิ่มเอง',
-      address: String(fd.get('address') ?? '').trim() || null,
-      lat: hasCoord ? lat : null,
-      lng: hasCoord ? lng : null,
-      coordStatus: hasCoord ? 'user' : 'unverified',
-      reasonTh: 'ผู้ใช้เพิ่มเอง',
-      suggestedStayMin: Math.max(0, Number(fd.get('stay')) || 60),
-      indoor: fd.get('indoor') === 'on',
-      sources: [],
-      custom: true,
-    };
     app.modal = null;
-    app.commit((p) => p.customPlaces.push(place), 'เพิ่มสถานที่แล้ว');
+    app.commit((p) => p.customPlaces.push(r.place), `เพิ่ม ${r.place.nameTh} แล้ว — แตะชื่อเพื่อใส่ในวัน`);
   } else if (kind === 'coord') {
     const c = parseLatLng(String(fd.get('coord') ?? ''));
     if (!c) {

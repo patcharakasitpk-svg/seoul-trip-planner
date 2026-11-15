@@ -12,6 +12,7 @@ import { TEMPLATES } from '../data/templates';
 import { CATEGORY_LABEL } from '../data/places';
 import { placeOptions } from './views/day';
 import { coordFixForm } from './views/library';
+import { buildOwnPlace, OWN_CATEGORY_LABEL, type OwnCategory } from '../core/ownPlace';
 import { travelText } from './views/leg';
 import { mealName, mealOf, newMeal, MEALS, type Meal } from '../core/meals';
 import { systemDayDefaults, recommendedStops } from '../core/dayDefaults';
@@ -37,6 +38,8 @@ interface PState {
   orig: Day;
   /** สถานที่ที่กำลังดูหมุดแดงก่อนใส่ */
   preview: string | null;
+  /** เปิดฟอร์มเพิ่มสถานที่เอง */
+  ownOpen: boolean;
   /** จุดที่กำลังเขียนโน้ต */
   noteEdit: string | null;
   /** ตัวกรองในแท็บค้นหา: หมวด และย่าน */
@@ -64,7 +67,7 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
   const day = app.findDay(dayId);
   if (!day) return;
   onDone = done;
-  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null, web: null, cat: '', zone: '', noteEdit: null };
+  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null, web: null, cat: '', zone: '', noteEdit: null, ownOpen: false };
   if (!root) {
     root = document.createElement('div');
     root.id = 'planner';
@@ -77,6 +80,7 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
     root.addEventListener('dragover', onDragOver);
     root.addEventListener('dragleave', (e) => (e.target as HTMLElement).closest('.drop')?.classList.remove('over'));
     root.addEventListener('drop', onDrop);
+    root.addEventListener('submit', onSubmit);
   }
   root.hidden = false;
   document.body.classList.add('planner-open');
@@ -288,12 +292,28 @@ function searchLane(): string {
 }
 
 /** ค้นหาบนแผนที่ (OSM/Google) เมื่อไม่เจอในรายการ — เลือกแล้วเพิ่มเป็นสถานที่ของแผน */
+/** ฟอร์มเพิ่มสถานที่เอง: ชื่อ + หมวด + วางพิกัด/ลิงก์ Google Maps */
+function ownBlock(): string {
+  if (!st!.ownOpen) return `<div class="pl-web pl-own-wrap"><button class="pl-btn sm web" data-pl="own-open">＋ เพิ่มสถานที่เอง (ชื่อ + พิกัด)</button></div>`;
+  const q = st!.q.trim();
+  const gm = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${q || 'Seoul'} Seoul`)}`;
+  return `<form class="pl-own" data-form="own-place">
+    <p class="pl-group">เพิ่มสถานที่เอง</p>
+    <label>ชื่อ<input class="inp" name="name" maxlength="120" required value="${esc(q)}" placeholder="ชื่อร้าน/สถานที่" data-autofocus></label>
+    <label>หมวด<select class="inp" name="category">${(Object.keys(OWN_CATEGORY_LABEL) as OwnCategory[]).map((c) => `<option value="${c}">${OWN_CATEGORY_LABEL[c]}</option>`).join('')}</select></label>
+    <label>พิกัด <a class="pl-photo" href="${esc(gm)}" target="_blank" rel="noopener">ค้นชื่อนี้ใน Google Maps ↗</a><input class="inp" name="coord" placeholder="วาง 37.5438, 127.0557 หรือลิงก์ Google Maps (ไม่บังคับ)"></label>
+    <p class="muted small">บนคอม: คลิกขวาที่ร้านใน Google Maps → กดตัวเลขพิกัดบรรทัดแรกเพื่อคัดลอก</p>
+    <label>อยู่ประมาณ<span class="pl-field"><input class="inp xs" type="number" name="stay" min="5" max="600" value="45"> นาที</span></label>
+    <div class="pl-note-actions"><button class="pl-btn primary sm" value="add">บันทึกแล้วใส่${st!.slot == null ? 'ท้ายวัน' : `ช่องที่ ${st!.slot + 1}`}</button><button class="pl-btn sm" value="save">บันทึกอย่างเดียว</button><button type="button" class="pl-btn ghost sm" data-pl="own-close">ยกเลิก</button></div>
+  </form>`;
+}
+
 function webBlock(): string {
   const q = st!.q.trim();
-  if (!q) return '';
+  if (!q) return ownBlock();
   const w = st!.web && st!.web.q === q ? st!.web : null;
   const btn = `<button class="pl-btn sm web" data-pl="web-search">ค้นหา “${esc(q)}” บนแผนที่</button>`;
-  if (!w) return `<div class="pl-web">${btn}<p class="muted small">ใช้เมื่อไม่เจอร้านที่ต้องการในรายการด้านบน</p></div>`;
+  if (!w) return `<div class="pl-web">${btn}<p class="muted small">ใช้เมื่อไม่เจอร้านที่ต้องการในรายการด้านบน</p></div>${ownBlock()}`;
   if (w.status === 'loading') return '<div class="pl-web"><p class="muted small">กำลังค้นหา…</p></div>';
   if (w.status === 'error') return `<div class="pl-web"><p class="bad-text small">${esc(w.note ?? 'ค้นหาไม่สำเร็จ')}</p>${btn}</div>`;
   if (!w.results.length) return '<div class="pl-web"><p class="muted small">ไม่พบบนแผนที่ — ลองชื่อภาษาอังกฤษหรือเกาหลี หรือเติมชื่อย่าน</p></div>';
@@ -305,7 +325,7 @@ function webBlock(): string {
         <button class="btn sm" data-pl="web-add" data-v="${i}" aria-label="ใส่ ${esc(r.name)}">＋</button>
       </div>`,
     )
-    .join('')}</div>`;
+    .join('')}</div>${ownBlock()}`;
 }
 
 async function runWebSearch() {
@@ -636,6 +656,12 @@ function onClick(e: Event) {
       st.draft = v === '__end' ? { ...st.draft, endLeg: { ...st.draft.endLeg, ...clear } } : updateStop(st.draft, v!, { legIn: { ...st.draft.stops.find((y) => y.uid === v)!.legIn, ...clear } });
       break;
     }
+    case 'own-open':
+      st.ownOpen = true;
+      break;
+    case 'own-close':
+      st.ownOpen = false;
+      break;
     case 'note-edit':
       st.noteEdit = el.dataset.uid ?? null;
       break;
@@ -704,6 +730,29 @@ function onClick(e: Event) {
       return;
   }
   render();
+}
+
+/** ฟอร์มเพิ่มสถานที่เอง (จัดการในตัวจัดแผน ไม่ส่งต่อให้หน้าหลัก) */
+function onSubmit(e: SubmitEvent) {
+  const form = e.target as HTMLFormElement;
+  if (form.dataset.form !== 'own-place' || !st) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const fd = new FormData(form);
+  const r = buildOwnPlace(
+    { id: `custom-${uid('c')}`, name: String(fd.get('name') ?? ''), category: String(fd.get('category') ?? ''), coord: String(fd.get('coord') ?? ''), stay: Number(fd.get('stay')) },
+    app.places(),
+  );
+  if (!r.ok) {
+    app.showToast(r.error);
+    return;
+  }
+  app.commit((p) => void p.customPlaces.push(r.place));
+  st.ownOpen = false;
+  const add = (e.submitter as HTMLButtonElement | null)?.value === 'add';
+  app.showToast(add ? `เพิ่ม ${r.place.nameTh} ลงแผนแล้ว` : `บันทึก ${r.place.nameTh} แล้ว — ค้นหาแล้วกด ＋ เพื่อใส่`);
+  if (add) addPlace(r.place.id, st.slot);
+  else render();
 }
 
 function onChange(e: Event) {
