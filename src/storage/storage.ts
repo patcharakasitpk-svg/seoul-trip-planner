@@ -13,6 +13,9 @@ export interface Settings {
   /** คีย์ที่ผู้ใช้กรอกในเครื่องนี้ — ไม่ส่งออก/ไม่แชร์ */
   apiKey?: string;
   mapId?: string;
+  /** กลุ่มแชร์สถานที่กับเพื่อน (รหัสห้อง) และชื่อที่เพื่อนเห็น */
+  placesRoom?: string;
+  myName?: string;
 }
 
 export function safeGet(key: string): string | null {

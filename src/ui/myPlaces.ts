@@ -8,6 +8,7 @@ import { coordError, parseLatLng } from '../core/coords';
 import { cleanLinks } from '../storage/validate';
 import { placePhotos, resizeImage } from '../services/shopPhotos';
 import { placeInfoHtml, hydratePlacePhotos } from './views/placeInfo';
+import { shareCardHtml, createPlacesRoom, leavePlacesRoom, inviteLink, setMyName } from './placesShare';
 
 /**
  * หน้า "สถานที่": เพิ่ม/แก้สถานที่ของฉัน (ชื่อ · ตำแหน่ง · รูป · ลิงก์ · โน้ต) พร้อมแผนที่ของตัวเอง
@@ -86,6 +87,7 @@ function listHtml(): string {
   const ps = mine();
   return `
     <div class="pp-head"><h2>สถานที่ที่เพิ่มเอง <span class="muted">(${ps.length})</span></h2>${form ? '' : '<button class="btn primary" data-pp="add">＋ เพิ่มสถานที่</button>'}</div>
+    ${shareCardHtml()}
     <p class="muted small pp-intro">ร้าน/ที่เที่ยวที่ไม่มีในรายการ — ใส่ตำแหน่ง แล้วเพิ่มรูปกับลิงก์ไว้ จะได้จำได้ว่าที่ไหน · ใช้ในหน้า “จัดแผน” ได้ทุกวัน</p>
     ${form && !form.id ? formHtml() : ''}
     ${ps.length ? ps.map(card).join('') : form ? '' : '<p class="empty">ยังไม่มีสถานที่ที่เพิ่มเอง — กด “＋ เพิ่มสถานที่”</p>'}`;
@@ -115,7 +117,7 @@ function card(p: Place): string {
   return `<article class="pp-card ${sel === p.id ? 'sel' : ''}" data-pp-card="${esc(p.id)}">
     <div class="pp-card-head">
       <button class="pp-name" data-pp="select" data-place="${esc(p.id)}">${esc(p.nameTh)}</button>
-      <span class="muted small">${esc(OWN_CATEGORY_LABEL[ownCat(p)])}${p.area && p.area !== 'เพิ่มเอง' ? ` · ${esc(p.area)}` : ''}</span>
+      <span class="muted small">${esc(OWN_CATEGORY_LABEL[ownCat(p)])}${p.area && p.area !== 'เพิ่มเอง' ? ` · ${esc(p.area)}` : ''}${p.addedBy ? ` · เพิ่มโดย ${esc(p.addedBy)}` : ''}</span>
     </div>
     ${p.lat == null ? '<p class="warn-text small">ยังไม่มีตำแหน่ง — กด “แก้” เพื่อใส่พิกัดหรือแตะบนแผนที่</p>' : ''}
     ${used.length ? `<p class="small pp-used">อยู่ในแผน: <b>${used.map(esc).join(', ')}</b></p>` : ''}
@@ -219,6 +221,23 @@ function onClick(e: Event) {
     case 'pick':
       picking = !picking;
       break;
+    case 'share-start':
+      createPlacesRoom();
+      app.showToast('เริ่มแชร์แล้ว — ส่งลิงก์ชวนให้เพื่อน');
+      break;
+    case 'share-copy':
+    case 'share-send': {
+      const url = inviteLink();
+      if (!url) return;
+      if (el.dataset.pp === 'share-send' && navigator.share) void navigator.share({ title: 'สถานที่ทริปโซล', url }).catch(() => {});
+      else void navigator.clipboard?.writeText(url).then(() => app.showToast('คัดลอกลิงก์ชวนแล้ว — ส่งให้เพื่อนที่ไปด้วย'), () => app.showToast(url));
+      app.requestRender();
+      return;
+    }
+    case 'share-stop':
+      leavePlacesRoom();
+      app.showToast('หยุดแชร์ในเครื่องนี้แล้ว — สถานที่ที่มีอยู่ยังอยู่ครบ');
+      break;
     case 'cat':
       if (form) form.category = (el.dataset.ppCat as OwnCategory) ?? form.category;
       break;
@@ -270,6 +289,12 @@ function onInput(e: Event) {
 
 function onChange(e: Event) {
   const el = e.target as HTMLInputElement;
+  if (el.hasAttribute('data-pp-name')) {
+    setMyName(el.value);
+    app.showToast('บันทึกชื่อแล้ว');
+    app.requestRender();
+    return;
+  }
   if (el.dataset.ppPhoto && el.files?.length) {
     void addPhotos(el.dataset.ppPhoto, [...el.files]);
     el.value = '';
@@ -289,7 +314,7 @@ function onSubmit(e: Event) {
     renderMyPlaces();
     return;
   }
-  const place: Place = { ...r.place, notes: form.note.trim().slice(0, 500) || null, links: cleanLinks(form.links.split(/\s+/)), photos: old?.photos ?? null };
+  const place: Place = { ...r.place, notes: form.note.trim().slice(0, 500) || null, links: cleanLinks(form.links.split(/\s+/)), photos: old?.photos ?? null, addedBy: old ? old.addedBy ?? null : app.settings.myName ?? null };
   const badLinks = form.links.split(/\s+/).filter(Boolean).length - (place.links?.length ?? 0);
   app.commit((p) => {
     p.customPlaces = old ? p.customPlaces.map((x) => (x.id === old.id ? place : x)) : [...p.customPlaces, place];

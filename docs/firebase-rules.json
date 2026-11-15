@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "places": {
+      "$room": {
+        ".read": "$room.length >= 20",
+        ".write": "$room.length >= 20",
+        "$id": {
+          ".validate": "!newData.exists() || (newData.child('nameTh').isString() && newData.child('nameTh').val().length <= 120)"
+        }
+      }
+    },
+    "photos": {
+      "$room": {
+        "$id": {
+          ".read": "$room.length >= 20",
+          ".write": "$room.length >= 20",
+          ".validate": "!newData.exists() || (newData.child('d').isString() && newData.child('d').val().length < 3000000)"
+        }
+      }
+    },
+    "rooms": {
+      "$room": {
+        ".read": "$room.length >= 20",
+        ".write": "$room.length >= 20"
+      }
+    }
+  }
+}

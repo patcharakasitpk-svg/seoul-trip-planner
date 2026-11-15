@@ -49,6 +49,14 @@ export function createPhotoStore(dbName: string) {
         return null;
       }
     },
+    /** ไฟล์รูปดิบ (ใช้ส่งขึ้นกลุ่มแชร์) */
+    async photoBlob(id: string): Promise<Blob | null> {
+      try {
+        return (await tx<Blob | undefined>('readonly', (s) => s.get(id) as IDBRequest<Blob | undefined>)) ?? null;
+      } catch {
+        return null;
+      }
+    },
     async photoIds(): Promise<string[]> {
       try {
         return (await tx('readonly', (s) => s.getAllKeys())).map(String);

@@ -89,7 +89,7 @@ export function validatePlan(input: unknown): { ok: true; plan: Plan; warnings: 
   };
 }
 
-function customPlace(p: unknown): Place | null {
+export function customPlace(p: unknown): Place | null {
   if (!isObj(p)) return null;
   const name = str(p.nameTh, 120) || str(p.nameEn, 120);
   if (!name) return null;
@@ -118,6 +118,7 @@ function customPlace(p: unknown): Place | null {
     notes: str(p.notes, 500) || null,
     links: cleanLinks(p.links),
     photos: Array.isArray(p.photos) ? p.photos.slice(0, 12).map((x: unknown) => str(x, 40)).filter((x: string) => /^[A-Za-z0-9_-]+$/.test(x)) : null,
+    addedBy: str(p.addedBy, 30).trim() || null,
     custom: true,
   };
 }

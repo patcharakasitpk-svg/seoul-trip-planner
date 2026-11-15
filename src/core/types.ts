@@ -55,6 +55,8 @@ export interface Place {
   links?: string[] | null;
   /** รูปที่ผู้ใช้อัปโหลด (id ใน IndexedDB ของเครื่องนี้) */
   photos?: string[] | null;
+  /** ชื่อคนที่เพิ่ม (กลุ่มแชร์สถานที่) */
+  addedBy?: string | null;
 }
 
 export type TravelMode = 'TRANSIT' | 'WALKING' | 'DRIVING';

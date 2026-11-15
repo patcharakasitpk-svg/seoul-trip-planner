@@ -3,6 +3,7 @@ import QRCode from 'qrcode';
 import { app, type Tab } from './ui/app';
 import { renderPlanOverview } from './ui/views/overview';
 import { initMyPlaces, renderMyPlaces } from './ui/myPlaces';
+import { startPlacesShare, syncPlacesShare, joinPlacesRoom, placesRoomFromHash } from './ui/placesShare';
 import { initPacking, renderPacking } from './ui/packing';
 import { hydratePlacePhotos } from './ui/views/placeInfo';
 import { renderToday, todayDay } from './ui/views/today';
@@ -84,6 +85,7 @@ document.querySelector('#app')!.innerHTML = `
 
 
 initMyPlaces($('#places-page'));
+startPlacesShare();
 initPacking($('#packing-page'));
 
 // ความสูงแถบเมนูบน/ล่าง → ตัวจัดแผนวางระหว่างสองแถบ (เมนูเห็นตลอด)
@@ -115,6 +117,7 @@ function render() {
   else if (syncState.status === 'error') st.push(`<span class="warn">🔗 ซิงก์ไม่ได้: ${esc(syncState.message)}</span>`);
   $('#status-bar').innerHTML = st.join('');
   if (app.tab === 'places') renderMyPlaces();
+  syncPlacesShare();
   if (app.tab === 'packing') renderPacking();
   $('#right').innerHTML = app.tab === 'today' ? renderToday() : renderPlanOverview();
   // คงตำแหน่งเลื่อนในหน้าต่าง (เช่นกด ＋ ในแม่แบบหลายครั้ง) ไม่ให้เด้งกลับบนสุด
@@ -1517,6 +1520,15 @@ onWeatherChange(() => app.requestRender());
 onGoogleStatus(() => app.requestRender());
 
 function handleHash() {
+  const pr = placesRoomFromHash(location.hash);
+  if (pr) {
+    history.replaceState(null, '', location.pathname + location.search);
+    joinPlacesRoom(pr);
+    app.tab = 'places';
+    app.showToast(app.settings.myName ? 'เข้ากลุ่มแชร์สถานที่แล้ว' : 'เข้ากลุ่มแชร์สถานที่แล้ว — ใส่ชื่อของคุณให้เพื่อนเห็น');
+    app.requestRender();
+    return;
+  }
   const room = roomFromHash(location.hash);
   if (room) {
     history.replaceState(null, '', location.pathname + location.search);
