@@ -17,6 +17,8 @@ import { systemDayDefaults, recommendedStops } from '../core/dayDefaults';
 import type { Day, Place, Stop, TravelMode } from '../core/types';
 import type { DaySchedule } from '../core/schedule';
 import { fmtDist, straightLineM } from '../core/geo';
+import { searchPlaces, placeFromResult, findExisting, resultMapsUrl, type SearchResult } from '../services/placeSearch';
+import { uid } from '../core/planOps';
 
 type Step = 1 | 2 | 3 | 4;
 interface PState {
@@ -33,6 +35,8 @@ interface PState {
   orig: Day;
   /** สถานที่ที่กำลังดูหมุดแดงก่อนใส่ */
   preview: string | null;
+  /** ค้นหาบนแผนที่ (นอกรายการที่เตรียมไว้) */
+  web: { q: string; status: 'loading' | 'done' | 'error'; results: SearchResult[]; note?: string } | null;
 }
 
 let st: PState | null = null;
@@ -53,7 +57,7 @@ export function openPlanner(dayId: string, done: (dayId: string) => void) {
   const day = app.findDay(dayId);
   if (!day) return;
   onDone = done;
-  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null };
+  st = { step: 1, dayId, draft: withDefaults(clone(day)), lane: 'cards', q: '', slot: null, backToSummary: false, orig: clone(day), preview: null, web: null };
   if (!root) {
     root = document.createElement('div');
     root.id = 'planner';
@@ -207,6 +211,55 @@ function step1(): string {
 /** ลิงก์ดูรูปสถานที่ (เปิดแท็บใหม่) — ชื่อแปลก ๆ จะได้นึกออกว่าหน้าตาเป็นยังไง */
 const photoLink = (p: Place | undefined) => (p && p.category !== 'base' ? `<a class="pl-photo" href="${esc(photosUrl(p))}" target="_blank" rel="noopener" title="ดูรูป ${esc(p.nameTh)}">ดูรูป ↗</a>` : '');
 
+/** ค้นหาบนแผนที่ (OSM/Google) เมื่อไม่เจอในรายการ — เลือกแล้วเพิ่มเป็นสถานที่ของแผน */
+function webBlock(): string {
+  const q = st!.q.trim();
+  if (!q) return '';
+  const w = st!.web && st!.web.q === q ? st!.web : null;
+  const btn = `<button class="pl-btn sm web" data-pl="web-search">ค้นหา “${esc(q)}” บนแผนที่</button>`;
+  if (!w) return `<div class="pl-web">${btn}<p class="muted small">ใช้เมื่อไม่เจอร้านที่ต้องการในรายการด้านบน</p></div>`;
+  if (w.status === 'loading') return '<div class="pl-web"><p class="muted small">กำลังค้นหา…</p></div>';
+  if (w.status === 'error') return `<div class="pl-web"><p class="bad-text small">${esc(w.note ?? 'ค้นหาไม่สำเร็จ')}</p>${btn}</div>`;
+  if (!w.results.length) return '<div class="pl-web"><p class="muted small">ไม่พบบนแผนที่ — ลองชื่อภาษาอังกฤษหรือเกาหลี หรือเติมชื่อย่าน</p></div>';
+  return `<div class="pl-web"><p class="pl-group">จากการค้นหาบนแผนที่${w.note ? ` <span class="muted">· ${esc(w.note)}</span>` : ''}</p>${w.results
+    .map(
+      (r, i) => `<div class="pl-item">
+        <div class="pl-item-text"><b>${esc(r.name)}</b><span class="muted small">${esc(r.address ?? '')}</span></div>
+        <a class="pl-photo" href="${esc(resultMapsUrl(r))}" target="_blank" rel="noopener">ดูใน Google Maps ↗</a>
+        <button class="btn sm" data-pl="web-add" data-v="${i}" aria-label="ใส่ ${esc(r.name)}">＋</button>
+      </div>`,
+    )
+    .join('')}</div>`;
+}
+
+async function runWebSearch() {
+  const q = st!.q.trim();
+  if (!q) return;
+  st!.web = { q, status: 'loading', results: [] };
+  render();
+  try {
+    const r = await searchPlaces(q);
+    if (!st || st.q.trim() !== q) return;
+    st.web = { q, status: 'done', results: r.results, note: r.note };
+  } catch {
+    if (!st) return;
+    st.web = { q, status: 'error', results: [], note: app.online ? 'ค้นหาไม่สำเร็จ ลองใหม่อีกครั้ง' : 'ออฟไลน์ — ค้นหาไม่ได้' };
+  }
+  render();
+}
+
+function addWebResult(i: number) {
+  const r = st!.web?.results[i];
+  if (!r) return;
+  let place = findExisting(app.plan.customPlaces, r);
+  if (!place) {
+    const created = placeFromResult(r, `custom-${uid('c')}`);
+    app.commit((p) => p.customPlaces.push(created)); // สถานที่ที่เพิ่มเองของแผน (ใช้ได้ทุกวัน)
+    place = created;
+  }
+  addPlace(place.id, st!.slot);
+}
+
 /** จุดที่จะต่อจากช่องที่เลือก (หรือจุดสุดท้ายของวัน) — ใช้วัดระยะตอนดูหมุดแดง */
 function anchorPlace(): Place | undefined {
   const d = st!.draft;
@@ -232,6 +285,7 @@ function laneItem(p: Place, _inDay: boolean): string {
   return `<div class="pl-item ${times ? 'in' : ''} ${on ? 'preview' : ''}" draggable="true" data-drag-place="${esc(p.id)}">
     <button class="pl-item-text" data-pl="preview" data-place="${esc(p.id)}" aria-pressed="${on}" title="แตะเพื่อดูหมุดบนแผนที่"><b>${esc(p.nameTh)}</b><span class="muted small">${esc(CATEGORY_LABEL[p.category] ?? '')} · ${esc(p.area)}${p.suggestedStayMin ? ` · ราว ${fmtDur(p.suggestedStayMin)}` : ''}</span>${on ? previewInfo(p) : ''}</button>
     ${photoLink(p)}
+    ${p.lat == null ? '<span class="pl-in-tag muted">ยังไม่มีพิกัด</span>' : ''}
     ${times ? `<span class="pl-in-tag">อยู่ในแผนแล้ว${times > 1 ? ` ${times} ครั้ง` : ''}</span>` : ''}
     <button class="btn sm" data-pl="add" data-place="${esc(p.id)}" aria-label="ใส่ ${esc(p.nameTh)} ในช่องที่เลือก${times ? ' (อีกครั้ง)' : ''}">＋</button>
   </div>`;
@@ -256,17 +310,17 @@ function step2(s: DaySchedule): string {
     const q = st!.q.trim().toLowerCase();
     const list = app
       .places()
-      .filter((p) => p.lat != null)
       .filter((p) => !q || [p.nameTh, p.thaiName, p.nameEn, p.nameKo, p.area, ...(p.food?.menu ?? [])].join(' ').toLowerCase().includes(q));
     // ใกล้จุดในแผนก่อน
     const anchors = d.stops.map(placeOf).filter((p): p is Place => !!p && p.lat != null);
-    const dist = (p: Place) => (anchors.length ? Math.min(...anchors.map((a) => straightLineM({ lat: a.lat!, lng: a.lng! }, { lat: p.lat!, lng: p.lng! }))) : 0);
+    const dist = (p: Place) => (p.lat == null ? 1e9 : anchors.length ? Math.min(...anchors.map((a) => straightLineM({ lat: a.lat!, lng: a.lng! }, { lat: p.lat!, lng: p.lng! }))) : 0);
     list.sort((a, b) => dist(a) - dist(b));
     const main = list.filter((p) => p.category === 'base');
     const others = list.filter((p) => p.category !== 'base');
     laneBody = list.length
       ? `${main.length ? `<p class="pl-group">สถานที่หลัก</p>${main.map((p) => laneItem(p, inDay.has(p.id))).join('')}` : ''}${others.length ? `<p class="pl-group">สถานที่อื่น ๆ <span class="muted">(ใกล้จุดในแผนก่อน)</span></p>${others.slice(0, 80).map((p) => laneItem(p, inDay.has(p.id))).join('')}` : ''}`
-      : '<p class="muted">ไม่พบ — ลองคำอื่น</p>';
+      : `<p class="muted">ไม่พบในรายการที่เตรียมไว้</p>`;
+    laneBody += webBlock();
   }
   const slotLabel = st!.slot == null ? 'ท้ายวัน' : `ช่องที่ ${st!.slot + 1}`;
   return `<div class="pl-lanes">
@@ -504,6 +558,12 @@ function onClick(e: Event) {
       st.draft = v === '__end' ? { ...st.draft, endLeg: { ...st.draft.endLeg, ...clear } } : updateStop(st.draft, v!, { legIn: { ...st.draft.stops.find((y) => y.uid === v)!.legIn, ...clear } });
       break;
     }
+    case 'web-search':
+      void runWebSearch();
+      return;
+    case 'web-add':
+      addWebResult(Number(v));
+      return;
     case 'preview':
       st.preview = st.preview === el.dataset.place ? null : el.dataset.place!;
       break;

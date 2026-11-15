@@ -563,3 +563,25 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await expect(page.locator('body')).toHaveAttribute('data-tab', 'today');
   await expect(page.locator('.tl-list')).toContainText('Gwangjang Market');
 });
+
+test('จัดแผนแบบขั้นตอน: ค้นไม่เจอในรายการ → ค้นหาบนแผนที่แล้วใส่ลงแผนได้', async ({ page }) => {
+  test.skip(isMobile(page), 'ออกแบบให้จัดแผนบนคอม/iPad');
+  await page.route('https://nominatim.openstreetmap.org/**', (r) =>
+    r.fulfill({ json: [{ lat: '37.5236', lon: '127.0230', name: 'Test Select Shop', display_name: 'Test Select Shop, Sinsa-dong, Gangnam-gu, Seoul', category: 'shop', type: 'clothes' }] }),
+  );
+  await page.goto('/');
+  await page.locator('[data-act="open-planner"]').click();
+  const pl = page.locator('#planner');
+  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('[data-pl="lane"][data-v="search"]').click();
+  await pl.locator('[data-pl-input="q"]').fill('test select');
+  await expect(pl.locator('.pl-lane-list')).toContainText('ไม่พบในรายการที่เตรียมไว้');
+  await pl.locator('[data-pl="web-search"]').click();
+  await expect(pl.locator('.pl-web')).toContainText('Test Select Shop');
+  await pl.locator('[data-pl="web-add"][data-v="0"]').click();
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Test Select Shop' })).toBeVisible();
+  // musinsa: ร้านที่ไม่มีพิกัดก็ขึ้นในผลค้นหา
+  await pl.locator('[data-pl-input="q"]').fill('musinsa');
+  await pl.locator('[data-pl-input="q"]').dispatchEvent('input');
+  await expect(pl.locator('.pl-lane-list .pl-item')).toHaveCount(2);
+});
