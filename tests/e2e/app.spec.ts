@@ -583,5 +583,6 @@ test('จัดแผนแบบขั้นตอน: ค้นไม่เจ
   // musinsa: ร้านที่ไม่มีพิกัดก็ขึ้นในผลค้นหา
   await pl.locator('[data-pl-input="q"]').fill('musinsa');
   await pl.locator('[data-pl-input="q"]').dispatchEvent('input');
-  await expect(pl.locator('.pl-lane-list .pl-item')).toHaveCount(2);
+  await expect(pl.locator('.pl-lane-list')).toContainText('MUSINSA STANDARD Myeongdong Jungang');
+  expect(await pl.locator('.pl-lane-list .pl-item').count()).toBeGreaterThanOrEqual(4);
 });

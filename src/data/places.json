@@ -963,10 +963,10 @@
   "category": "fashion",
   "area": "Myeongdong",
   "address": "40 Myeongdong 8-gil, Jung-gu, Seoul (서울 중구 명동8길 40), 1F–4F",
-  "lat": null,
-  "lng": null,
-  "coordStatus": "unverified",
-  "coordSource": null,
+  "lat": 37.5618787,
+  "lng": 126.9847339,
+  "coordStatus": "verified",
+  "coordSource": "Kakao Map place 1630552866 '무신사 스탠다드 명동중앙점' (서울 중구 명동8길 40 1-4층; WCONGNAMUL 496628,1128430 converted to WGS84 → 37.56188, 126.98473); corroborated by OSM node 14248123267 'Musinsa Standard' on Myeongdong 8-gil (37.56194, 126.98493, ~18 m). The older MUSINSA STANDARD Myeongdong (남대문로 90, Myeongdong N Bldg) is at Kakao 37.56509, 126.98292 (~400 m away), so the OSM node belongs to the Jungang branch. Kakao lists hours 11:00–22:00, tel 0507-872-3743.",
   "reasonTh": "สาขาใหม่ 4 ชั้น (~500 พยอง) เสื้อผ้าเบสิกราคาคุ้ม มีบริการสกรีนเสื้อยืด 'Seoul T-shirt' ร่วมกับกรุงโซล เดินจากโรงแรมได้",
   "suggestedStayMin": 45,
   "budget": {
@@ -3849,5 +3849,997 @@
   ],
   "checkedAt": "2026-11-15",
   "notes": "Optional. Tax refund + elevator (Daiso finder). Floor count not found. Older alternative: 강남역2호점, B1 109 Teheran-ro (OSM node 12464855600; KTripTips 4030880). KTripTips also lists a '강남본점' at 1F 372 Gangnam-daero which no longer appears in the Daiso finder search for 강남 — possibly closed/relocated."
+ },
+ {
+  "id": "lotte-department-store-myeongdong-main",
+  "nameTh": "ห้างล็อตเต้ สาขาหลักเมียงดง",
+  "nameEn": "LOTTE Department Store Main Branch",
+  "nameKo": "롯데백화점 본점",
+  "branch": "Main Store (Myeongdong / Sogong-dong)",
+  "category": "fashion",
+  "area": "Myeongdong",
+  "address": "81 Namdaemun-ro, Jung-gu, Seoul 04533 (서울 중구 남대문로 81)",
+  "lat": 37.5648738,
+  "lng": 126.9817344,
+  "coordStatus": "verified",
+  "coordSource": "OSM way 233592424 (롯데백화점, 남대문로 81) via Nominatim; matches Kakao Map place 7858517 '롯데백화점 본점' (WCONGNAMUL 495970,1129270 → 37.56491, 126.98175, ~5 m apart)",
+  "reasonTh": "ห้างล็อตเต้สาขาใหญ่ใกล้ที่พักเมียงดง เดินไปได้ ผู้ใช้บอกว่าชั้น 1 มีแจกบัตร T-money ฟรี — แหล่งข่าวยืนยันว่ามี 'LOTTE Tourist Membership Card' สำหรับชาวต่างชาติ ใช้แตะรถไฟใต้ดิน/รถเมล์แบบ T-money ได้ (ต้องใช้พาสปอร์ต + อีเมล) แต่รายละเอียดว่าฟรีและจุดรับยังไม่ยืนยันจากเว็บทางการ",
+  "suggestedStayMin": 75,
+  "budget": {
+   "textTh": "ห้างหรู ราคาขึ้นกับแบรนด์ ไม่ได้ตรวจสอบจากแหล่งข้อมูล (บัตรนักท่องเที่ยวไม่มีเงินในบัตร ต้องเติมเอง)",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "Kakao Map / KoreaToDo: daily 10:30–20:30 (food court to 21:00). One 2026 blog says Mon–Thu 10:30–20:00, Fri–Sun to 20:30 – confirm on lotteshopping.com. Irregular monthly closing day.",
+   "closedDays": "Irregular monthly closing (usually a Monday); December 2026 date not found",
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": []
+  },
+  "openTime": "10:30",
+  "closeTime": "20:30",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": [
+   "department store",
+   "luxury",
+   "tourist membership card"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Euljiro 1(il)-ga",
+     "nameKo": "을지로입구",
+     "lines": [
+      "2"
+     ],
+     "exit": "7",
+     "walkMin": 1
+    },
+    {
+     "name": "Myeongdong",
+     "nameKo": "명동",
+     "lines": [
+      "4"
+     ],
+     "exit": "5",
+     "walkMin": 10
+    }
+   ],
+   "bus": null,
+   "status": "verified",
+   "sources": [
+    {
+     "label": "KoreaToDo – Lotte Dept Store Main (Euljiro 1-ga exit 7/8 direct; Myeongdong exit 5 ~10 min)",
+     "url": "https://www.koreatodo.com/lotte-department-store-main-branch"
+    },
+    {
+     "label": "Trazy – Lotte Department Store Myeongdong",
+     "url": "https://www.trazy.com/spot/2333"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "TheSmartLocal – Lotte Tourist Membership Card (T-money function, passport, 1F Tax Refund Lounge / B1 foreign desk; updated 19 Jun 2026)",
+    "url": "https://thesmartlocal.com/read/lotte-tourist-membership-card-korea/"
+   },
+   {
+    "label": "Asia Economy – Tourists Membership Card passes 25,000 issuances (launched Dec 2025, transport card function)",
+    "url": "https://view.asiae.co.kr/en/article/2026020218250818602"
+   },
+   {
+    "label": "Asia Economy – Lotte expands foreigner membership to Jamsil (passport + email verification)",
+    "url": "https://www.asiae.co.kr/en/article/2026042816590547011"
+   },
+   {
+    "label": "KoreaToDo – floor guide, hours",
+    "url": "https://www.koreatodo.com/lotte-department-store-main-branch"
+   },
+   {
+    "label": "Kakao Map search '롯데백화점 본점'",
+    "url": "https://m.map.kakao.com/actions/searchView?q=%EB%A1%AF%EB%8D%B0%EB%B0%B1%ED%99%94%EC%A0%90%20%EB%B3%B8%EC%A0%90"
+   },
+   {
+    "label": "OSM way 233592424",
+    "url": "https://www.openstreetmap.org/way/233592424"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "User note '1F, pick up a free T-money card': PARTLY verified. The 'LOTTE Tourist Membership Card' (launched Dec 2025 at the main store, foreigners only) works as a T-money-style transit card with zero stored value (top up at convenience stores/station machines). Requirements: passport + email verification + consent form, issued on the spot. TheSmartLocal (updated Jun 2026) lists pickup at the Tax Refund Lounge next to Gucci on 1F and the Foreign Customer Service Desk next to Lotteria on B1, and says issuance runs 'till 31 Dec 2026'. 'Free' comes only from travel blogs (TheSmartLocal/Tripzilla), not an official Lotte page – could not load lotteshopping.com (connection refused). Card perks: 5% off at the main store (purchases over KRW 100,000, limited coupons), 10% Lotte Duty Free/7-Eleven, 7% Lotte Mart; terms may change. Monthly closing day for Dec 2026 not found – Lotte Jamsil closed Mon 12 Oct and Mon 9 Nov, so a Monday closure (30 Nov or 7 Dec) is possible; check lotteshopping.com or call 1577-0001. Winter sale runs 13–29 Nov 2026 (ends before the trip). 'Lotte Town Light' media facade on the exterior runs from December. Lotte Duty Free is on 9F–12F."
+ },
+ {
+  "id": "random-walk-dosan",
+  "nameTh": "แรนดอมวอล์ก (ร้านเสื้อผ้าผู้ชายสายคลาสสิก โดซาน)",
+  "nameEn": "Random Walk Dosan-Park",
+  "nameKo": "랜덤워크",
+  "branch": "Dosan Park (Sinsa-dong, Gangnam)",
+  "category": "fashion",
+  "area": "Apgujeong",
+  "address": "40 Eonju-ro 164-gil, Gangnam-gu, Seoul 06020 (서울 강남구 언주로164길 40)",
+  "lat": 37.5252977,
+  "lng": 127.0367901,
+  "coordStatus": "verified",
+  "coordSource": "OSM node 13761630194 (Random Walk, 언주로164길) via Nominatim; matches Kakao Map place 26916575 '랜덤워크' (→ 37.52528, 127.03678) and Wanderlog 37.525257, 127.036753 (all within ~5 m)",
+  "reasonTh": "ร้านเลือกสรรเสื้อผ้าผู้ชายสายคลาสสิก/เฮอริเทจใกล้สวนโดซาน มีแบรนด์อย่าง Anatomica, orSlow, JM Weston, Crescent Down Works พนักงานบริการดี",
+  "suggestedStayMin": 45,
+  "budget": {
+   "textTh": "แบรนด์นำเข้าระดับกลาง-บน ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "Mon–Sun 12:30–20:00 (official site)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "12:30",
+  "closeTime": "20:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": [
+   "menswear",
+   "select shop",
+   "heritage",
+   "classic",
+   "Japanese brands"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Apgujeong Rodeo",
+     "nameKo": "압구정로데오",
+     "lines": [
+      "SB"
+     ],
+     "exit": null,
+     "walkMin": 7
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": []
+  },
+  "sources": [
+   {
+    "label": "Random Walk official site (address, Mon–Sun 12:30–20:00, 02-516-0225)",
+    "url": "https://www.randomwalk.co.kr/"
+   },
+   {
+    "label": "Wanderlog – Random Walk (coords, brands, reviews)",
+    "url": "https://wanderlog.com/place/details/8058721/random-walk"
+   },
+   {
+    "label": "Instagram @randomwalkshop",
+    "url": "https://www.instagram.com/randomwalkshop/"
+   },
+   {
+    "label": "OSM node 13761630194",
+    "url": "https://www.openstreetmap.org/node/13761630194"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Identified as 랜덤워크 'Random Walk Dosan-Park', a classic/heritage menswear select shop (the only physical store listed on randomwalk.co.kr). Opens only at 12:30. No closed days or holiday closures listed for 30 Nov–6 Dec 2026; check Instagram @randomwalkshop. Transit is an estimate: ~450 m straight-line west of Apgujeong Rodeo station (Suin-Bundang) – exit not sourced. Phone 02-516-0225. Note: Random Walk also stocks Anatomica, which the user associated with ETC SEOUL."
+ },
+ {
+  "id": "etc-seoul-sinsa",
+  "nameTh": "อีทีซี โซล สาขาซินซา (ร้านมัลติแบรนด์)",
+  "nameEn": "ETC SEOUL Sinsa",
+  "nameKo": "이티씨서울 신사 (ETC서울)",
+  "branch": "Sinsa (Garosu-gil)",
+  "category": "fashion",
+  "area": "Sinsa / Garosu-gil",
+  "address": "B1, 11 Apgujeong-ro 10-gil, Gangnam-gu, Seoul 06028 (서울 강남구 압구정로10길 11, 지하1층)",
+  "lat": 37.5228292,
+  "lng": 127.0219892,
+  "coordStatus": "verified",
+  "coordSource": "OSM node 13946799148 (another tenant '골드참치' tagged 압구정로10길 11, i.e. same building) via Nominatim; matches Kakao Map place 26886605 'ETC서울' (→ 37.52283, 127.02199, <1 m apart)",
+  "reasonTh": "ร้านมัลติแบรนด์ชั้นใต้ดินย่านกาโรซูกิล ขายแบรนด์เกาหลีและต่างประเทศ รวมถึง Anatomica ผู้ใช้บอกว่ามักมีลดราคา (เว็บร้านมีหมวด SALE)",
+  "suggestedStayMin": 40,
+  "budget": {
+   "textTh": "ตัวอย่างบนเว็บ: กางเกง Anatomica M51 ราคาเต็ม ₩510,000 (ลด 40%) ราคาอื่นไม่ได้ตรวจสอบ",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "Mon–Sun 12:00–21:00 (official site; also Kakao Map)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "12:00",
+  "closeTime": "21:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": [
+   "multi-brand",
+   "select shop",
+   "menswear",
+   "Anatomica"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Sinsa",
+     "nameKo": "신사",
+     "lines": [
+      "3",
+      "SB"
+     ],
+     "exit": "6",
+     "walkMin": 10
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "Korean Buddies – best Korean fashion stores (ETC SEOUL ~10 min from Sinsa exit 6; page paywalled on re-check)",
+     "url": "https://www.koreanbuddies.com/shopping-guides/best-korean-fashion-stores"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "ETC SEOUL official – stores (Sinsa B1, 12:00–21:00, 070-7520-9801)",
+    "url": "https://etcseoul.com/store.html"
+   },
+   {
+    "label": "ETC SEOUL – ANATOMICA category",
+    "url": "https://etcseoul.com/category/anatomica/1609/"
+   },
+   {
+    "label": "ETC SEOUL – SALE category",
+    "url": "https://etcseoul.com/category/sale/1101/"
+   },
+   {
+    "label": "Kakao Map search '이티씨서울'",
+    "url": "https://m.map.kakao.com/actions/searchView?q=%EC%9D%B4%ED%8B%B0%EC%94%A8%EC%84%9C%EC%9A%B8"
+   },
+   {
+    "label": "OSM node 13946799148 (same building)",
+    "url": "https://www.openstreetmap.org/node/13946799148"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Basement (B1) shop. There is also an ETC SEOUL Seochon branch (8 Pirundae-ro, Jongno-gu, 12:00–20:30) – don't confuse. Anatomica stock confirmed via the online shop's category; in-store availability/sale not verified. No closed days listed for 30 Nov–6 Dec 2026. Station exit is from a single guide (exit 6, ~10 min); straight-line ~730 m north-east of Sinsa station."
+ },
+ {
+  "id": "modeman-hongdae",
+  "nameTh": "โหมดแมน สาขาแฟลกชิป ฮงแด (ร้านยีนส์/เสื้อผ้าผู้ชาย)",
+  "nameEn": "MODEMAN Hongdae",
+  "nameKo": "모드맨",
+  "branch": "Flagship (Donggyo-dong, Hongdae)",
+  "category": "fashion",
+  "area": "Hongdae",
+  "address": "2F, 43 World Cup Buk-ro 4-gil, Mapo-gu, Seoul 03993 (서울 마포구 월드컵북로4길 43, 2층)",
+  "lat": 37.55821,
+  "lng": 126.9215453,
+  "coordStatus": "unverified",
+  "coordSource": "Kakao Map place 13272398 '모드맨' (WCONGNAMUL 482670,1127419 converted to WGS84); single source – no OSM feature at this address. Conversion validated against OSM for other places (≤5 m).",
+  "reasonTh": "ร้านเลือกสรรเสื้อผ้าผู้ชายสายยีนส์และเวิร์กแวร์ญี่ปุ่น/อเมริกันชื่อดังของฮงแด อยู่ชั้น 2 เดินจากสถานีฮงอิกได้ไม่กี่นาที",
+  "suggestedStayMin": 40,
+  "budget": {
+   "textTh": "ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "Daily 12:00–20:00 (official stores page; Kakao Map)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "12:00",
+  "closeTime": "20:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": [
+   "menswear",
+   "denim",
+   "workwear",
+   "select shop"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Hongik Univ.",
+     "nameKo": "홍대입구",
+     "lines": [
+      "2",
+      "AREX",
+      "GJ"
+     ],
+     "exit": "1",
+     "walkMin": 4
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "Mode-Man official stores page (address only)",
+     "url": "https://en.mode-man.com/stores.html?cate_no=852"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Mode-Man official – stores (Flagship 2F, 43 World Cup Buk-ro 4-gil, 12–8pm, 070-8691-4358)",
+    "url": "https://en.mode-man.com/stores.html?cate_no=852"
+   },
+   {
+    "label": "Kakao Map search '모드맨' (12:00–20:00)",
+    "url": "https://m.map.kakao.com/actions/searchView?q=%EB%AA%A8%EB%93%9C%EB%A7%A8"
+   },
+   {
+    "label": "Instagram @modemanstore",
+    "url": "https://www.instagram.com/modemanstore/"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Older listings place Mode-Man at Yeonnam-dong 567-34 or 46 Yanghwa-ro 23-gil – both outdated; current flagship per official site and Kakao is 43 World Cup Buk-ro 4-gil, 2F. Second shop 'LT by Modeman' at 49 World Cup Buk-ro 6-gil 1F (Yeonnam-dong, 12–8pm, ~110 m away) and a counter at The Hyundai Seoul 3F (Yeouido). Exit 1 / 4 min comes from an older magazine description of the Yeonnam store; straight-line ~270 m from Hongik Univ. station – plausible but unverified. No closures found for 30 Nov–6 Dec 2026."
+ },
+ {
+  "id": "b-and-tailor-sinsa",
+  "nameTh": "บีแอนด์เทเลอร์ (ร้านตัดสูทบีสโปก ซินซา)",
+  "nameEn": "B&TAILOR",
+  "nameKo": "비앤테일러 (비앤테일러샵)",
+  "branch": "Sinsa-dong showroom",
+  "category": "fashion",
+  "area": "Sinsa / Garosu-gil",
+  "address": "1F Dongbo Bldg, 16 Nonhyeon-ro 159-gil, Gangnam-gu, Seoul (서울 강남구 논현로159길 16 동보빌딩 1층)",
+  "lat": 37.5231697,
+  "lng": 127.0268105,
+  "coordStatus": "unverified",
+  "coordSource": "Kakao Map place 210214267 '비앤테일러샵' (WCONGNAMUL 505925,1117690 converted to WGS84); single source – no OSM feature at this address (point lies on the 논현로159길 street segment in OSM).",
+  "reasonTh": "ร้านตัดสูทบีสโปกเก่าแก่ (ก่อตั้ง 1967) ที่ช่างตัดเสื้อสายเมนส์แวร์ทั่วโลกรู้จัก แวะชมโชว์รูม/ปรึกษาได้ แต่การตัดสูทต้องใช้เวลาหลายสัปดาห์และควรนัดล่วงหน้า",
+  "suggestedStayMin": 45,
+  "budget": {
+   "textTh": "สูทบีสโปกราคาสูง ไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "Hours not published; Kakao Map lists closed on Sundays",
+   "closedDays": "Sunday (Kakao Map)",
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": [
+    0
+   ]
+  },
+  "openTime": null,
+  "closeTime": null,
+  "indoor": true,
+  "food": null,
+  "fashionTypes": [
+   "bespoke tailoring",
+   "menswear",
+   "suits"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Apgujeong",
+     "nameKo": "압구정",
+     "lines": [
+      "3"
+     ],
+     "exit": null,
+     "walkMin": 7
+    },
+    {
+     "name": "Sinsa",
+     "nameKo": "신사",
+     "lines": [
+      "3",
+      "SB"
+     ],
+     "exit": null,
+     "walkMin": 13
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": []
+  },
+  "sources": [
+   {
+    "label": "B&TAILOR official site (address, 02-763-9997)",
+    "url": "https://bntailor.com/"
+   },
+   {
+    "label": "Kakao Map search '비앤테일러' (closed Sunday)",
+    "url": "https://m.map.kakao.com/actions/searchView?q=%EB%B9%84%EC%95%A4%ED%85%8C%EC%9D%BC%EB%9F%AC"
+   },
+   {
+    "label": "Permanent Style – B&Tailor: real bespoke, distinctive style (2024)",
+    "url": "https://www.permanentstyle.com/2024/02/btailor-korea-real-bespoke-and-distinctive-style.html"
+   },
+   {
+    "label": "Vitale Barberis Canonico stockist page (est. 1967, master tailor Park Jung-yul)",
+    "url": "https://vitalebarberiscanonico.com/find-us/south-korea/seoul/bntailor/"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Appointment strongly recommended (bespoke tailor; opening hours not published) – call 02-763-9997 or DM before visiting. A bespoke suit needs multiple fittings over weeks, so it cannot be completed within a 7-day trip; at most a consultation/order with shipping. Closed Sundays per Kakao (Sun 6 Dec 2026 is a Sunday). Older listings show 567-27 Sinsa-dong and a Yongsan (Hoenamu-ro 44-gil) address – the official site gives 16 Nonhyeon-ro 159-gil. Station walk times are straight-line estimates (~450 m to Apgujeong stn, ~950 m to Sinsa stn); exits not sourced."
+ },
+ {
+  "id": "tannery-seochon",
+  "nameTh": "แทนเนอรี (ร้านเสื้อผ้าและรองเท้าผู้ชาย ใกล้คย็องบกกุง)",
+  "nameEn": "Tannery",
+  "nameKo": "테너리",
+  "branch": "Seochon (Tongui-dong, Jongno-gu)",
+  "category": "fashion",
+  "area": "Jongno",
+  "address": "B1, 36 Jahamun-ro, Jongno-gu, Seoul 03044 (서울 종로구 자하문로 36, 지하1층)",
+  "lat": 37.5792655,
+  "lng": 126.9717565,
+  "coordStatus": "verified",
+  "coordSource": "Kakao Map place 90143430 '테너리' (→ 37.57927, 126.97176); matches OSM node 12074606515 (another tenant '몹시' tagged 자하문로 36, same building, ~2 m apart)",
+  "reasonTh": "ร้านเลือกสรรเสื้อผ้าผู้ชายสายคลาสสิก มีรองเท้าหนังของร้านเอง (ออกซฟอร์ด โลฟเฟอร์ บูต) และแบรนด์อย่าง orSlow, Postman อยู่ชั้นใต้ดินย่านซอชน เดินจากสถานีคย็องบกกุงได้",
+  "suggestedStayMin": 40,
+  "budget": {
+   "textTh": "ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "hours": {
+   "text": "Mon–Sun 11:00–19:00 (Seoulshopper; Kakao Map)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "11:00",
+  "closeTime": "19:00",
+  "indoor": true,
+  "food": null,
+  "fashionTypes": [
+   "menswear",
+   "select shop",
+   "leather shoes",
+   "classic"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Gyeongbokgung",
+     "nameKo": "경복궁",
+     "lines": [
+      "3"
+     ],
+     "exit": "3",
+     "walkMin": 5
+    }
+   ],
+   "bus": null,
+   "status": "verified",
+   "sources": [
+    {
+     "label": "Seoulshopper – Tannery (~300 m from Gyeongbokgung exit 3)",
+     "url": "https://seoulshopper.com/blogs/shopping/tannery"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Tannery official – find us (B1, 36 Jahamun-ro, 070-8822-6429)",
+    "url": "https://m.tanneryshoes.com/find-us.html"
+   },
+   {
+    "label": "Seoulshopper – Tannery (hours, brands, directions)",
+    "url": "https://seoulshopper.com/blogs/shopping/tannery"
+   },
+   {
+    "label": "Kakao Map search '테너리'",
+    "url": "https://m.map.kakao.com/actions/searchView?q=%ED%85%8C%EB%84%88%EB%A6%AC"
+   },
+   {
+    "label": "Permanent Style – Seoul menswear shopping guide (Tannery, opposite Take Ivy)",
+    "url": "https://www.permanentstyle.com/2023/12/seoul-a-menswear-shopping-guide.html"
+   }
+  ],
+  "checkedAt": "2026-11-15",
+  "notes": "Identified as 테너리 TANNERY (tanneryshoes.com), a classic menswear select shop with its own leather footwear line, in Seochon near Gyeongbokgung – most plausible match given the user's other menswear picks (Permanent Style lists it). Alternatives ruled out: 'tanneryshop' (online vintage seller on Fruitsfamily, no store) and 'Peter Tannery' (피터테너리, bag brand with Lotte Ilsan counter, outside central Seoul). Entrance is down a basement stairway behind an emerald-green door. Sizing reportedly runs small (Permanent Style). No closures found for 30 Nov–6 Dec 2026; Kakao 'open' status only, hours source may be dated (~2023)."
+ },
+ {
+  "category": "fashion",
+  "indoor": true,
+  "food": null,
+  "checkedAt": "2026-11-15",
+  "budget": {
+   "textTh": "ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "id": "musinsa-empty-seongsu",
+  "nameTh": "มูซินซา เอ็มพ์ตี้ ซองซู (ร้านดีไซเนอร์แบรนด์)",
+  "nameEn": "MUSINSA EMPTY Seongsu",
+  "nameKo": "무신사 엠프티 성수",
+  "branch": "Seongsu",
+  "area": "Seongsu",
+  "address": "1F–4F, 97 Seongsui-ro, Seongdong-gu, Seoul 04782 (서울 성동구 성수이로 97)",
+  "lat": 37.5436479,
+  "lng": 127.0565868,
+  "coordStatus": "verified",
+  "coordSource": "Kakao Map place 1464533333 '무신사 엠프티 성수' (WCONGNAMUL→WGS84 37.54365, 127.05659); matches OSM node 13946958917 (another tenant tagged 성수이로 97, 37.54363, 127.05662, ~3 m)",
+  "reasonTh": "ร้านเลือกสรรแบรนด์ดีไซเนอร์เกาหลีและต่างประเทศ 4 ชั้นของ Musinsa ห่างทางออก 3 สถานีซองซูแค่ราว 80 ม. มีป็อปอัป/นิทรรศการหมุนเวียน",
+  "suggestedStayMin": 40,
+  "hours": {
+   "text": "Daily 11:00–22:00",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "11:00",
+  "closeTime": "22:00",
+  "fashionTypes": [
+   "designer",
+   "select shop",
+   "multi-brand",
+   "lifestyle"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Seongsu",
+     "nameKo": "성수",
+     "lines": [
+      "2"
+     ],
+     "exit": "3",
+     "walkMin": 1
+    }
+   ],
+   "bus": null,
+   "status": "verified",
+   "sources": [
+    {
+     "label": "VisitSeoul – EMPTY (Seongsu stn exit 3, 77 m)",
+     "url": "https://english.visitseoul.net/shopping/EMPTY/ENPoigt91"
+    },
+    {
+     "label": "MUSINSA newsroom – K-Fashion Edit Vol.2 (3 min from exit 3)",
+     "url": "https://about.musinsa.com/newsroom/2025-0821-k-fashion-edit2"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "VisitSeoul – EMPTY (address, 11:00–22:00 daily)",
+    "url": "https://english.visitseoul.net/shopping/EMPTY/ENPoigt91"
+   },
+   {
+    "label": "NOL World POI – Musinsa Empty (Seongsu)",
+    "url": "https://world.nol.com/en/content/pois/b9bc5d12-3cca-4045-8d8e-83d1dbaa4c55"
+   },
+   {
+    "label": "Kakao Map search '무신사 엠프티'",
+    "url": "https://m.map.kakao.com/actions/searchView?q=%EB%AC%B4%EC%8B%A0%EC%82%AC%20%EC%97%A0%ED%94%84%ED%8B%B0"
+   },
+   {
+    "label": "OSM node 13946958917 (same building)",
+    "url": "https://www.openstreetmap.org/node/13946958917"
+   }
+  ],
+  "notes": "nameEn follows MUSINSA/VisitSeoul naming ('EMPTY' / 'MUSINSA EMPTY'); Google Maps label could not be checked directly. Seongsu station is co-named 'Seongsu (MUSINSA)' since Dec 2025. Older DayTrip listing shows 11:00–20:00 weekdays – superseded by VisitSeoul and Kakao (11:00–22:00). No closures found for 30 Nov–6 Dec 2026. Other Musinsa stores within ~300 m: MUSINSA KICKS Seongsu (성수이로 96), MUSINSA STORE Seongsu (성수이로 74), MUSINSA MEGASTORE Seongsu (성수이로 62)."
+ },
+ {
+  "category": "fashion",
+  "indoor": true,
+  "food": null,
+  "checkedAt": "2026-11-15",
+  "budget": {
+   "textTh": "ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "id": "musinsa-megastore-seongsu",
+  "nameTh": "มูซินซา เมกะสโตร์ ซองซู",
+  "nameEn": "MUSINSA MEGASTORE Seongsu",
+  "nameKo": "무신사 메가스토어 성수",
+  "branch": "Seongsu (MUSINSA Seongsu S1 building)",
+  "area": "Seongsu",
+  "address": "B1–4F, 62 Seongsui-ro, Seongdong-gu, Seoul (서울 성동구 성수이로 62, 무신사 성수 S1)",
+  "lat": 37.5403614,
+  "lng": 127.0558602,
+  "coordStatus": "verified",
+  "coordSource": "Kakao Map place 90596435 '무신사 메가스토어 성수' (→ 37.54036, 127.05586); matches OSM node 13946959470 (tenant '피자슬라이스 서울 무신사' tagged 성수이로 62, ~1 m)",
+  "reasonTh": "สโตร์ใหญ่ที่สุดของ Musinsa (เปิด 24 เม.ย. 2026) 5 ชั้น ~1,000 แบรนด์ มีทั้งเสื้อผ้า Musinsa Standard (ชั้น 3) รองเท้า KICKS (ชั้น 1) และบิวตี้ (ชั้น 2) จบได้ในที่เดียว",
+  "suggestedStayMin": 75,
+  "hours": {
+   "text": "11:00–22:00 (Kakao Map only)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": []
+  },
+  "openTime": "11:00",
+  "closeTime": "22:00",
+  "fashionTypes": [
+   "multi-brand",
+   "basics",
+   "sneakers",
+   "K-beauty",
+   "megastore"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Seongsu",
+     "nameKo": "성수",
+     "lines": [
+      "2"
+     ],
+     "exit": "3",
+     "walkMin": 6
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "Asia Economy – megastore opening (via exit 3 of Seongsu (Musinsa) stn, turn into alley)",
+     "url": "https://view.asiae.co.kr/en/article/2026042316200962004"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Korea Times – Musinsa opens Seongsu megastore (2026-04-24)",
+    "url": "https://www.koreatimes.co.kr/lifestyle/20260424/musinsa-opens-seongsu-megastore-to-challenge-olive-young"
+   },
+   {
+    "label": "Asia Economy – Megastore draws 42,000 visitors in first week",
+    "url": "https://www.asiae.co.kr/en/article/2026042809375318505"
+   },
+   {
+    "label": "Kakao Map search '무신사 성수'",
+    "url": "https://m.map.kakao.com/actions/searchView?q=%EB%AC%B4%EC%8B%A0%EC%82%AC%20%EC%84%B1%EC%88%98"
+   },
+   {
+    "label": "OSM node 13946959470 (same building)",
+    "url": "https://www.openstreetmap.org/node/13946959470"
+   }
+  ],
+  "notes": "Opened 24 Apr 2026; very busy (42,000 visitors first week) – expect crowds on weekends. Hours only from Kakao Map (11:00–22:00); no official hours found. Contains 'MUSINSA STANDARD Seongsui-ro' on 3F (Kakao lists it separately). Walk time from exit 3 is a straight-line estimate (~430 m). Tax refund not verified. Google Maps English label not checked directly."
+ },
+ {
+  "category": "fashion",
+  "indoor": true,
+  "food": null,
+  "checkedAt": "2026-11-15",
+  "budget": {
+   "textTh": "ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "id": "musinsa-standard-seongsu",
+  "nameTh": "มูซินซา สแตนดาร์ด ซองซู",
+  "nameEn": "MUSINSA STANDARD Seongsu",
+  "nameKo": "무신사 스탠다드 성수점",
+  "branch": "Seongsu (Yeonmujang-gil)",
+  "area": "Seongsu",
+  "address": "1F–2F, 83 Yeonmujang-gil, Seongdong-gu, Seoul 04783 (서울 성동구 연무장길 83)",
+  "lat": 37.5416827,
+  "lng": 127.0586356,
+  "coordStatus": "verified",
+  "coordSource": "Kakao Map place 916567769 '무신사 스탠다드 성수점' (→ 37.54168, 127.05864); matches OSM node 14335419901 'Musinsa Standard' (37.54175, 127.05867, ~8 m)",
+  "reasonTh": "ร้านเสื้อผ้าเบสิกราคาคุ้มของ Musinsa บนถนนยอนมูจังกิล ย่านคาเฟ่ซองซู เดินต่อไป EMPTY และ Megastore ได้",
+  "suggestedStayMin": 40,
+  "hours": {
+   "text": "Daily 11:00–22:00 per Kakao Map; KTO (ktriptips) lists 11:00–21:00, open year-round",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": []
+  },
+  "openTime": "11:00",
+  "closeTime": "21:00",
+  "fashionTypes": [
+   "basics",
+   "casual"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Seongsu",
+     "nameKo": "성수",
+     "lines": [
+      "2"
+     ],
+     "exit": "3",
+     "walkMin": 5
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "Seongsu guide (Seongsu stn exit 3)",
+     "url": "https://stay.enko.kr/blog/seongsu-hotspots-guide"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "ktriptips (KTO) – Musinsa Standard Seongsu",
+    "url": "https://www.ktriptips.com/eng/shopping/3417814"
+   },
+   {
+    "label": "Kakao Map search '무신사 스탠다드 성수'",
+    "url": "https://m.map.kakao.com/actions/searchView?q=%EB%AC%B4%EC%8B%A0%EC%82%AC%20%EC%8A%A4%ED%83%A0%EB%8B%A4%EB%93%9C%20%EC%84%B1%EC%88%98"
+   },
+   {
+    "label": "OSM node 14335419901",
+    "url": "https://www.openstreetmap.org/node/14335419901"
+   }
+  ],
+  "notes": "Hours conflict (21:00 vs 22:00) – closeTime set to the conservative 21:00. Not to be confused with MUSINSA STANDARD Seongsui-ro (3F of MEGASTORE, 62 Seongsui-ro) or MUSINSA STANDARD Seoul Forest (121 Wangsimni-ro). Same building as Musinsa E1 office. Walk time is a straight-line estimate."
+ },
+ {
+  "category": "fashion",
+  "indoor": true,
+  "food": null,
+  "checkedAt": "2026-11-15",
+  "budget": {
+   "textTh": "ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "id": "musinsa-standard-gangnam",
+  "nameTh": "มูซินซา สแตนดาร์ด คังนัม",
+  "nameEn": "MUSINSA STANDARD Gangnam",
+  "nameKo": "무신사 스탠다드 강남점",
+  "branch": "Gangnam (Seocho W Tower)",
+  "area": "Gangnam",
+  "address": "B2–1F, Seocho W Tower, 54 Seocho-daero 77-gil, Seocho-gu, Seoul 06611 (서울 서초구 서초대로77길 54 서초W타워)",
+  "lat": 37.5025443,
+  "lng": 127.0249348,
+  "coordStatus": "verified",
+  "coordSource": "Kakao Map place 1902051957 '무신사 스탠다드 강남점' (→ 37.50254, 127.02493); matches OSM way 541695113 'W타워' (서초대로77길 54, 37.50258, 127.02480, ~12 m)",
+  "reasonTh": "สาขาใหญ่ย่านคังนัม 3 ชั้น เสื้อผ้าเบสิกราคาคุ้มของ Musinsa เปิดถึงดึก ใกล้สถานีชินนนฮยอน/คังนัม",
+  "suggestedStayMin": 40,
+  "hours": {
+   "text": "11:00–23:00 per Kakao Map; older Creatrip listing 11:00–21:00",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": []
+  },
+  "openTime": "11:00",
+  "closeTime": "21:00",
+  "fashionTypes": [
+   "basics",
+   "casual"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Sinnonhyeon",
+     "nameKo": "신논현",
+     "lines": [
+      "9",
+      "SB"
+     ],
+     "exit": "7",
+     "walkMin": 4
+    },
+    {
+     "name": "Gangnam",
+     "nameKo": "강남",
+     "lines": [
+      "2",
+      "SB"
+     ],
+     "exit": null,
+     "walkMin": null
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "Creatrip – Musinsa stores (Sinnonhyeon exit 7)",
+     "url": "https://creatrip.com/en/blog/14284"
+    },
+    {
+     "label": "Asia Economy 2022 – between Gangnam and Sinnonhyeon",
+     "url": "https://www.asiae.co.kr/en/article/2022063015330621658"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "MUSINSA newsroom – K-Fashion Edit Vol.3 Gangnam",
+    "url": "https://about.musinsa.com/newsroom/kfashion-edit-3"
+   },
+   {
+    "label": "Creatrip – Musinsa store guide",
+    "url": "https://creatrip.com/en/blog/14284"
+   },
+   {
+    "label": "Kakao Map search '무신사 스탠다드 강남'",
+    "url": "https://m.map.kakao.com/actions/searchView?q=%EB%AC%B4%EC%8B%A0%EC%82%AC%20%EC%8A%A4%ED%83%A0%EB%8B%A4%EB%93%9C%20%EA%B0%95%EB%82%A8"
+   },
+   {
+    "label": "OSM way 541695113 (W Tower)",
+    "url": "https://www.openstreetmap.org/way/541695113"
+   }
+  ],
+  "notes": "Opened July 2022. Hours conflict (Kakao 23:00 vs older blog 21:00) – closeTime set conservatively to 21:00. Different from 'MUSINSA STORE Gangnam' (multi-brand, opened Aug 2025 on Gangnam-daero, ~2 min from Sinnonhyeon) – not researched here. Building also houses Haidilao (OSM)."
+ },
+ {
+  "category": "fashion",
+  "indoor": true,
+  "food": null,
+  "checkedAt": "2026-11-15",
+  "budget": {
+   "textTh": "ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "id": "musinsa-store-hongdae",
+  "nameTh": "มูซินซา สโตร์ ฮงแด (มัลติแบรนด์)",
+  "nameEn": "MUSINSA STORE Hongdae",
+  "nameKo": "무신사 스토어 홍대",
+  "branch": "Hongdae",
+  "area": "Hongdae",
+  "address": "B1, 1F–3F, 164 Yanghwa-ro, Mapo-gu, Seoul 04050 (서울 마포구 양화로 164)",
+  "lat": 37.5565394,
+  "lng": 126.9240505,
+  "coordStatus": "verified",
+  "coordSource": "Kakao Map place 1305962347 '무신사 스토어 홍대' (→ 37.55654, 126.92405); matches OSM way 420153378 (building 양화로 164, 37.55652, 126.92402, ~3 m)",
+  "reasonTh": "สโตร์มัลติแบรนด์ของ Musinsa (รวมแบรนด์สตรีทเกาหลีหลายแบรนด์ ไม่ใช่แค่ Standard) ติดสถานีฮงอิก มีจุดแลกเงินในตึก ต่างจากร้าน Musinsa Standard Hongdae ที่มีอยู่แล้ว",
+  "suggestedStayMin": 45,
+  "hours": {
+   "text": "10:30–23:00 per Kakao Map; travel guides list 11:00–21:00 or 11:00–22:00",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "unverified",
+   "closedWeekdays": []
+  },
+  "openTime": "11:00",
+  "closeTime": "21:00",
+  "fashionTypes": [
+   "multi-brand",
+   "K-fashion",
+   "streetwear"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Hongik Univ.",
+     "nameKo": "홍대입구",
+     "lines": [
+      "2",
+      "AREX",
+      "GJ"
+     ],
+     "exit": "9",
+     "walkMin": 2
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": [
+    {
+     "label": "Creatrip – Hongdae shopping guide (exit 8 vs 9 conflict)",
+     "url": "https://creatrip.com/en/blog/4570"
+    }
+   ]
+  },
+  "sources": [
+   {
+    "label": "Creatrip – Musinsa store guide",
+    "url": "https://creatrip.com/en/blog/14284"
+   },
+   {
+    "label": "Creatrip – Hongdae shopping guide",
+    "url": "https://creatrip.com/en/blog/4570"
+   },
+   {
+    "label": "Kakao Map search '무신사 홍대'",
+    "url": "https://m.map.kakao.com/actions/searchView?q=%EB%AC%B4%EC%8B%A0%EC%82%AC%20%ED%99%8D%EB%8C%80"
+   },
+   {
+    "label": "OSM way 420153378",
+    "url": "https://www.openstreetmap.org/way/420153378"
+   }
+  ],
+  "notes": "This is the Hongdae multi-brand MUSINSA STORE; the existing app entry musinsa-standard-hongdae (144 Yanghwa-ro) is the separate own-label store ~200 m south-west. Hours conflict – closeTime set conservatively to 21:00. Exit: sources disagree (8 or 9). Nearby: MUSINSA KICKS Hongdae (29 Hongik-ro) and MUSINSA BEAUTY Hongdae (18 Hongik-ro). Google Maps English label not checked directly."
+ },
+ {
+  "category": "fashion",
+  "indoor": true,
+  "food": null,
+  "checkedAt": "2026-11-15",
+  "budget": {
+   "textTh": "ราคาไม่ได้ตรวจสอบจากแหล่งข้อมูล",
+   "krwMin": null,
+   "krwMax": null,
+   "status": "unknown"
+  },
+  "id": "musinsa-empty-apgujeong-basement",
+  "nameTh": "มูซินซา เอ็มพ์ตี้ อัปกูจอง เบสเมนต์",
+  "nameEn": "MUSINSA EMPTY Apgujeong Basement",
+  "nameKo": "무신사 엠프티 압구정 베이스먼트",
+  "branch": "Apgujeong Rodeo (Sinsa-dong)",
+  "area": "Apgujeong",
+  "address": "B1, 30 Eonju-ro 174-gil, Gangnam-gu, Seoul 06017 (서울 강남구 언주로174길 30, 지하1층)",
+  "lat": 37.5278632,
+  "lng": 127.0363107,
+  "coordStatus": "verified",
+  "coordSource": "Kakao Map place 1230677148 '무신사 엠프티 압구정베이스먼트' (→ 37.52786, 127.03631); matches OSM nodes 13851213603/13946798816 (tenants tagged 언주로174길 30, ~0.5 m)",
+  "reasonTh": "ร้านดีไซเนอร์แบรนด์ชั้นใต้ดินขนาด ~350 พยองของ MUSINSA EMPTY ย่านอัปกูจองโรดีโอ ใกล้ Random Walk เดินถึงกันได้ (ไม่มีสาขา Musinsa ที่กาโรซูกิล)",
+  "suggestedStayMin": 40,
+  "hours": {
+   "text": "11:00–20:00 (heyPOP; Kakao Map)",
+   "closedDays": null,
+   "lastOrder": null,
+   "status": "verified",
+   "closedWeekdays": []
+  },
+  "openTime": "11:00",
+  "closeTime": "20:00",
+  "fashionTypes": [
+   "designer",
+   "select shop",
+   "multi-brand"
+  ],
+  "transit": {
+   "stations": [
+    {
+     "name": "Apgujeong Rodeo",
+     "nameKo": "압구정로데오",
+     "lines": [
+      "SB"
+     ],
+     "exit": null,
+     "walkMin": 6
+    }
+   ],
+   "bus": null,
+   "status": "unverified",
+   "sources": []
+  },
+  "sources": [
+   {
+    "label": "heyPOP – EMPTY Apgujeong Basement (11:00–20:00, 2nd EMPTY store, ~350 pyeong)",
+    "url": "https://heypop.kr/place/114195/"
+   },
+   {
+    "label": "MUSINSA newsroom – K-Fashion Edit Vol.3 Gangnam",
+    "url": "https://about.musinsa.com/newsroom/kfashion-edit-3"
+   },
+   {
+    "label": "Kakao Map search '무신사 엠프티'",
+    "url": "https://m.map.kakao.com/actions/searchView?q=%EB%AC%B4%EC%8B%A0%EC%82%AC%20%EC%97%A0%ED%94%84%ED%8B%B0"
+   },
+   {
+    "label": "OSM node 13946798816 (same building)",
+    "url": "https://www.openstreetmap.org/node/13946798816"
+   }
+  ],
+  "notes": "No MUSINSA store found on Garosu-gil/Sinsa proper; this Apgujeong Rodeo store (legally Sinsa-dong) is the closest match. A third EMPTY opened 26 Feb 2026 inside Galleria Luxury Hall WEST 3F (343 Apgujeong-ro, 10:30–20:30) – not added. Station walk is a straight-line estimate (~380 m to Apgujeong Rodeo); exit not sourced. ~300 m north of Random Walk."
  }
 ]
