@@ -47,7 +47,8 @@ export function initLogin(el: HTMLElement, onChange: () => void) {
   onAuth((s) => {
     // เข้าสู่ระบบสำเร็จ → ปิดหน้า (ยกเว้นเปิดดูบัญชีอยู่)
     if (s.status === 'signed-in' && view !== 'start') view = 'start';
-    if (s.status === 'signed-in' && open && busy) open = false;
+    // เพิ่งเข้าสู่ระบบ: ค้างหน้าไว้จนรู้ว่าอยู่ในทริปไหม — อยู่แล้วค่อยปิดเอง · ยังไม่อยู่ → แสดงคำเชิญ/วิธีเข้าทริป
+    if (s.status === 'signed-in' && open && busy) waitTrip = true;
     busy = '';
     if (s.status === 'signed-out' && isEmailLinkReturn()) {
       open = true;
@@ -70,7 +71,18 @@ export function openLogin() {
 export const loginOpen = () => open;
 /** อัปเดตหน้าบัญชีเมื่อสถานะทริปเปลี่ยน (ถ้าเปิดอยู่) */
 export function refreshLogin() {
-  if (open) render();
+  if (!open) return;
+  const t = tripState();
+  if (waitTrip && t.status !== 'loading') {
+    waitTrip = false;
+    if (t.trip) {
+      open = false;
+      render();
+      afterChange();
+      return;
+    }
+  }
+  render();
 }
 
 function close(skip = false) {
@@ -101,6 +113,8 @@ function avatar(u: AuthUser, size: number): string {
 }
 
 let note = '';
+/** เพิ่งเข้าสู่ระบบ → ปิดหน้าเองเมื่อพบว่าอยู่ในทริปแล้ว */
+let waitTrip = false;
 let inviteDraft = '';
 let sendMail = true;
 
@@ -132,18 +146,26 @@ function tripSection(u: AuthUser): string {
   const mine = t.myTrips.map((x) => `<button class="lg-btn" data-lg="open-trip" data-id="${esc(x.id)}">เปิดทริป ${esc(x.name)}</button>`).join('');
   const p = app.store.plans.find((x) => !x.id.startsWith('trip-')) ?? app.plan;
   const photos = p.customPlaces.reduce((n, c) => n + (c.photos?.length ?? 0), 0);
+  const createBlock = `<div class="lg-create">
+      <p class="muted small"><b>${esc(p.name)}</b> · ${p.days.length} วัน · สถานที่ที่เพิ่มเอง ${p.customPlaces.length} แห่ง${photos ? ` · รูป ${photos} รูป` : ''} — แผนในเครื่องยังเก็บไว้เป็นสำรอง แล้วค่อยเชิญเพื่อนด้วยอีเมล</p>
+      <button class="lg-btn" data-lg="create" ${t.busy ? 'disabled' : ''}>${t.busy === 'create' ? 'กำลังสร้างทริป…' : 'สร้างทริปที่แชร์ได้'}</button>
+    </div>`;
+  if (t.status === 'loading') return '<section class="lg-trip"><p class="lg-note">กำลังตรวจทริปและคำเชิญ…</p></section>';
   return `<section class="lg-trip">
-    ${inv ? `<p class="lg-sub">คำเชิญเข้าทริป</p>${inv}` : ''}
+    ${inv ? `<p class="lg-sub">คุณได้รับเชิญเข้าทริป — กด “เข้าร่วม” เพื่อดูและแก้แผนเดียวกัน</p>${inv}` : ''}
     ${mine}
     ${t.error ? `<p class="lg-error">${esc(t.error)}</p>` : ''}
-    ${inv || mine ? '<details class="lg-create-more"><summary>หรือ สร้างทริปของตัวเองจากแผนในเครื่องนี้</summary>' : ''}
-    <div class="lg-create">
-      ${inv || mine ? '' : '<p class="lg-sub">สร้างทริปจากแผนในเครื่องนี้</p>'}
-      <p class="muted small"><b>${esc(p.name)}</b> · ${p.days.length} วัน · สถานที่ที่เพิ่มเอง ${p.customPlaces.length} แห่ง${photos ? ` · รูป ${photos} รูป` : ''} — แผนในเครื่องยังเก็บไว้เป็นสำรอง แล้วค่อยเชิญเพื่อนด้วยอีเมล</p>
-      <button class="lg-btn ${inv ? '' : 'primary'}" data-lg="create" ${t.busy ? 'disabled' : ''}>${t.busy === 'create' ? 'กำลังสร้างทริป…' : 'สร้างทริปที่แชร์ได้'}</button>
-    </div>
-    ${inv || mine ? '</details>' : ''}
-    ${!inv && !mine ? `<p class="muted small">ถ้าเพื่อนเป็นเจ้าของทริป: แจ้งอีเมล <b>${esc(u.email ?? '')}</b> ให้เพื่อนเชิญ แล้วเปิดหน้านี้อีกครั้ง <button class="lg-inline" data-lg="refresh">ตรวจคำเชิญอีกครั้ง</button></p>` : ''}
+    ${
+      !inv && !mine
+        ? `<div class="lg-wait">
+            <p class="lg-sub">ยังไม่ได้อยู่ในทริปไหน</p>
+            <p class="small">ถ้าจะเข้าทริปของเพื่อน: ส่งอีเมลนี้ให้เจ้าของทริป แล้วให้เขากด <b>เชิญ</b> ในหน้าบัญชีของเขา — คำเชิญจะขึ้นที่หน้านี้เองทันที</p>
+            <div class="lg-row"><input class="inp" readonly value="${esc(u.email ?? '')}" aria-label="อีเมลของคุณ"><button class="lg-btn primary" data-lg="copy-email">คัดลอกอีเมล</button></div>
+            <button class="lg-inline small" data-lg="refresh">ตรวจคำเชิญอีกครั้ง</button>
+          </div>`
+        : ''
+    }
+    <details class="lg-create-more"><summary>${inv || mine ? 'หรือ ' : ''}สร้างทริปของตัวเองจากแผนในเครื่องนี้ (สำหรับเจ้าของทริป)</summary>${createBlock}</details>
   </section>`;
 }
 
@@ -246,9 +268,15 @@ async function onClick(e: Event) {
     }
     case 'join': {
       const err = await joinTrip(el.dataset.id!);
-      if (err) error = err;
-      else note = 'เข้าร่วมทริปแล้ว';
-      render();
+      if (err) {
+        error = err;
+        render();
+        return;
+      }
+      // เข้าร่วมแล้ว → กลับไปที่แอป หน้าแผนของฉัน (เห็นแผนของทริปทันที)
+      app.tab = 'plan';
+      close();
+      afterChange();
       return;
     }
     case 'open-trip':
@@ -275,6 +303,14 @@ async function onClick(e: Event) {
       note = error ? '' : 'ออกจากทริปแล้ว';
       render();
       afterChange();
+      return;
+    }
+    case 'copy-email': {
+      const me = signedInUser();
+      void navigator.clipboard?.writeText(me?.email ?? '').then(() => {
+        note = 'คัดลอกอีเมลแล้ว — ส่งให้เจ้าของทริปเพื่อเชิญ';
+        render();
+      });
       return;
     }
     case 'copy-site':

@@ -1049,3 +1049,5 @@ body.planner-open .main-menu [data-act="tab"].on { background: none; box-shadow:
 .wx-ico { color: #475569; font-size: 2.2rem; display: inline-grid; }
 .pl-meal-tag .ico.i, .ov-meal .ico.i { vertical-align: -0.12em; }
 .meal-btn span .ico.i { font-size: 1.2rem; }
+.lg-wait { display: grid; gap: .5rem; padding: .7rem; border-radius: 12px; background: #fff7e6; }
+.lg-wait p { margin: 0; }
