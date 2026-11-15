@@ -22,7 +22,7 @@ import { tplTargetDay } from './ui/views/modals';
 import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
 import { stopLocationId } from './core/schedule';
 import { MEALS, mealName, mealOf, newMeal, mealInsertIndex, setMeal, type Meal } from './core/meals';
-import { parseLatLng } from './core/coords';
+import { parseLatLng, coordError } from './core/coords';
 import { buildOwnPlace } from './core/ownPlace';
 import { searchPlaces, placeFromResult, findExisting } from './services/placeSearch';
 import { SEARCH_PREFIX } from './ui/mapSpecs';
@@ -1362,9 +1362,10 @@ document.addEventListener('submit', (ev) => {
     app.modal = null;
     app.commit((p) => p.customPlaces.push(r.place), `เพิ่ม ${r.place.nameTh} แล้ว — แตะชื่อเพื่อใส่ในวัน`);
   } else if (kind === 'coord') {
-    const c = parseLatLng(String(fd.get('coord') ?? ''));
+    const raw = String(fd.get('coord') ?? '');
+    const c = parseLatLng(raw);
     if (!c) {
-      app.showToast('อ่านพิกัดไม่ได้ — วางตัวเลขเช่น 37.5438, 127.0557 หรือลิงก์ Google Maps แบบเต็ม (ไม่ใช่ลิงก์ย่อ)');
+      app.showToast(coordError(raw));
       app.requestRender();
       return;
     }

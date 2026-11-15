@@ -662,10 +662,10 @@ test('ร้านที่ยังไม่มีพิกัด: แตะแ
   await expect(pl.locator('.pl-nocoord')).toContainText('ยังไม่มีพิกัด');
   await expect(pl.locator('.pl-nocoord a')).toHaveAttribute('href', /google\.com\/maps/);
   await pl.locator('.pl-nocoord [name="coord"]').fill('hello');
-  await pl.locator('.pl-nocoord button').click();
+  await pl.locator('.pl-nocoord button.primary').click();
   await expect(page.locator('#toast')).toContainText('อ่านพิกัดไม่ได้');
   await pl.locator('.pl-nocoord [name="coord"]').fill('37.5440, 127.0556');
-  await pl.locator('.pl-nocoord button').click();
+  await pl.locator('.pl-nocoord button.primary').click();
   await expect(page.locator('#toast')).toContainText('บันทึกพิกัดแล้ว');
   await expect(pl.locator('.pl-pin.preview')).toContainText('29CM HOME Seongsu');
   await expect(pl.locator('.pl-nocoord')).toHaveCount(0);
@@ -693,4 +693,30 @@ test('เพิ่มสถานที่เองในตัวจัดแ�
   // ค้นเจอในรายการภายหลัง (หมวดคาเฟ่)
   await pl.locator('[data-pl="cat"][data-v="cafe"]').click();
   await expect(pl.locator('.pl-lane-list')).toContainText('Nudake Seongsu');
+});
+
+test('เพิ่มสถานที่เอง: ลิงก์ย่อ → บอกเหตุผลใต้ช่อง (ไม่หาย) · เลือกตำแหน่งด้วยการแตะบนแผนที่ได้', async ({ page }) => {
+  test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
+  await page.route('https://tile.openstreetmap.org/**', (r) => r.fulfill({ status: 204, body: '' }));
+  await page.goto('/');
+  await page.locator('[data-act="open-planner"]').click();
+  const pl = page.locator('#planner');
+  await pl.locator('.pl-foot [data-pl="goto"][data-v="2"]').click();
+  await pl.locator('[data-pl="lane"][data-v="search"]').click();
+  await pl.locator('[data-pl-input="q"]').fill('My Cafe');
+  await pl.locator('[data-pl="own-open"]').click();
+  const f = pl.locator('form[data-form="own-place"]');
+  await f.locator('[name="coord"]').fill('https://maps.app.goo.gl/wjf34sTG61ZEu9N59');
+  await f.locator('button[value="add"]').click();
+  await expect(f.locator('.pl-own-error')).toContainText('ลิงก์ย่อ');
+  await expect(f.locator('[name="name"]')).toHaveValue('My Cafe'); // ที่พิมพ์ไว้ไม่หาย
+  // แตะบนแผนที่เพื่อเลือกตำแหน่ง
+  await f.locator('[data-pl="pick-map"]').click();
+  await expect(pl.locator('.pl-pick-hint')).toBeVisible();
+  const box = (await pl.locator('#pl-map').boundingBox())!;
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await expect(f.locator('[name="coord"]')).toHaveValue(/^3\d\.\d+, 12\d\.\d+$/);
+  await expect(pl.locator('.pl-pick-hint')).toHaveCount(0);
+  await f.locator('button[value="add"]').click();
+  await expect(pl.locator('.pl-row.stop', { hasText: 'My Cafe' })).toBeVisible();
 });

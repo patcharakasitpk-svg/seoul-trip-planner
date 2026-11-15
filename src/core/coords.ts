@@ -18,3 +18,12 @@ export function parseLatLng(text: string): { lat: number; lng: number } | null {
   }
   return null;
 }
+
+/** เหตุผลที่อ่านพิกัดไม่ได้ (ข้อความแสดงใต้ช่อง) */
+export function coordError(text: string): string {
+  const t = text.trim();
+  if (/goo\.gl|maps\.app/i.test(t)) return 'ลิงก์ย่อ (maps.app.goo.gl) ไม่มีพิกัดอยู่ในลิงก์ — กด “เลือกตำแหน่งบนแผนที่” แล้วแตะตรงร้าน หรือเปิดลิงก์นั้นแล้วคัดลอกลิงก์ยาวจากแถบที่อยู่';
+  const m = /(-?\d{1,3}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/.exec(t);
+  if (m && !inKorea(Number(m[1]), Number(m[2]))) return 'พิกัดนี้ไม่อยู่ในเกาหลี — ตรวจลำดับตัวเลข (ละติจูด 37.xx ก่อน ลองจิจูด 126–127.xx)';
+  return 'อ่านพิกัดไม่ได้ — วางตัวเลขเช่น 37.5438, 127.0557 หรือกด “เลือกตำแหน่งบนแผนที่”';
+}

@@ -1,5 +1,5 @@
 import type { Place } from './types';
-import { parseLatLng } from './coords';
+import { coordError, parseLatLng } from './coords';
 import { straightLineM } from './geo';
 
 export type OwnCategory = 'food' | 'cafe' | 'fashion' | 'beauty' | 'market' | 'sight';
@@ -20,7 +20,7 @@ export function buildOwnPlace(
   let lng: number | null = null;
   if (input.coord.trim()) {
     const c = parseLatLng(input.coord);
-    if (!c) return { ok: false, error: 'อ่านพิกัดไม่ได้ — วางตัวเลขเช่น 37.5438, 127.0557 หรือลิงก์ Google Maps แบบเต็ม (ไม่ใช่ลิงก์ย่อ)' };
+    if (!c) return { ok: false, error: coordError(input.coord) };
     ({ lat, lng } = c);
   }
   let area = 'เพิ่มเอง';

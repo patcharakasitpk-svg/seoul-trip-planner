@@ -118,6 +118,7 @@ export function refreshPlanner() {
 }
 
 function close() {
+  endPick();
   if (!root) return;
   root.hidden = true;
   document.body.classList.remove('planner-open');
@@ -317,8 +318,9 @@ function ownBlock(): string {
     <p class="pl-group">เพิ่มสถานที่เอง</p>
     <label>ชื่อ<input class="inp" name="name" maxlength="120" required value="${esc(q)}" placeholder="ชื่อร้าน/สถานที่" data-autofocus></label>
     <label>หมวด<select class="inp" name="category">${(Object.keys(OWN_CATEGORY_LABEL) as OwnCategory[]).map((c) => `<option value="${c}">${OWN_CATEGORY_LABEL[c]}</option>`).join('')}</select></label>
-    <label>พิกัด <a class="pl-photo" href="${esc(gm)}" target="_blank" rel="noopener">ค้นชื่อนี้ใน Google Maps ↗</a><input class="inp" name="coord" placeholder="วาง 37.5438, 127.0557 หรือลิงก์ Google Maps (ไม่บังคับ)"></label>
-    <p class="muted small">บนคอม: คลิกขวาที่ร้านใน Google Maps → กดตัวเลขพิกัดบรรทัดแรกเพื่อคัดลอก</p>
+    <label>พิกัด <a class="pl-photo" href="${esc(gm)}" target="_blank" rel="noopener">ดูตำแหน่งใน Google Maps ↗</a><input class="inp" name="coord" placeholder="วาง 37.5438, 127.0557 (ไม่บังคับ)"></label>
+    <button type="button" class="pl-btn sm web" data-pl="pick-map" data-target="own">เลือกตำแหน่งบนแผนที่ (แตะตรงร้าน)</button>
+    <p class="muted small">ง่ายสุด: ดูใน Google Maps ว่าร้านอยู่ตรงไหน แล้วกดปุ่มด้านบนและแตะจุดเดียวกันบนแผนที่ทางขวา · หรือบนคอมคลิกขวาที่ร้านใน Google Maps → กดตัวเลขพิกัดเพื่อคัดลอก · ลิงก์ย่อ maps.app.goo.gl ใช้ไม่ได้</p>
     <label>อยู่ประมาณ<span class="pl-field"><input class="inp xs" type="number" name="stay" min="5" max="600" value="45"> นาที</span></label>
     <div class="pl-note-actions"><button class="pl-btn primary sm" value="add">บันทึกแล้วใส่${st!.slot == null ? 'ท้ายวัน' : `ช่องที่ ${st!.slot + 1}`}</button><button class="pl-btn sm" value="save">บันทึกอย่างเดียว</button><button type="button" class="pl-btn ghost sm" data-pl="own-close">ยกเลิก</button></div>
   </form>`;
@@ -393,7 +395,7 @@ function previewInfo(p: Place): string {
 
 function laneItem(p: Place, _inDay: boolean): string {
   const on = st!.preview === p.id;
-  return laneItemRow(p, on) + (on && p.lat == null ? `<div class="pl-nocoord">${coordFixForm(p)}</div>` : '');
+  return laneItemRow(p, on) + (on && p.lat == null ? `<div class="pl-nocoord">${coordFixForm(p).replace('</form>', `<button type="button" class="pl-btn sm web" data-pl="pick-map" data-target="${esc(p.id)}">เลือกตำแหน่งบนแผนที่ (แตะตรงร้าน)</button></form>`)}</div>` : '');
 }
 
 function laneItemRow(p: Place, on: boolean): string {
@@ -564,8 +566,11 @@ function drawMap(s: DaySchedule) {
     map = L.map(el, { zoomControl: true, attributionControl: true });
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
     layer = L.layerGroup().addTo(map);
+    map.on('click', (e: L.LeafletMouseEvent) => onMapPick(e.latlng.lat, e.latlng.lng));
   }
   layer!.clearLayers();
+  pickMarker?.remove();
+  pickMarker = null;
   if (!layer) return;
   const d = st!.draft;
   const pts: { p: Place; label: string }[] = [];
@@ -696,6 +701,12 @@ function onClick(e: Event) {
       st.draft = v === '__end' ? { ...st.draft, endLeg: { ...st.draft.endLeg, ...clear } } : updateStop(st.draft, v!, { legIn: { ...st.draft.stops.find((y) => y.uid === v)!.legIn, ...clear } });
       break;
     }
+    case 'pick-map':
+      startPick(el.dataset.target ?? 'own');
+      return;
+    case 'pick-cancel':
+      endPick();
+      return;
     case 'map-fit':
       forceFit = true;
       if (st) drawMap(sched());
@@ -776,6 +787,48 @@ function onClick(e: Event) {
   render();
 }
 
+/** ข้อความผิดพลาดค้างใต้ฟอร์ม (ไม่วาดใหม่ทั้งหน้า สิ่งที่พิมพ์ไว้ไม่หาย) */
+function showFormError(form: HTMLElement, msg: string) {
+  let el = form.querySelector('.pl-own-error') as HTMLElement | null;
+  if (!el) {
+    el = document.createElement('p');
+    el.className = 'pl-own-error';
+    el.setAttribute('role', 'alert');
+    form.querySelector('[name="coord"]')?.insertAdjacentElement('afterend', el) ?? form.append(el);
+  }
+  el.textContent = msg;
+}
+
+/* ---------- เลือกตำแหน่งด้วยการแตะบนแผนที่ ---------- */
+let pickFor: string | null = null; // 'own' = ฟอร์มเพิ่มสถานที่เอง · อื่น ๆ = placeId ของกรอบ "ยังไม่มีพิกัด"
+let pickMarker: L.Marker | null = null;
+
+function startPick(target: string) {
+  pickFor = target;
+  root?.classList.add('picking');
+  const wrap = root?.querySelector('.pl-mapwrap');
+  if (wrap && !wrap.querySelector('.pl-pick-hint'))
+    wrap.insertAdjacentHTML('beforeend', '<div class="pl-pick-hint">แตะบนแผนที่ตรงตำแหน่งร้าน <button class="pl-btn ghost sm" data-pl="pick-cancel">ยกเลิก</button></div>');
+}
+
+function endPick() {
+  pickFor = null;
+  root?.classList.remove('picking');
+  root?.querySelector('.pl-pick-hint')?.remove();
+}
+
+function onMapPick(lat: number, lng: number) {
+  if (!pickFor || !root) return;
+  const text = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  const form = (pickFor === 'own' ? root.querySelector('form[data-form="own-place"]') : root.querySelector(`.pl-nocoord form[data-place="${CSS.escape(pickFor)}"]`)) as HTMLFormElement | null;
+  const inp = form?.querySelector('[name="coord"]') as HTMLInputElement | null;
+  if (inp) inp.value = text;
+  form?.querySelector('.pl-own-error')?.remove();
+  pickMarker?.remove();
+  if (map) pickMarker = L.marker([lat, lng], { icon: L.divIcon({ className: 'pl-pin preview', html: '<span>ตำแหน่งที่เลือก</span>', iconSize: [0, 0] }), zIndexOffset: 1200 }).addTo(map);
+  endPick();
+}
+
 /** ฟอร์มเพิ่มสถานที่เอง (จัดการในตัวจัดแผน ไม่ส่งต่อให้หน้าหลัก) */
 function onSubmit(e: SubmitEvent) {
   const form = e.target as HTMLFormElement;
@@ -788,7 +841,7 @@ function onSubmit(e: SubmitEvent) {
     app.places(),
   );
   if (!r.ok) {
-    app.showToast(r.error);
+    showFormError(form, r.error);
     return;
   }
   app.commit((p) => void p.customPlaces.push(r.place));
