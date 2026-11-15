@@ -5,7 +5,7 @@ import { renderPlanOverview } from './ui/views/overview';
 import { initMyPlaces, renderMyPlaces } from './ui/myPlaces';
 import { initPacking, renderPacking } from './ui/packing';
 import { initLogin, openLogin, accountButtonHtml, refreshLogin } from './ui/login';
-import { initAuth } from './services/auth';
+import { initAuth, signOutUser, authState } from './services/auth';
 import { initTripSync, personalStoreChanged, inTrip, isTripOwner } from './services/tripSync';
 import { hydratePlacePhotos } from './ui/views/placeInfo';
 import { renderToday, todayDay } from './ui/views/today';
@@ -21,7 +21,7 @@ import { moveStopToDay, insertStop, moveStop, newDay, newStop, removeStop, updat
 import type { Day, Plan, Stop, TravelMode } from './core/types';
 import { suggestOrder } from './core/compare';
 import { decodeFragment, parseJsonPlan, buildShareUrl, exportablePlan } from './storage/share';
-import { saveSettings, loadPlans } from './storage/storage';
+import { saveSettings, loadPlans, safeSet } from './storage/storage';
 import { TEMPLATES, templateDayStops, applyDatedTemplate, mergeDayStops } from './data/templates';
 import { tplTargetDay } from './ui/views/modals';
 import { fmtDateTh, fmtDur, fmtHM, parseHM, seoulNow } from './core/time';
@@ -112,8 +112,17 @@ barSizes();
 new ResizeObserver(barSizes).observe($('.topbar'));
 window.addEventListener('resize', barSizes);
 
+/** ชื่อแพลนเนอร์ = ชื่อบัญชีที่เข้าสู่ระบบ (เช่น "Patcharakasit's planner") · ไม่เข้าสู่ระบบ = Travel planner */
+function plannerTitle(): string {
+  const s = authState();
+  if (s.status !== 'signed-in') return 'Travel planner';
+  const first = (s.user.name || s.user.email?.split('@')[0] || '').trim().split(/\s+/)[0];
+  return first ? `${first}'s planner` : 'Travel planner';
+}
+
 function render() {
   $('#plan-name').textContent = app.plan.name;
+  $('.brand b').textContent = plannerTitle();
   $('#account-slot').innerHTML = accountButtonHtml();
   document.body.dataset.tab = app.tab;
   document.querySelectorAll('[data-act="tab"]').forEach((b) => b.classList.toggle('on', (b as HTMLElement).dataset.tab === app.tab));
@@ -1100,7 +1109,15 @@ document.addEventListener('click', (ev) => {
       app.modal = { type: 'place', placeId: d.place! };
       break;
     case 'open-login':
+      app.modal = null;
+      app.requestRender();
       openLogin();
+      return;
+    case 'sign-out':
+      app.modal = null;
+      safeSet('stp.v1.loginSkipped', '1'); // ออกเองแล้ว ไม่ต้องเด้งหน้าเข้าสู่ระบบ
+      void signOutUser().then(() => app.showToast('ออกจากระบบแล้ว — แผนในเครื่องนี้ยังอยู่'));
+      app.requestRender();
       return;
     case 'map-day':
       app.activeDayId = d.day!;

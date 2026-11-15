@@ -17,6 +17,8 @@ import { placeCard } from './library';
 import { placeInfoHtml } from './placeInfo';
 import { buildShareUrl } from '../../storage/share';
 import { googleStatus } from '../../services/google';
+import { signedInUser, tripState } from '../../services/tripSync';
+import { authAvailable } from '../../services/auth';
 import { peekRoute, routeKey } from '../../services/routes';
 
 export function renderModal(): string {
@@ -81,7 +83,7 @@ export function renderModal(): string {
       ];
       break;
     case 'settings':
-      [title, body] = ['ตั้งค่าบริการแผนที่', settingsBody()];
+      [title, body] = ['ตั้งค่า', settingsBody()];
       break;
     case 'place': {
       const p = app.getPlace(m.placeId);
@@ -403,14 +405,26 @@ function customBody(): string {
 
 function settingsBody(): string {
   const g = googleStatus();
-  return `<div class="card settings-tpl"><b>แผนแนะนำทั้งทริป</b><p class="muted small">เริ่มใหม่จากแผนตัวอย่าง หรือหยิบแผนรายวันมาใช้ (ปกติเลือกได้ในหน้า “จัดแผน” แท็บแผนแนะนำอยู่แล้ว)</p><button type="button" class="btn sm" data-act="open-templates">เปิดแผนแนะนำ</button></div>
+  const u = signedInUser();
+  const t = tripState().trip;
+  const account = !authAvailable()
+    ? ''
+    : u
+      ? `<div class="card settings-account">
+          <div class="sa-row">${u.photo ? `<img class="avatar" src="${esc(u.photo)}" alt="" width="40" height="40" referrerpolicy="no-referrer">` : `<span class="avatar" style="width:40px;height:40px">${esc((u.name || u.email || '?').charAt(0).toUpperCase())}</span>`}<div><b>${esc(u.name || u.email || '')}</b><span class="muted small">${u.name ? esc(u.email ?? '') : ''}${t ? `${u.name ? ' · ' : ''}ทริป ${esc(t.name)} (${t.members.length} คน)` : ''}</span></div></div>
+          <div class="row-btns"><button type="button" class="btn sm" data-act="open-login">ทริปและสมาชิก</button><button type="button" class="btn sm" data-act="sign-out">ออกจากระบบ</button></div>
+        </div>`
+      : `<div class="card settings-account"><b>บัญชี</b><p class="muted small">ยังไม่ได้เข้าสู่ระบบ — แผนอยู่ในเครื่องนี้เท่านั้น</p><div class="row-btns"><button type="button" class="btn sm primary" data-act="open-login">เข้าสู่ระบบ</button></div></div>`;
+  return `${account}<div class="card settings-tpl"><b>แผนแนะนำทั้งทริป</b><p class="muted small">เริ่มใหม่จากแผนตัวอย่าง หรือหยิบแผนรายวันมาใช้ (ปกติเลือกได้ในหน้า “จัดแผน” แท็บแผนแนะนำอยู่แล้ว)</p><button type="button" class="btn sm" data-act="open-templates">เปิดแผนแนะนำ</button></div>
+  <details class="settings-adv"><summary>ตั้งค่า Google Maps (ขั้นสูง)</summary>
   <form data-form="settings" class="form">
     <p>สถานะ Google Maps: <b>${{ 'no-key': 'ยังไม่มีคีย์', loading: 'กำลังโหลด', ready: 'พร้อมใช้งาน', error: 'ผิดพลาด' }[g.status]}</b> ${g.error ? `<span class="warn-text small">${esc(g.error)}</span>` : ''}</p>
     <label>Google Maps API Key <input class="inp" name="apiKey" value="${esc(app.settings.apiKey ?? '')}" autocomplete="off" spellcheck="false"></label>
     <label>Map ID (สำหรับหมุดแบบ Advanced) <input class="inp" name="mapId" value="${esc(app.settings.mapId ?? '')}" placeholder="DEMO_MAP_ID"></label>
     <p class="muted small">คีย์เก็บเฉพาะในเบราว์เซอร์เครื่องนี้ ไม่อยู่ในลิงก์แชร์/ไฟล์ JSON · ผู้ดูแลเว็บตั้งค่า VITE_GOOGLE_MAPS_API_KEY ตอน build ได้ · จำกัดคีย์ด้วย HTTP referrer และเปิดเฉพาะ Maps JavaScript API + Routes API + Places API (New) (ใช้ค้นหาสถานที่ด้วยชื่อ)</p>
     <div class="modal-actions"><button type="button" class="btn" data-act="modal-close">ยกเลิก</button><button class="btn primary">บันทึกและโหลดใหม่</button></div>
-  </form>`;
+  </form>
+  </details>`;
 }
 
 export function parseTime(v: string): number | null {

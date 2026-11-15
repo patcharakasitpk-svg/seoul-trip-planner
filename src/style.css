@@ -978,3 +978,11 @@ body.login-open { overflow: hidden; }
   .lg-card { padding: 1.4rem 1.2rem 1.1rem; gap: .7rem; }
   .lg-brand b { font-size: 1.4rem; }
 }
+/* ตั้งค่า: บัญชี + ขั้นสูง */
+.settings-account { display: grid; gap: .5rem; margin-bottom: .8rem; padding: .8rem; }
+.settings-account .sa-row { display: flex; align-items: center; gap: .7rem; }
+.settings-account .sa-row > div { display: grid; min-width: 0; }
+.settings-account p { margin: 0; }
+.settings-adv { margin-top: .8rem; border: 1px solid var(--line); border-radius: 12px; padding: .5rem .8rem; }
+.settings-adv summary { cursor: pointer; font-weight: 600; padding: .3rem 0; }
+.settings-adv[open] summary { margin-bottom: .5rem; }
