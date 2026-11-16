@@ -64,7 +64,13 @@ let map: L.Map | null = null;
 let layer: L.LayerGroup | null = null;
 let onDone: (dayId: string) => void = () => {};
 
-const STAY_CHOICES = [15, 30, 45, 60, 90, 120, 180];
+/** เวลาอยู่: พิมพ์ชั่วโมง + นาทีเอง (สูงสุด 20 ชม.) */
+const MAX_STAY = 20 * 60;
+function stayInputs(x: Stop): string {
+  const h = Math.floor(x.stayMin / 60);
+  const m = x.stayMin % 60;
+  return `<span class="pl-dur" data-uid="${x.uid}"><input class="inp xs" type="number" inputmode="numeric" min="0" max="20" value="${h}" data-pl-change="stay-h" data-uid="${x.uid}" aria-label="อยู่กี่ชั่วโมง">ชม.<input class="inp xs" type="number" inputmode="numeric" min="0" max="59" step="5" value="${m}" data-pl-change="stay-m" data-uid="${x.uid}" aria-label="อยู่กี่นาที">นาที</span>`;
+}
 const STEPS: [Step, string][] = [
   [1, 'ตั้งวัน'],
   [2, 'เลือกสถานที่'],
@@ -235,6 +241,8 @@ function budgetBar(s: DaySchedule): string {
 /* ---------------- render ---------------- */
 function render(resetMap = false) {
   if (!st || !root) return;
+  const ae = document.activeElement as HTMLElement | null;
+  const keepFocus = ae && root.contains(ae) && ae.dataset.plChange && ae.dataset.uid ? `[data-pl-change="${ae.dataset.plChange}"][data-uid="${ae.dataset.uid}"]` : null;
   const s = sched();
   const d = st.draft;
   const idx = app.dayIndex(st.dayId);
@@ -271,7 +279,12 @@ function render(resetMap = false) {
     });
   autosaveDraft();
   drawMap(s);
-  (root.querySelector('[data-autofocus]') as HTMLInputElement | null)?.focus();
+  // คืนเคอร์เซอร์ให้ช่องที่กำลังพิมพ์อยู่ (ช่องเวลา/ตัวเลือกของจุดเดิม) ไม่งั้นใช้ช่องที่ตั้งให้โฟกัส
+  const back = keepFocus ? (root.querySelector(keepFocus) as HTMLInputElement | null) : null;
+  if (back) {
+    back.focus();
+    if (back.type === 'number' || back.type === 'text') back.select?.();
+  } else (root.querySelector('[data-autofocus]') as HTMLInputElement | null)?.focus();
 }
 
 /** ปุ่มขวาบน: ขั้นสรุป = ยืนยัน · แก้จากหน้าสรุป = กลับไปสรุป (เปลี่ยนขั้นใช้แถบขั้นตอนด้านบน) */
@@ -607,7 +620,7 @@ function dayLane(s: DaySchedule): string {
         <span class="t">${t.start != null ? fmtHM(t.start) : '--:--'}</span>
         <div class="pl-row-main">
           ${numBadge(nums.get(x.uid))} ${nameLink(x)}${x.lockedTime ? ` <span class="pill">นัด ${esc(x.lockedTime)}</span>` : ''}
-          <div class="pl-stay">อยู่ <select class="inp xs" data-pl-change="stay" data-uid="${x.uid}" aria-label="อยู่นานเท่าไร">${[...new Set([...STAY_CHOICES, x.stayMin])].sort((a, b) => a - b).map((m) => `<option value="${m}" ${m === x.stayMin ? 'selected' : ''}>${fmtDur(m)}</option>`).join('')}</select>
+          <div class="pl-stay">อยู่ ${stayInputs(x)}
             ${defaultStay(x) != null && defaultStay(x) !== x.stayMin ? resetBtn('reset-stay', x.uid, `คืนเวลาที่แนะนำ (${fmtDur(defaultStay(x)!)})`) : ''}
             ${t.depart != null ? `<span class="muted small">ถึง ${fmtHM(t.depart)}</span>` : ''}
             ${mealSelect(x)}
@@ -1039,9 +1052,17 @@ function onChange(e: Event) {
       st.draft = { ...d, stops: d.stops.map((y) => (y.uid === x.uid ? next : y)) };
       break;
     }
-    case 'stay':
-      st.draft = updateStop(d, el.dataset.uid!, { stayMin: Number(el.value) });
-      break;
+    case 'stay-h':
+    case 'stay-m': {
+      const box = el.closest('.pl-dur') as HTMLElement | null;
+      const num = (sel: string) => Math.max(0, Math.round(Number((box?.querySelector(sel) as HTMLInputElement | null)?.value) || 0));
+      const total = Math.min(MAX_STAY, num('[data-pl-change="stay-h"]') * 60 + Math.min(59, num('[data-pl-change="stay-m"]')));
+      st.draft = updateStop(d, el.dataset.uid!, { stayMin: Math.max(5, total) });
+      if (num('[data-pl-change="stay-h"]') * 60 + num('[data-pl-change="stay-m"]') > MAX_STAY) { app.showToast('อยู่ได้สูงสุด 20 ชั่วโมง — ตั้งเป็น 20 ชม. ให้แล้ว'); app.requestRender(); }
+      // วาดใหม่หลังเคอร์เซอร์ย้ายไปช่องถัดไปแล้ว (เช่น ชม. → นาที) แล้วคืนเคอร์เซอร์ให้ช่องเดิม
+      setTimeout(() => render(), 0);
+      return;
+    }
     case 'mode': {
       const t = el.dataset.target!;
       const m = el.value as TravelMode;

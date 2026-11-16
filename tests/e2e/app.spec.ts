@@ -45,6 +45,12 @@ async function setDay(page: Page, date: string, time: string, endTime = '22:00')
   await pl.locator('[data-pl="confirm"]').click();
   await expect(pl).toBeHidden();
 }
+/** ตั้งเวลาอยู่ในตัวจัดแผน (ช่องชั่วโมง + นาที) */
+async function setStay(row: import('@playwright/test').Locator, h: number, m: number) {
+  await row.locator('[data-pl-change="stay-h"]').fill(String(h));
+  await row.locator('[data-pl-change="stay-m"]').fill(String(m));
+  await row.locator('[data-pl-change="stay-m"]').dispatchEvent('change');
+}
 /** แผนแนะนำ (แม่แบบ) อยู่ในหน้าต่างตั้งค่า */
 async function openTemplates(page: Page) {
   await page.locator('[data-act="open-settings"]').click();
@@ -516,7 +522,7 @@ test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั�
   await expect(pl.locator('.pl-lane-list')).toContainText('Soha Salt Pond');
   const row = pl.locator('.pl-row.stop', { hasText: 'Gwangjang Market' });
   await expect(row).toBeVisible();
-  await row.locator('[data-pl-change="stay"]').selectOption('120');
+  await setStay(row, 2, 0);
   await row.locator('[data-pl="reset-stay"]').click();
   await expect(pl.locator('.pl-row.stop', { hasText: 'Gwangjang Market' }).locator('[data-pl="reset-stay"]')).toHaveCount(0);
   await expect(pl.locator('.pl-budget-range')).toContainText('08:00 – 21:00');
@@ -649,7 +655,8 @@ test('เพิ่มสถานที่เองในตัวจัดแ�
   await f.locator('button[value="add"]').click();
   await expect(page.locator('#toast')).toContainText('เพิ่ม Nudake Seongsu');
   await expect(pl.locator('.pl-row.stop', { hasText: 'Nudake Seongsu' })).toBeVisible();
-  await expect(pl.locator('.pl-row.stop', { hasText: 'Nudake Seongsu' }).locator('[data-pl-change="stay"]')).toHaveValue('40');
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Nudake Seongsu' }).locator('[data-pl-change="stay-h"]')).toHaveValue('0');
+  await expect(pl.locator('.pl-row.stop', { hasText: 'Nudake Seongsu' }).locator('[data-pl-change="stay-m"]')).toHaveValue('40');
   // ค้นเจอในรายการภายหลัง (หมวดคาเฟ่)
   await pl.locator('[data-pl="cat"][data-v="cafe"]').click();
   await expect(pl.locator('.pl-lane-list')).toContainText('Nudake Seongsu');
@@ -700,12 +707,12 @@ test('ตัวจัดแผน: แก้แล้วรายการไม
   await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
   await page.evaluate(() => (document.querySelector('.pl-day')!.scrollTop = 400));
   const last = () => pl.locator('.pl-row.stop').last();
-  await last().locator('[data-pl-change="stay"]').selectOption('120');
+  await setStay(last(), 2, 0);
   expect(await page.evaluate(() => document.querySelector('.pl-day')!.scrollTop)).toBeGreaterThan(300);
   // โน้ตที่ยังไม่บันทึก + แก้เวลา → ข้อความยังอยู่
   await last().locator('[data-pl="note-edit"]').click();
   await last().locator('textarea').fill('เช็คอิน นอนพัก');
-  await last().locator('[data-pl-change="stay"]').selectOption('90');
+  await setStay(last(), 1, 30);
   await expect(last().locator('textarea')).toHaveValue('เช็คอิน นอนพัก');
   await last().locator('[data-pl="note-save"]').click();
   await expect(last().locator('.pl-note')).toContainText('เช็คอิน นอนพัก');
@@ -947,4 +954,32 @@ test('เพิ่มสถานที่: เลือกย่านเอง
   await expect(pl.locator('.pl-item', { hasText: 'Lotte Town Christmas Market' })).toHaveCount(1);
   await pl.locator('[data-pl-change="zone"]').selectOption('myeongdong');
   await expect(pl.locator('.pl-item', { hasText: 'ร้านในเมียงดง' })).toHaveCount(1);
+});
+
+test('เวลาอยู่: พิมพ์ชั่วโมง/นาทีเองได้ สูงสุด 20 ชม. · สถานที่ที่ยังไม่มีพิกัดใส่ได้ในหน้าเพิ่มสถานที่', async ({ page }) => {
+  test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
+  await page.goto('/');
+  await applyTripTemplate(page);
+  await openPlanner(page);
+  const pl = page.locator('#planner');
+  await pl.locator('.pl-steps [data-pl="goto"][data-v="2"]').click();
+  const row = pl.locator('.pl-row.stop').first();
+  await setStay(row, 5, 15);
+  await expect(pl.locator('.pl-row.stop').first()).toContainText('ถึง');
+  await expect(pl.locator('.pl-row.stop').first().locator('[data-pl-change="stay-h"]')).toHaveValue('5');
+  await expect(pl.locator('.pl-row.stop').first().locator('[data-pl-change="stay-m"]')).toHaveValue('15');
+  await setStay(pl.locator('.pl-row.stop').first(), 25, 0);
+  await expect(pl.locator('.pl-row.stop').first().locator('[data-pl-change="stay-h"]')).toHaveValue('20');
+  await expect(page.locator('#toast')).toContainText('สูงสุด 20 ชั่วโมง');
+  await pl.locator('[data-pl="cancel"]').click();
+  // หน้าเพิ่มสถานที่: รายการที่ยังไม่มีพิกัด → วางพิกัดแล้วหายจากรายการ
+  await page.locator('.main-menu [data-tab="places"]').click();
+  const miss = page.locator('.pp-missing');
+  await expect(miss).toContainText('ยังไม่มีพิกัด 4 แห่ง');
+  const item = miss.locator('.pp-missing-item', { hasText: '29CM HOME Seongsu' });
+  await item.locator('input[name="coord"]').fill('37.5446, 127.0557');
+  await item.locator('button.primary').click();
+  await expect(page.locator('#toast')).toContainText('บันทึกพิกัดแล้ว');
+  await expect(miss).toContainText('ยังไม่มีพิกัด 3 แห่ง');
+  await expect(miss.locator('.pp-missing-item', { hasText: '29CM HOME Seongsu' })).toHaveCount(0);
 });

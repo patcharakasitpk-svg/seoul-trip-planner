@@ -1051,3 +1051,11 @@ body.planner-open .main-menu [data-act="tab"].on { background: none; box-shadow:
 .meal-btn span .ico.i { font-size: 1.2rem; }
 .lg-wait { display: grid; gap: .5rem; padding: .7rem; border-radius: 12px; background: #fff7e6; }
 .lg-wait p { margin: 0; }
+/* เวลาอยู่: ชั่วโมง + นาที */
+.pl-dur { display: inline-flex; align-items: center; gap: .3rem; }
+.pl-dur .inp.xs { width: 3.6rem; text-align: center; padding-left: .3rem; padding-right: .3rem; }
+/* สถานที่ที่ยังไม่มีพิกัด */
+.pp-missing { margin-bottom: .8rem; padding: .7rem .9rem; border-color: #f5dfb3; background: #fffaf0; }
+.pp-missing summary { cursor: pointer; }
+.pp-missing-item { padding-top: .6rem; margin-top: .6rem; border-top: 1px dashed #f0d9a8; }
+.pp-missing-item .coord-fix { margin-top: .3rem; }

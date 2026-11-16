@@ -11,6 +11,7 @@ import { placePhotos, resizeImage } from '../services/shopPhotos';
 import { placeInfoHtml, hydratePlacePhotos } from './views/placeInfo';
 import { ZONES, ZONE_AREA, zoneOf, zoneShort, type Zone } from '../core/zones';
 import { signedInUser } from '../services/tripSync';
+import { coordFixForm } from './views/library';
 
 /**
  * หน้า "สถานที่": เพิ่ม/แก้สถานที่ของฉัน (ชื่อ · ตำแหน่ง · รูป · ลิงก์ · โน้ต) พร้อมแผนที่ของตัวเอง
@@ -92,8 +93,18 @@ function listHtml(): string {
   return `
     <div class="pp-head"><h2>สถานที่ที่เพิ่มเอง <span class="muted">(${ps.length})</span></h2>${form ? '' : '<button class="btn primary" data-pp="add">＋ เพิ่มสถานที่</button>'}</div>
     <p class="muted small pp-intro">ร้าน/ที่เที่ยวที่ไม่มีในรายการ — ใส่ตำแหน่ง แล้วเพิ่มรูปกับลิงก์ไว้ จะได้จำได้ว่าที่ไหน · ใช้ในหน้า “จัดแผน” ได้ทุกวัน</p>
+    ${missingCoords()}
     ${form && !form.id ? formHtml() : ''}
     ${ps.length ? ps.map(card).join('') : form ? '' : '<p class="empty">ยังไม่มีสถานที่ที่เพิ่มเอง — กด “＋ เพิ่มสถานที่”</p>'}`;
+}
+
+/** สถานที่ในรายการที่ยังไม่มีพิกัด → ใส่พิกัดได้ที่นี่ทีละแห่ง (ทุกคนในทริปเห็น) */
+function missingCoords(): string {
+  const miss = app.places().filter((p) => !p.custom && p.lat == null);
+  if (!miss.length) return '';
+  return `<details class="pp-missing card" open><summary><b>ยังไม่มีพิกัด ${miss.length} แห่ง</b> <span class="muted small">— ใส่แล้วจะปักหมุดและคำนวณเวลาเดินทางได้</span></summary>
+    ${miss.map((p) => `<div class="pp-missing-item"><div><b>${esc(p.nameTh)}</b> <span class="muted small">${esc(p.area)}</span></div>${coordFixForm(p)}</div>`).join('')}
+  </details>`;
 }
 
 function formHtml(): string {
