@@ -14,7 +14,7 @@ import { stopInfoBody } from './day';
 import { MEALS, mealName, type Meal } from '../../core/meals';
 import { OWN_CATEGORY_LABEL, type OwnCategory } from '../../core/ownPlace';
 import { placeCard } from './library';
-import { placeInfoHtml } from './placeInfo';
+import { placeInfoHtml, placeSheetHtml } from './placeInfo';
 import { buildShareUrl } from '../../storage/share';
 import { googleStatus } from '../../services/google';
 import { I, catIcon } from '../icons';
@@ -27,6 +27,7 @@ export function renderModal(): string {
   if (!m) return '';
   let title = '';
   let body = '';
+  let cls = '';
   switch (m.type) {
     case 'compare':
       [title, body] = [m.title, compareBody(m)];
@@ -88,6 +89,11 @@ export function renderModal(): string {
       break;
     case 'place': {
       const p = app.getPlace(m.placeId);
+      if (p && m.sheet) {
+        cls = 'sheet';
+        [title, body] = [p.nameTh, placeSheetHtml(p, m.date ?? null)];
+        break;
+      }
       [title, body] = [p?.nameTh ?? 'สถานที่', !p ? 'ไม่พบสถานที่' : p.custom ? `${placeInfoHtml(p)}<p class="muted small">แก้รูป/ลิงก์ได้ที่แท็บ “สถานที่”</p>` : `<div class="place-list">${placeCard(p, { open: true })}</div>`];
       break;
     }
@@ -98,7 +104,7 @@ export function renderModal(): string {
       break;
   }
   return `<div class="modal-backdrop" data-act="modal-backdrop">
-    <div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+    <div class="modal ${cls}" role="dialog" aria-modal="true" aria-label="${esc(title)}">
       <div class="modal-head"><h2>${esc(title)}</h2><button class="icon-btn" data-act="modal-close" aria-label="ปิด">✕</button></div>
       <div class="modal-body">${body}</div>
     </div></div>`;

@@ -1123,7 +1123,7 @@ document.addEventListener('click', (ev) => {
       });
       return;
     case 'place-modal':
-      app.modal = { type: 'place', placeId: d.place! };
+      app.modal = { type: 'place', placeId: d.place!, sheet: true, date: d.date ?? null };
       break;
     case 'join-trip':
       void joinTrip(d.v!).then((err) => {

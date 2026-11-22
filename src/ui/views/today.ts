@@ -26,6 +26,13 @@ const stopName = (t: StopTiming) => {
   return p?.nameTh ?? (t.stop.kind === 'dinner' ? `${mealName(t.stop)} (ยังไม่เลือกร้าน)` : t.stop.title ?? 'รายการ');
 };
 
+/** ชื่อที่กดดูรายละเอียดได้ (รูป · ลิงก์ · ข้อมูลร้าน) — โรงแรม/จุดที่ยังไม่เลือกร้าน เป็นข้อความธรรมดา */
+const nameLink = (t: StopTiming, date: string | null | undefined) => {
+  const p = app.getPlace(t.stop.placeId);
+  if (!p || p.kind === 'hotel') return esc(stopName(t));
+  return `<button class="pname" data-act="place-modal" data-place="${esc(p.id)}"${date ? ` data-date="${esc(date)}"` : ''}>${esc(stopName(t))}</button>`;
+};
+
 /** ป้ายมื้อ (เฉพาะมื้อที่เลือกร้านแล้ว — ยังไม่เลือกร้าน ชื่อบอกมื้ออยู่แล้ว) */
 const mealTag = (t: StopTiming) => (t.stop.kind === 'dinner' && t.stop.placeId ? `<span class="pl-meal-tag">${I.utensils} ${esc(mealName(t.stop))}</span> ` : '');
 
@@ -58,7 +65,7 @@ function heroMoving(day: Day, s: DaySchedule, t: StopTiming, live: boolean, eyeb
   const isMove = t.stop.kind === 'place' || t.stop.kind === 'dinner';
   return `<section class="hero">
     <p class="eyebrow">${eyebrow}</p>
-    <h2>${mealTag(t)}${esc(stopName(t))}</h2>
+    <h2>${mealTag(t)}${nameLink(t, day.date)}</h2>
     <p class="hero-big">${t.arrive != null ? `ถึงประมาณ <b>${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive)}</b>` : 'ยังไม่มีเวลา'}</p>
     <p class="hero-facts">${isMove ? `<span>${legIcon(t.leg)} เดินทาง <b>${travelText(t.leg)}</b></span>` : ''}<span>${I.clock} อยู่ <b>${fmtDur(t.stop.stayMin)}</b></span>${t.stop.lockedTime ? `<span>${I.lock} นัด <b>${esc(t.stop.lockedTime)}</b></span>` : ''}</p>
     ${t.stop.note ? `<p class="stop-note">${esc(t.stop.note)}</p>` : ''}
@@ -80,7 +87,7 @@ function heroAt(day: Day, s: DaySchedule, t: StopTiming, now: number | null): st
   const nextLeg = next ? next.leg : s.end?.leg;
   return `<section class="hero">
     <p class="eyebrow">ตอนนี้อยู่ที่${arrived != null ? ` · ถึง ${fmtHM(arrived)}` : ''}</p>
-    <h2>${mealTag(t)}${esc(stopName(t))}</h2>
+    <h2>${mealTag(t)}${nameLink(t, day.date)}</h2>
     <p class="hero-big ${left != null && left < 0 ? 'bad' : ''}">${left == null ? `อยู่ ${fmtDur(t.stop.stayMin)}` : left >= 0 ? `อยู่ได้อีก <b>${fmtDur(left)}</b>` : `เกินเวลา <b>${fmtDur(-left)}</b>`}</p>
     <div class="bar" role="progressbar" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     <p class="hero-facts"><span>ควรออก <b>${fmtHM(plannedOut)}</b></span>${t.stop.lockedTime ? `<span>${I.lock} ${esc(t.stop.lockedTime)}</span>` : ''}</p>
@@ -89,7 +96,7 @@ function heroAt(day: Day, s: DaySchedule, t: StopTiming, now: number | null): st
     ${
       nextTo && nextLeg
         ? `<div class="hero-next"><p class="eyebrow">ถัดไป</p>
-      <p class="next-line"><b>${esc(next ? stopName(next) : `กลับ${shortName(nextTo)}`)}</b> · ${legIcon(nextLeg)} ${travelText(nextLeg)}${next?.arrive != null ? ` · ถึง ~${fmtHM(next.arrive)}` : ''}</p>
+      <p class="next-line"><b>${next ? nameLink(next, day.date) : esc(`กลับ${shortName(nextTo)}`)}</b> · ${legIcon(nextLeg)} ${travelText(nextLeg)}${next?.arrive != null ? ` · ถึง ~${fmtHM(next.arrive)}` : ''}</p>
       ${navRow(here, nextTo, nextLeg.mode)}</div>`
         : ''
     }
@@ -137,7 +144,7 @@ function timeline(day: Day, s: DaySchedule, current: string | null): string {
     rows.push(`<li class="tl ${done ? 'done' : ''} ${now ? 'now' : ''}">
       <span class="tl-t">${t.arrive != null ? `${t.lowerBound ? '≥' : ''}${fmtHM(t.arrive)}` : '--:--'}</span>
       <span class="tl-dot">${done ? '✓' : now ? '●' : ''}</span>
-      <span class="tl-n">${t.stop.lockedTime ? `${I.lock} ` : ''}${mealTag(t)}${esc(stopName(t))}<small>อยู่ ${fmtDur(t.stop.stayMin)}${t.stop.lockedTime ? ` · นัด ${esc(t.stop.lockedTime)}` : ''} ${warn}</small></span>
+      <span class="tl-n">${t.stop.lockedTime ? `${I.lock} ` : ''}${mealTag(t)}${nameLink(t, day.date)}<small>อยู่ ${fmtDur(t.stop.stayMin)}${t.stop.lockedTime ? ` · นัด ${esc(t.stop.lockedTime)}` : ''} ${warn}</small></span>
     </li>`);
   }
   if (s.end && day.endPlaceId) {
@@ -179,7 +186,7 @@ export function renderToday(): string {
       <p class="eyebrow">เริ่มวัน</p>
       <h2>ออกจาก${esc(shortName(start))}</h2>
       <p class="hero-big">ตามแผน <b>${esc(day.startTime ?? '--:--')}</b>${lateBy != null && lateBy > 5 ? ` <span class="bad-text small">ช้ากว่าแผน ${fmtDur(lateBy)}</span>` : ''}</p>
-      ${first ? `<p class="hero-facts"><span>จุดแรก <b>${esc(stopName(first))}</b></span><span>${legIcon(first.leg)} ${travelText(first.leg)}</span></p>` : ''}
+      ${first ? `<p class="hero-facts"><span>จุดแรก <b>${nameLink(first, day.date)}</b></span><span>${legIcon(first.leg)} ${travelText(first.leg)}</span></p>` : ''}
       <button class="btn primary huge" data-act="live-start">▶ ออกเดินทางตอนนี้</button>
     </section>`;
   } else if (phase.kind === 'moving') {

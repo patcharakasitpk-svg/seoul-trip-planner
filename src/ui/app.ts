@@ -29,7 +29,7 @@ export type Modal =
   | { type: 'stop'; dayId: string; stopUid: string }
   | { type: 'meal'; dayId: string }
   | { type: 'settings' }
-  | { type: 'place'; placeId: string }
+  | { type: 'place'; placeId: string; sheet?: boolean; date?: string | null }
   | { type: 'indoor'; dayId: string };
 
 export interface Filters {

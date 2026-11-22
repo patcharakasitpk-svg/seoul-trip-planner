@@ -463,6 +463,33 @@ test('วันนี้ระหว่างเดินทาง: เริ่
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
 });
 
+test('วันนี้: กดชื่อสถานที่ → แผ่นรายละเอียด (ข้อมูลร้าน · สถานี · ปุ่มแผนที่) อ่านอย่างเดียว ปิดได้', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-12-01T01:00:00Z'));
+  await page.goto('/');
+  await applyTripTemplate(page);
+  await gotoToday(page);
+  await page.locator('[data-act="live-start"]').click();
+  const hero = page.locator('.hero');
+  await hero.locator('h2 .pname').click();
+  const sheet = page.locator('.modal.sheet');
+  await expect(sheet).toBeVisible();
+  await expect(sheet.locator('.modal-head h2')).toContainText('Gwangjang Market');
+  await expect(sheet.locator('.psheet-meta')).toBeVisible();
+  await expect(sheet.locator('.psheet-text')).not.toBeEmpty();
+  await expect(sheet.locator('.psheet-nav [data-act="naver"]')).toBeVisible();
+  await expect(sheet.locator('.psheet-nav a.google')).toHaveAttribute('href', /google\.com\/maps/);
+  // อ่านอย่างเดียว: ไม่มีปุ่มเพิ่ม/เอาออกจากวัน
+  await expect(sheet.locator('[data-act="quick-toggle"]')).toHaveCount(0);
+  await sheet.locator('[data-act="modal-close"]').click();
+  await expect(sheet).toHaveCount(0);
+  // ชื่อในรายการทั้งวันก็กดได้ · โรงแรมไม่ใช่ปุ่ม
+  await page.locator('.tl-list .pname', { hasText: 'Soha Salt Pond' }).click();
+  await expect(page.locator('.modal.sheet .modal-head h2')).toContainText('Soha Salt Pond');
+  await page.locator('[data-act="modal-close"]').click();
+  await expect(page.locator('.tl-list .tl').first().locator('.pname')).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+});
+
 test('จัดแผนแบบขั้นตอน (คอม/iPad): ตั้งวัน → เลือกสถานที่ → เดินทาง → สรุป → ยืนยัน · ปุ่มคืนค่า ↺', async ({ page }) => {
   test.skip(isMobile(page), 'ออกแบบให้จัดแผนบนคอม/iPad');
   await page.goto('/');
@@ -861,7 +888,7 @@ test('สถานที่ที่เพิ่มเองในตัวจ�
   await pl.locator('[data-pl="confirm"]').click();
   // หน้าแผนของฉัน: แตะชื่อ → หน้าต่างสถานที่มีรูป
   await page.locator('.ov-day').first().locator('[data-act="place-modal"]', { hasText: 'Onion Anguk' }).click();
-  await expect(page.locator('.modal img')).toHaveAttribute('src', /^blob:/);
+  await expect(page.locator('.modal.sheet .psheet-ph img[data-pphoto]')).toHaveAttribute('src', /^blob:/);
   await page.locator('.modal [data-act="modal-close"]').first().click();
   // ลบไม่ได้เพราะอยู่ในแผน
   await page.locator('.main-menu [data-tab="places"]').click();
