@@ -664,11 +664,12 @@ test('ร้านที่ยังไม่มีพิกัด: แตะแ
   await expect(pl.locator('.pl-nocoord')).toHaveCount(0);
 });
 
-test('หน้าเพิ่มสถานที่: แผนที่มีจุดอ้างอิง ที่พัก 2 แห่ง + สนามบิน (ไอคอนเส้น ไม่กดไม่ได้)', async ({ page }) => {
+test('หน้าเพิ่มสถานที่: แผนที่มีจุดอ้างอิง ที่พัก 2 แห่ง + COEX + สนามบิน (ไอคอนเส้น กดไม่ได้)', async ({ page }) => {
   await page.goto('/');
   await page.locator('[data-act="tab"][data-tab="places"]').filter({ visible: true }).first().click();
   const lands = page.locator('#pp-map .pp-land');
-  await expect(lands).toHaveCount(3);
+  await expect(lands).toHaveCount(4);
+  await expect(lands.filter({ hasText: 'COEX' })).toHaveCount(1);
   await expect(lands.filter({ hasText: 'ที่พัก เมียงดง' })).toHaveCount(1);
   await expect(lands.filter({ hasText: 'Novotel ซูวอน' })).toHaveCount(1);
   await expect(lands.filter({ hasText: 'สนามบิน ICN' })).toHaveCount(1);
