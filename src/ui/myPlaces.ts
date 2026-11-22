@@ -171,6 +171,30 @@ function viewerHtml(): string {
 }
 
 /* ---------------- แผนที่ ---------------- */
+/** จุดอ้างอิง (ที่พัก 2 แห่ง + สนามบิน) — ไอคอนเส้นสีเดียว ให้เห็นว่าสถานที่ที่เพิ่มอยู่ห่างแค่ไหน ไม่นับตอนซูมพอดี */
+const LANDMARKS: [id: string, label: string, icon: string][] = [
+  ['hotel', 'ที่พัก เมียงดง', I.hotel],
+  ['novotel-suwon', 'Novotel ซูวอน', I.hotel],
+  ['icn', 'สนามบิน ICN', I.plane],
+];
+
+function drawLandmarks(): L.LatLngExpression[] {
+  const out: L.LatLngExpression[] = [];
+  for (const [id, label, icon] of LANDMARKS) {
+    const p = app.getPlace(id);
+    if (p?.lat == null || p.lng == null) continue;
+    L.marker([p.lat, p.lng], {
+      icon: L.divIcon({ className: 'pp-land', html: `<span class="pp-land-ico">${icon}</span><span class="pp-land-lbl">${esc(label)}</span>`, iconSize: [0, 0] }),
+      title: p.nameTh,
+      keyboard: false,
+      interactive: false,
+      zIndexOffset: -500,
+    }).addTo(layer!);
+    out.push([p.lat, p.lng]);
+  }
+  return out;
+}
+
 function drawMap() {
   const el = root?.querySelector('#pp-map') as HTMLElement | null;
   if (!el || !el.offsetParent) return;
@@ -189,6 +213,7 @@ function drawMap() {
   }
   setTimeout(() => map?.invalidateSize(), 0);
   layer!.clearLayers();
+  const lands = drawLandmarks();
   const pts: L.LatLngExpression[] = [];
   for (const p of mine()) {
     if (p.lat == null || p.lng == null) continue;
@@ -209,7 +234,9 @@ function drawMap() {
   const key = `${pts.length}`;
   if (key !== fitKey) {
     fitKey = key;
-    if (pts.length) map.fitBounds(L.latLngBounds(pts), { padding: [48, 48], maxZoom: 15 });
+    // ยังไม่มีสถานที่ของตัวเอง → ซูมให้เห็นที่พักและสนามบินแทน
+    const fit = pts.length ? pts : lands;
+    if (fit.length) map.fitBounds(L.latLngBounds(fit), { padding: [48, 48], maxZoom: 15 });
   }
 }
 

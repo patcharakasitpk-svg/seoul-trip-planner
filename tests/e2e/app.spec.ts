@@ -664,6 +664,17 @@ test('ร้านที่ยังไม่มีพิกัด: แตะแ
   await expect(pl.locator('.pl-nocoord')).toHaveCount(0);
 });
 
+test('หน้าเพิ่มสถานที่: แผนที่มีจุดอ้างอิง ที่พัก 2 แห่ง + สนามบิน (ไอคอนเส้น ไม่กดไม่ได้)', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-act="tab"][data-tab="places"]').filter({ visible: true }).first().click();
+  const lands = page.locator('#pp-map .pp-land');
+  await expect(lands).toHaveCount(3);
+  await expect(lands.filter({ hasText: 'ที่พัก เมียงดง' })).toHaveCount(1);
+  await expect(lands.filter({ hasText: 'Novotel ซูวอน' })).toHaveCount(1);
+  await expect(lands.filter({ hasText: 'สนามบิน ICN' })).toHaveCount(1);
+  await expect(lands.first().locator('svg')).toHaveCount(1);
+});
+
 test('เพิ่มสถานที่เองในตัวจัดแผน: ชื่อ + หมวด + วางพิกัด → บันทึกแล้วใส่ลงช่อง · ค้นเจอภายหลัง', async ({ page }) => {
   test.skip(isMobile(page), 'ตัวจัดแผนบนคอม/iPad');
   await page.goto('/');
