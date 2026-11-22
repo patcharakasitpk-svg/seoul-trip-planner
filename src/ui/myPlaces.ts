@@ -12,6 +12,18 @@ import { placeInfoHtml, hydratePlacePhotos } from './views/placeInfo';
 import { ZONES, ZONE_AREA, zoneOf, zoneShort, type Zone } from '../core/zones';
 import { signedInUser } from '../services/tripSync';
 import { coordFixForm } from './views/library';
+import { safeGet, safeSet } from '../storage/storage';
+
+/** หาพิกัดจากแอปไหน (จำไว้ในเครื่องนี้) — เปลี่ยนคำแนะนำ/ตัวอย่าง และปุ่มค้นชื่อร้าน ส่วนช่องอ่านได้ทั้งสองแบบเสมอ */
+type CoordSrc = 'google' | 'naver';
+const SRC_KEY = 'stp.v1.coordSrc';
+let coordSrc: CoordSrc = safeGet(SRC_KEY) === 'naver' ? 'naver' : 'google';
+const SRC_TEXT: Record<CoordSrc, { label: string; hint: string; ph: string }> = {
+  google: { label: 'Google Maps', hint: 'วางพิกัด, Plus Code (เช่น HX7M+HQ8) หรือลิงก์ Google Maps แบบเต็ม', ph: '37.5639, 126.9844' },
+  naver: { label: 'Naver Map', hint: 'วางลิงก์ Naver Map แบบเต็ม (map.naver.com/…) หรือตัวเลขพิกัด', ph: 'https://map.naver.com/…' },
+};
+const srcSearchUrl = (src: CoordSrc, name: string) =>
+  src === 'naver' ? `https://map.naver.com/p/search/${encodeURIComponent(name || 'Seoul')}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name ? `${name} Seoul` : 'Seoul')}`;
 
 /**
  * หน้า "สถานที่": เพิ่ม/แก้สถานที่ของฉัน (ชื่อ · ตำแหน่ง · รูป · ลิงก์ · โน้ต) พร้อมแผนที่ของตัวเอง
@@ -114,8 +126,10 @@ function formHtml(): string {
     <h3>${f.id ? 'แก้สถานที่' : 'เพิ่มสถานที่'}</h3>
     <label>ชื่อสถานที่<input class="inp" data-pp-field="name" value="${esc(f.name)}" maxlength="120" placeholder="เช่น Onion Anguk" required ${f.id ? '' : 'data-autofocus'}></label>
     <div class="pp-cat-field"><span>ประเภท</span><div class="chips pp-cats" role="radiogroup" aria-label="ประเภทสถานที่">${(Object.entries(OWN_CATEGORY_LABEL) as [OwnCategory, string][]).map(([k, v]) => `<button type="button" class="chip ${k === f.category ? 'on' : ''}" data-pp="cat" data-pp-cat="${k}" role="radio" aria-checked="${k === f.category}">${esc(v)}</button>`).join('')}</div></div>
-    <label>ตำแหน่ง <span class="muted small">— วางพิกัด, Plus Code (เช่น HX7M+HQ8) หรือลิงก์ Google Maps แบบเต็ม</span>
-      <span class="pp-coord"><input class="inp" data-pp-field="coord" value="${esc(f.coord)}" placeholder="37.5639, 126.9844" inputmode="text"><button type="button" class="btn sm ${picking ? 'primary' : ''}" data-pp="pick">${picking ? 'กำลังเลือก… แตะบนแผนที่' : `${I.pin} แตะบนแผนที่`}</button></span></label>
+    <div class="pp-coord-field">
+      <div class="pp-coord-head"><span>ตำแหน่ง</span><select class="inp sm pp-src" data-pp-src aria-label="หาพิกัดจาก">${(Object.keys(SRC_TEXT) as CoordSrc[]).map((k) => `<option value="${k}" ${k === coordSrc ? 'selected' : ''}>จาก ${SRC_TEXT[k].label}</option>`).join('')}</select><button type="button" class="btn sm ghost pp-src-open" data-pp="src-open" aria-label="ค้นชื่อร้านใน ${SRC_TEXT[coordSrc].label}">${I.search} ค้นชื่อ ↗</button></div>
+      <span class="muted small">${esc(SRC_TEXT[coordSrc].hint)}</span>
+      <span class="pp-coord"><input class="inp" data-pp-field="coord" value="${esc(f.coord)}" placeholder="${esc(SRC_TEXT[coordSrc].ph)}" inputmode="text" aria-label="ตำแหน่ง"><button type="button" class="btn sm ${picking ? 'primary' : ''}" data-pp="pick">${picking ? 'กำลังเลือก… แตะบนแผนที่' : `${I.pin} แตะบนแผนที่`}</button></span></div>
     <p class="pp-coord-msg ${f.error ? 'bad-text' : 'muted'} small">${f.error ? esc(f.error) : pt ? `✓ ได้ตำแหน่งแล้ว (${pt.lat.toFixed(5)}, ${pt.lng.toFixed(5)}) — ดูหมุดแดงบนแผนที่ แล้วเช็กใน <a href="https://www.google.com/maps/search/?api=1&query=${pt.lat},${pt.lng}" target="_blank" rel="noopener">Google Maps ↗</a>` : 'ยังไม่มีตำแหน่งก็บันทึกได้ (จะยังไม่ปักหมุด)'}</p>
     <label>ย่าน <span class="muted small">— ใช้กรองในหน้า “จัดแผน”</span><select class="inp" data-pp-field="zone">${zoneOptions(f)}</select></label>
     <label>โน้ต <span class="muted small">(ไม่บังคับ)</span><textarea class="inp" data-pp-field="note" rows="2" maxlength="500" placeholder="เช่น ร้านคาเฟ่ในบ้านเก่า สั่งขนมปังเกลือ">${esc(f.note)}</textarea></label>
@@ -277,6 +291,9 @@ function onClick(e: Event) {
     case 'pick':
       picking = !picking;
       break;
+    case 'src-open':
+      window.open(srcSearchUrl(coordSrc, form?.name.trim() ?? ''), '_blank', 'noopener');
+      return;
     case 'cat':
       if (form) form.category = (el.dataset.ppCat as OwnCategory) ?? form.category;
       break;
@@ -309,6 +326,12 @@ function onClick(e: Event) {
 
 function onInput(e: Event) {
   const el = e.target as HTMLInputElement;
+  if (el.dataset.ppSrc != null) {
+    coordSrc = el.value === 'naver' ? 'naver' : 'google';
+    safeSet(SRC_KEY, coordSrc);
+    renderMyPlaces();
+    return;
+  }
   const k = el.dataset.ppField as keyof FormState | undefined;
   if (!k || !form) return;
   (form as any)[k] = k === 'stay' ? Number(el.value) : el.value;

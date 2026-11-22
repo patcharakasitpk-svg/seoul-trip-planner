@@ -4,6 +4,8 @@ export const inKorea = (lat: number, lng: number) => lat >= 33 && lat <= 39 && l
 /**
  * อ่านพิกัดที่ผู้ใช้วาง: "37.5438, 127.0557" (คลิกขวาบน Google Maps) หรือลิงก์ Google Maps แบบยาว
  * (มี !3d…!4d… ซึ่งเป็นตำแหน่งร้าน, @lat,lng หรือ q=lat,lng) — ลิงก์ย่อ maps.app.goo.gl อ่านไม่ได้ (ต้องเปิดก่อน)
+ * ลิงก์ Naver Map: c=x,y (เมตร Web Mercator แบบเก่า) / c=lng,lat (องศา) / /address/x,y / lat=&lng= (nmap://, มือถือ)
+ * ตัวเลขสลับลำดับ "lng, lat" ก็อ่านได้ เพราะช่วงละติจูด (33–39) กับลองจิจูด (124–132) ของเกาหลีไม่ทับกัน
  */
 export function parseLatLng(text: string): { lat: number; lng: number } | null {
   const pc = parsePlusCode(text);
@@ -18,12 +20,43 @@ export function parseLatLng(text: string): { lat: number; lng: number } | null {
     const lng = Number(m[2]);
     if (Number.isFinite(lat) && Number.isFinite(lng) && inKorea(lat, lng)) return { lat, lng };
   }
+  return parseNaver(t);
+}
+
+const R_EARTH = 6378137;
+/** เมตร Web Mercator (EPSG:3857) → องศา */
+const fromMercator = (x: number, y: number) => ({ lat: (Math.atan(Math.sinh(y / R_EARTH)) * 180) / Math.PI, lng: ((x / R_EARTH) * 180) / Math.PI });
+const ok = (p: { lat: number; lng: number }) => (Number.isFinite(p.lat) && Number.isFinite(p.lng) && inKorea(p.lat, p.lng) ? p : null);
+
+function parseNaver(t: string): { lat: number; lng: number } | null {
+  const num = '(-?\\d{1,3}\\.\\d+)';
+  // lat=…&lng=… (ลำดับไหนก็ได้)
+  const la = new RegExp(`[?&]lat=${num}`).exec(t);
+  const ln = new RegExp(`[?&]lng=${num}`).exec(t);
+  if (la && ln) {
+    const p = ok({ lat: Number(la[1]), lng: Number(ln[1]) });
+    if (p) return p;
+  }
+  // เมตร Web Mercator: x ≈ 13.8–14.7 ล้าน, y ≈ 3.9–4.8 ล้าน
+  const m = /(1[34]\d{6}(?:\.\d+)?)\s*,\s*(\d{7}(?:\.\d+)?)/.exec(t);
+  if (m) {
+    const p = ok(fromMercator(Number(m[1]), Number(m[2])));
+    if (p) return p;
+  }
+  // คู่องศาแบบ lng,lat (เช่น c=127.02,37.49,…)
+  const re = new RegExp(`${num}\\s*,\\s*${num}`, 'g');
+  for (let x = re.exec(t); x; x = re.exec(t)) {
+    const p = ok({ lat: Number(x[2]), lng: Number(x[1]) });
+    if (p) return p;
+  }
   return null;
 }
 
 /** เหตุผลที่อ่านพิกัดไม่ได้ (ข้อความแสดงใต้ช่อง) */
 export function coordError(text: string): string {
   const t = text.trim();
+  if (/naver\.me/i.test(t)) return 'ลิงก์ย่อ naver.me ไม่มีพิกัดในลิงก์ — เปิดใน map.naver.com บนคอมแล้วคัดลอกลิงก์เต็มจากช่องที่อยู่ หรือกด “แตะบนแผนที่” แล้วแตะตรงร้านแทน';
+  if (/naver\.com/i.test(t)) return 'ลิงก์ Naver นี้มีแต่รหัสร้าน ไม่มีพิกัด — ลองคัดลอกลิงก์ “ที่อยู่/จุดบนแผนที่” ของ Naver หรือกด “แตะบนแผนที่” แล้วแตะตรงร้านแทน';
   if (/goo\.gl|maps\.app/i.test(t)) return 'ลิงก์ย่อ (maps.app.goo.gl) ไม่มีพิกัดในลิงก์ — เปิดลิงก์นั้นใน Google Maps แล้วคัดลอกบรรทัดรหัสแบบ “HX7M+HQ8 Seoul” (ไอคอนจุดตาราง) มาวางแทน';
   const m = /(-?\d{1,3}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/.exec(t);
   if (m && !inKorea(Number(m[1]), Number(m[2]))) return 'พิกัดนี้ไม่อยู่ในเกาหลี — ตรวจลำดับตัวเลข (ละติจูด 37.xx ก่อน ลองจิจูด 126–127.xx)';

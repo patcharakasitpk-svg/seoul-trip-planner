@@ -219,8 +219,8 @@ function placeDetails(p: Place): string {
 /** สถานที่ที่ยังไม่มีพิกัด: เปิดดูใน Google Maps แล้ววางพิกัด/ลิงก์ เพื่อปักหมุดเอง */
 export function coordFixForm(p: Place): string {
   return `<form class="coord-fix" data-form="coord" data-place="${esc(p.id)}">
-    <p class="small"><b class="closed">ยังไม่มีพิกัด จึงปักหมุดไม่ได้</b> · <a href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">เปิดใน Google Maps ↗</a></p>
-    <div class="coord-row"><input class="inp sm" name="coord" placeholder="วางรหัส เช่น HX7M+HQ8 หรือ 37.5438, 127.0557" aria-label="รหัส Plus Code หรือพิกัด"><button class="btn sm primary">บันทึกพิกัด</button></div>
+    <p class="small"><b class="closed">ยังไม่มีพิกัด จึงปักหมุดไม่ได้</b> · <a href="${esc(gmapsPlaceUrl(p))}" target="_blank" rel="noopener">เปิดใน Google Maps ↗</a> · <a href="https://map.naver.com/p/search/${esc(encodeURIComponent(p.nameEn || p.nameTh))}" target="_blank" rel="noopener">Naver Map ↗</a></p>
+    <div class="coord-row"><input class="inp sm" name="coord" placeholder="วาง HX7M+HQ8, 37.5438, 127.0557 หรือลิงก์ Naver/Google แบบเต็ม" aria-label="รหัส Plus Code พิกัด หรือลิงก์"><button class="btn sm primary">บันทึกพิกัด</button></div>
     <p class="muted small">ในหน้าร้านของ Google Maps มีบรรทัดรหัสแบบ <b>HX7M+HQ8 Seoul</b> (ไอคอนจุดตาราง) → กดค้าง/คัดลอก แล้ววางที่นี่ · บนคอมคลิกขวาที่ร้านแล้วกดตัวเลขพิกัดก็ได้</p>
   </form>`;
 }

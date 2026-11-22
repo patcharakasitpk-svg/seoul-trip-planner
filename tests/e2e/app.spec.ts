@@ -653,7 +653,8 @@ test('ร้านที่ยังไม่มีพิกัด: แตะแ
   await pl.locator('[data-pl-input="q"]').fill('29cm');
   await pl.locator('[data-pl="preview"][data-place="29cm-home-seongsu"]').click();
   await expect(pl.locator('.pl-nocoord')).toContainText('ยังไม่มีพิกัด');
-  await expect(pl.locator('.pl-nocoord a')).toHaveAttribute('href', /google\.com\/maps/);
+  await expect(pl.locator('.pl-nocoord a').first()).toHaveAttribute('href', /google\.com\/maps/);
+  await expect(pl.locator('.pl-nocoord a').nth(1)).toHaveAttribute('href', /map\.naver\.com/);
   await pl.locator('.pl-nocoord [name="coord"]').fill('hello');
   await pl.locator('.pl-nocoord button.primary').click();
   await expect(page.locator('#toast')).toContainText('อ่านพิกัดไม่ได้');
@@ -662,6 +663,27 @@ test('ร้านที่ยังไม่มีพิกัด: แตะแ
   await expect(page.locator('#toast')).toContainText('บันทึกพิกัดแล้ว');
   await expect(pl.locator('.pl-pin.preview')).toContainText('29CM HOME Seongsu');
   await expect(pl.locator('.pl-nocoord')).toHaveCount(0);
+});
+
+test('หน้าเพิ่มสถานที่: เลือกหาพิกัดจาก Google/Naver (จำไว้) · วางลิงก์ Naver แบบเต็มได้ตำแหน่ง', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-act="tab"][data-tab="places"]').filter({ visible: true }).first().click();
+  await page.locator('#places-page [data-pp="add"]').click();
+  const src = page.locator('[data-pp-src]');
+  await expect(src).toHaveValue('google');
+  await expect(page.locator('.pp-src-open')).toHaveAttribute('aria-label', /Google Maps/);
+  await src.selectOption('naver');
+  await expect(page.locator('.pp-src-open')).toHaveAttribute('aria-label', /Naver Map/);
+  await expect(page.locator('[data-pp-field="coord"]')).toHaveAttribute('placeholder', /map\.naver\.com/);
+  await page.locator('[data-pp-field="name"]').fill('ร้านทดสอบ');
+  await page.locator('[data-pp-field="coord"]').fill('https://map.naver.com/p?c=127.0276368,37.4979502,15,0,0,0,dh');
+  await expect(page.locator('.pp-coord-msg')).toContainText('37.49795, 127.02764');
+  await page.locator('[data-pp-field="coord"]').fill('https://naver.me/5AbCdEfG');
+  await expect(page.locator('.pp-coord-msg')).toContainText('naver.me');
+  await page.reload();
+  await page.locator('[data-act="tab"][data-tab="places"]').filter({ visible: true }).first().click();
+  await page.locator('#places-page [data-pp="add"]').click();
+  await expect(page.locator('[data-pp-src]')).toHaveValue('naver');
 });
 
 test('หน้าเพิ่มสถานที่: แผนที่มีจุดอ้างอิง ที่พัก 2 แห่ง + COEX + สนามบิน (ไอคอนเส้น กดไม่ได้)', async ({ page }) => {
